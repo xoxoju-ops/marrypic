@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MarryPic（マリピク）- ふたりの結婚式写真共有アルバム</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    :root {
+      --primary: #c59b27;
+      --primary-dark: #a17c18;
+      --primary-light: #fdfaf3;
+      --accent: #e07a5f;
+      --text: #2c2c2c;
+      --text-muted: #767676;
+      --bg: #f8f6f0;
+      --card-bg: #ffffff;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 70px; }
+    .container { max-width: 480px; margin: 0 auto; background: var(--card-bg); min-height: 100vh; box-shadow: 0 4px 20px rgba(0,0,0,0.06); position: relative; }
+    
+    /* Top Bar */
+    .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: #fff; border-bottom: 1px solid #f0e6d2; font-size: 12px; }
+    .top-logo { font-size: 16px; font-weight: 800; color: var(--primary-dark); }
+    .btn-switch-mode { background: #fdfaf3; border: 1px solid var(--primary); color: var(--primary-dark); padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+    /* Header */
+    .header { padding: 24px 20px 18px; text-align: center; background: linear-gradient(180deg, #fff9ee 0%, #ffffff 100%); border-bottom: 1px solid #f0e6d2; }
+    .wedding-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; color: var(--text); }
+    .wedding-meta { font-size: 12px; color: var(--text-muted); letter-spacing: 0.5px; }
+    .welcome-msg { font-size: 13px; color: var(--text-muted); margin-top: 10px; line-height: 1.6; }
+
+    /* Badges */
+    .header-badges { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 3px 8px; border-radius: 10px; font-weight: 700; }
+    .badge-sync { color: #27ae60; background: #eafaf1; }
+    .badge-quality { color: #8e44ad; background: #f4ecf7; }
+    .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #27ae60; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+    /* Tabs */
+    .tabs { display: flex; border-bottom: 1px solid #eee; background: #fff; position: sticky; top: 0; z-index: 20; }
+    .tab { flex: 1; padding: 14px 0; text-align: center; font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; }
+    .tab.active { color: var(--primary-dark); border-bottom: 3px solid var(--primary); }
+
+    /* Content Area */
+    .tab-content { padding: 20px; display: none; }
+    .tab-content.active { display: block; }
+
+    /* Cards */
+    .app-card { background: #fff; border: 1px solid #eee; border-radius: var(--radius); padding: 20px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .card-title { font-size: 15px; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; color: var(--primary-dark); }
+
+    /* Form Fields */
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--text-muted); }
+    .form-input { width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; outline: none; }
+    .form-input:focus { border-color: var(--primary); }
+    textarea.form-input { height: 75px; resize: none; }
+
+    /* Buttons */
+    .btn-gold {
+      display: block; width: 100%; background: linear-gradient(135deg, #d4af37, #aa820a); color: #fff; border: none; padding: 15px; border-radius: 30px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(197, 155, 39, 0.35); text-align: center; text-decoration: none;
+    }
+    .btn-gold:active { transform: scale(0.98); }
+    .btn-gold:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-dark { background: #2c2c2c; color: #fff; border: none; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; width: 100%; cursor: pointer; margin-bottom: 10px; }
+
+    /* Slideshow Trigger Button */
+    .btn-slideshow-trigger {
+      display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: linear-gradient(135deg, #2c2c2c, #1a1a1a); color: #fdfaf3; border: 1px solid var(--primary); padding: 14px; border-radius: 30px; font-size: 14px; font-weight: 800; cursor: pointer; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .btn-slideshow-trigger:active { transform: scale(0.98); }
+
+    /* File Upload Big Button */
+    .file-select-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: linear-gradient(135deg, #d4af37, #aa820a); color: #fff; padding: 18px 20px; border-radius: 30px; font-size: 16px; font-weight: 800; box-shadow: 0 4px 14px rgba(197, 155, 39, 0.4); cursor: pointer; text-align: center; border: none;
+    }
+    .file-select-btn:active { transform: scale(0.98); }
+
+    /* Selected Thumbnails */
+    .selected-files-box { display: none; background: #fdfdfd; border: 1px solid #e5e5e5; border-radius: 12px; padding: 12px; margin-bottom: 18px; }
+    .thumb-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+    .thumb-mini { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; flex-shrink: 0; border: 1px solid #ddd; }
+
+    /* Progress Bar */
+    .progress-wrap { display: none; margin: 16px 0; background: #f0f0f0; border-radius: 10px; height: 18px; overflow: hidden; position: relative; }
+    .progress-bar { background: linear-gradient(90deg, #d4af37, #2ecc71); width: 0%; height: 100%; transition: width 0.2s; }
+    .progress-text { font-size: 11px; font-weight: 700; color: #fff; position: absolute; width: 100%; text-align: center; top: 0; line-height: 18px; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+
+    /* Gallery Grid */
+    .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .photo-thumb { aspect-ratio: 1/1; border-radius: 10px; overflow: hidden; position: relative; background: #f0f0f0; cursor: pointer; }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo-tag { position: absolute; bottom: 4px; left: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fff; font-size: 10px; padding: 2px 4px; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .orig-badge { position: absolute; top: 4px; right: 4px; background: rgba(142, 68, 173, 0.85); color: #fff; font-size: 8px; padding: 1px 4px; border-radius: 3px; font-weight: 700; }
+
+    /* QR Display Box */
+    .qr-card { background: #fff9ee; border: 2px solid var(--primary); border-radius: var(--radius); padding: 24px 16px; text-align: center; margin-bottom: 20px; }
+    .qr-img { width: 180px; height: 180px; margin: 12px auto; display: block; border-radius: 8px; background: #fff; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .qr-url-box { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 8px 12px; font-size: 11px; color: var(--text-muted); word-break: break-all; margin: 12px 0; }
+
+    /* Table Card Print Preview */
+    .print-card-preview { background: #ffffff; border: 2px solid #e0c98f; border-radius: 12px; padding: 24px 20px; text-align: center; box-shadow: 0 6px 18px rgba(0,0,0,0.08); margin-top: 14px; position: relative; }
+    .print-card-title { font-size: 13px; letter-spacing: 2px; color: var(--primary-dark); font-weight: 700; margin-bottom: 6px; }
+    .print-card-names { font-size: 18px; font-weight: 800; margin-bottom: 2px; }
+    .print-card-date { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
+    .print-card-qr { width: 150px; height: 150px; margin: 0 auto 12px; display: block; }
+    .print-card-instructions { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
+
+    /* Toast */
+    .toast { display: none; background: #27ae60; color: #fff; padding: 14px 24px; border-radius: 30px; position: fixed; top: 24px; left: 50%; transform: translateX(-50%); z-index: 200; font-size: 14px; font-weight: 700; box-shadow: 0 6px 18px rgba(0,0,0,0.2); text-align: center; width: 85%; max-width: 380px; }
+
+    /* Modal for Photo View */
+    .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.88); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+    .modal.show { display: flex; }
+    .modal-content { max-width: 100%; max-height: 85vh; border-radius: 12px; overflow: hidden; background: #1a1a1a; text-align: center; color: #fff; width: 92%; max-width: 420px; }
+    .modal-img { max-width: 100%; max-height: 55vh; object-fit: contain; background:#000; }
+    .modal-caption { padding: 14px 16px; font-size: 13px; text-align: left; }
+    .modal-close { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 32px; font-weight: bold; cursor: pointer; }
+    .btn-download-single { background: var(--primary); color: #fff; border: none; padding: 10px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; display: block; text-decoration: none; text-align: center; }
+
+    /* Fullscreen Slideshow Player */
+    .slideshow-modal {
+      display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: #000; z-index: 1000; flex-direction: column; justify-content: space-between; overflow: hidden;
+    }
+    .slideshow-modal.show { display: flex; }
+    
+    .ss-top {
+      display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%); z-index: 10; color: #fff;
+    }
+    .ss-title { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
+    .ss-actions { display: flex; align-items: center; gap: 12px; }
+    .ss-btn-icon { background: rgba(255,255,255,0.2); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+
+    .ss-stage {
+      flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 10px;
+    }
+    .ss-media {
+      max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.6s ease-in-out, transform 4s linear; transform: scale(1);
+    }
+    .ss-media.active { opacity: 1; transform: scale(1.03); }
+
+    .ss-nav {
+      position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.3); color: #fff; border: none; font-size: 24px; padding: 16px 12px; cursor: pointer; z-index: 10; border-radius: 8px;
+    }
+    .ss-prev { left: 10px; }
+    .ss-next { right: 10px; }
+
+    .ss-bottom {
+      padding: 20px 24px 30px; background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%); color: #fff; z-index: 10;
+    }
+    .ss-guest-info { font-size: 14px; font-weight: 700; color: #dfc685; margin-bottom: 4px; display: flex; justify-content: space-between; }
+    .ss-msg-text { font-size: 14px; line-height: 1.5; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+    .ss-progress-bar { width: 100%; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; margin-top: 14px; overflow: hidden; }
+    .ss-progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.1s linear; }
+
+    /* Download Modal */
+    .download-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">✨ 設定を更新しました</div>
+
+  <!-- Photo Preview Modal -->
+  <div id="modal" class="modal" onclick="closeModal()">
+    <span class="modal-close">&times;</span>
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <img id="modal-img" class="modal-img" src="" alt="preview">
+      <div id="modal-caption" class="modal-caption"></div>
+      <div style="padding:0 16px 16px;">
+        <button id="modal-dl-btn" class="btn-download-single" onclick="downloadCurrentPhoto()">
+          💎 写真をスマホ・PCに保存する
+        </button>
+        <div style="font-size:11px; color:#aaa; margin-top:8px; line-height:1.4; text-align:center;">
+          💡 iPhoneの方は、上の画像を長押しして「“写真”に追加」でもカメラロールへ保存できます
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Download All Modal -->
+  <div id="dl-modal" class="modal" onclick="closeDlModal()">
+    <div class="modal-content" style="background:#fff; color:var(--text); padding:24px; text-align:left; max-width:440px;" onclick="event.stopPropagation()">
+      <h3 style="font-size:17px; font-weight:800; color:var(--primary-dark); margin-bottom:6px;">📥 写真・動画の一括保存</h3>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
+        集まった写真をまとめてZIPファイルで一括ダウンロードできます。
+      </p>
+
+      <div style="background:#fdfaf3; padding:12px 14px; border-radius:10px; border:1px solid #f0e6d2; margin-bottom:16px;">
+        <div style="font-size:13px; font-weight:700; color:var(--primary-dark);" id="dl-summary-count">保管中の写真：0枚</div>
+        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">PC・iPhone（ファイルアプリ）・Googleドライブ対応</div>
+      </div>
+
+      <div id="dl-items-container" style="max-height:200px; overflow-y:auto; margin-bottom:16px;"></div>
+
+      <button id="btn-batch-download" class="btn-gold" onclick="downloadAllAsZip()">
+        📦 全枚数をまとめて一括ZIPダウンロード（無料）
+      </button>
+      <div id="zip-status-msg" style="display:none; font-size:12px; margin-top:10px; padding:12px; background:#eafaf1; color:#27ae60; border-radius:8px; text-align:center; font-weight:600; line-height:1.5;"></div>
+
+      <!-- Sponsor / Bridal Photo Album Tie-up -->
+      <div id="sponsor-tieup-box" style="background:linear-gradient(135deg, #fff9ee, #fdfaf3); border:1px solid #f0e6d2; border-radius:12px; padding:12px 14px; margin-top:14px; display:flex; align-items:center; gap:12px;">
+        <div style="font-size:26px; flex-shrink:0;">📖</div>
+        <div style="flex:1;">
+          <div style="font-size:10px; font-weight:700; color:var(--primary); letter-spacing:0.5px;">MARRYPIC × フォトブック提携限定</div>
+          <div style="font-size:12px; font-weight:800; color:#2c2c2c; margin-top:1px;">集まった写真で、両親へ送る最高品質アルバム</div>
+          <div style="font-size:10px; color:#777; margin-top:2px;">ハードカバー上質紙仕上げ · 【限定20%OFF】</div>
+        </div>
+        <button style="background:var(--primary-dark); color:#fff; border:none; padding:7px 12px; border-radius:16px; font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap;" onclick="alert('MarryPic限定クーポン（20%OFF）が適用されました✨ 提携フォトブック作成ページを開きます')">
+          クーポン
+        </button>
+      </div>
+
+      <button class="btn-dark" style="background:#eee; color:#333; margin-top:8px;" onclick="closeDlModal()">
+        閉じる
+      </button>
+    </div>
+  </div>
+
+  <!-- Fullscreen Automatic Slideshow Player -->
+  <div id="slideshow-modal" class="slideshow-modal">
+    <div class="ss-top">
+      <div class="ss-title" id="ss-top-title">Ken & Yui Wedding</div>
+      <div class="ss-actions">
+        <span id="ss-counter" style="font-size:12px; color:#ddd; font-weight:700;">1 / 5</span>
+        <button class="ss-btn-icon" id="ss-play-btn" onclick="toggleSlideshowPlay()">⏸️</button>
+        <button class="ss-btn-icon" onclick="closeSlideshow()">✕</button>
+      </div>
+    </div>
+
+    <div class="ss-stage">
+      <button class="ss-nav ss-prev" onclick="prevSlide()">❮</button>
+      <img id="ss-media" class="ss-media" src="" alt="slide">
+      <button class="ss-nav ss-next" onclick="nextSlide()">❯</button>
+    </div>
+
+    <div class="ss-bottom">
+      <div class="ss-guest-info">
+        <span id="ss-guest-name">ゲスト様</span>
+        <span id="ss-photo-time" style="font-size:11px; color:#aaa; font-weight:normal;">14:30</span>
+      </div>
+      <div class="ss-msg-text" id="ss-guest-msg">ご結婚おめでとうございます！</div>
+      <div class="ss-progress-bar">
+        <div id="ss-progress-fill" class="ss-progress-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-logo">💍 MarryPic</div>
+      <button class="btn-switch-mode" onclick="toggleSetupModal()">
+        ⚙️ 新郎新婦設定・QR作成
+      </button>
+    </div>
+
+    <!-- Wedding Header -->
+    <div class="header">
+      <h1 class="wedding-title" id="disp-wedding-title">Ken & Yui Wedding Party</h1>
+      <div class="wedding-meta" id="disp-wedding-meta">2027.05.22 · The Tokyo Grand Hotel</div>
+      <div class="header-badges">
+        <span class="badge badge-sync"><span class="sync-dot"></span> クラウドリアルタイム同期</span>
+        <span class="badge badge-quality">💎 オリジナル無劣化保存ON</span>
+      </div>
+      <p class="welcome-msg" id="disp-welcome-msg">
+        本日はご列席いただきありがとうございます！<br>皆様が撮影された写真や動画を、ぜひこちらからお気軽にお送りください📷✨
+      </p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" id="tab-btn-upload" onclick="switchTab('upload')">写真を送る</div>
+      <div class="tab" id="tab-btn-gallery" onclick="switchTab('gallery')">みんなの写真 (<span id="photo-count">0</span>)</div>
+      <div class="tab" id="tab-btn-manage" onclick="switchTab('manage')">アルバム管理</div>
+    </div>
+
+    <!-- 1. ゲスト写真送信タブ -->
+    <div id="tab-upload" class="tab-content active">
+      <div class="app-card" style="background:var(--primary-light); border: 2px dashed #dfc685; text-align:center;">
+        <div style="font-size:38px; margin-bottom:6px;">📸</div>
+        <h3 style="font-size:16px; margin-bottom:4px;">写真を選ぶ</h3>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">複数枚OK・登録不要・無劣化オリジナル保存</p>
+        
+        <label for="file-input" class="file-select-btn">
+          📷 カメラロールから写真を選ぶ
+        </label>
+        <input type="file" id="file-input" style="opacity:0; position:absolute; z-index:-1; width:1px; height:1px;" multiple accept="image/*" onchange="handleFileSelect(event)">
+      </div>
+
+      <!-- 選択中ファイルプレビュー -->
+      <div id="selected-box" class="selected-files-box">
+        <div style="font-size:12px; font-weight:700; color:var(--primary-dark); margin-bottom:8px; display:flex; justify-content:space-between;">
+          <span>選択中の写真 (<span id="selected-count">0</span>枚)</span>
+          <span style="color:#e07a5f; cursor:pointer;" onclick="clearSelected()">✕ キャンセル</span>
+        </div>
+        <div id="thumb-container" class="thumb-scroll"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">お名前・テーブル番号（任意）</label>
+        <input type="text" id="guest-name" class="form-input" placeholder="例：鈴木 健太 / A卓 友人">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">おふたりへのお祝いメッセージ（任意）</label>
+        <textarea id="guest-msg" class="form-input" placeholder="ご結婚おめでとうございます！末永くお幸せに✨"></textarea>
+      </div>
+
+      <!-- プログレスバー -->
+      <div id="progress-wrap" class="progress-wrap">
+        <div id="progress-bar" class="progress-bar"></div>
+        <div id="progress-text" class="progress-text">送信中... 0%</div>
+      </div>
+
+      <button id="submit-btn" class="btn-gold" onclick="uploadPhotos()">
+        アルバムへ送信する ✨
+      </button>
+    </div>
+
+    <!-- 2. ギャラリータブ -->
+    <div id="tab-gallery" class="tab-content">
+      <button class="btn-slideshow-trigger" onclick="startSlideshow()">
+        ▶️ スライドショーで見る（自動再生）
+      </button>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <span style="font-size:15px; font-weight:700;">みんなの写真</span>
+        <button style="background:#fdfaf3; border:1px solid #ddd; font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer;" onclick="syncFromCloud(true)">🔄 最新を取得</button>
+      </div>
+
+      <div id="empty-state" style="text-align:center; padding:30px 20px; color:var(--text-muted); font-size:13px;">
+        <div style="font-size:36px; margin-bottom:8px;">📷</div>
+        <p>まだ投稿写真がありません。<br>「写真を送る」からカメラロールの写真をアップロードしてみてください！</p>
+      </div>
+
+      <div class="photo-grid" id="gallery-grid"></div>
+    </div>
+
+    <!-- 3. 新郎新婦アルバム管理タブ -->
+    <div id="tab-manage" class="tab-content">
+      <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; margin-bottom:18px;">
+        <div style="background:#fdfaf3; padding:16px; border-radius:12px; text-align:center; border:1px solid #f0e6d2;">
+          <div style="font-size:26px; font-weight:800; color:var(--primary-dark);" id="stat-total">0</div>
+          <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">集まった写真</div>
+        </div>
+        <div style="background:#fdfaf3; padding:16px; border-radius:12px; text-align:center; border:1px solid #f0e6d2;">
+          <div style="font-size:26px; font-weight:800; color:var(--primary-dark);" id="stat-guests">0人</div>
+          <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">参加ゲスト数</div>
+        </div>
+      </div>
+
+      <!-- 高画質保存ステータス -->
+      <div class="app-card" style="background:#fdfaf3; border: 1px solid #e0c98f;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:14px; font-weight:800; color:var(--primary-dark);">💎 オリジナル高画質保存</span>
+          <span style="font-size:11px; background:#27ae60; color:#fff; padding:2px 8px; border-radius:10px;">完全無劣化</span>
+        </div>
+        <p style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+          ゲストが送信した写真のオリジナル生データ（最大画質）を1枚残らず保存しています。後から印刷やフォトアルバム制作にそのままお使いいただけます。
+        </p>
+      </div>
+
+      <!-- プラン状態 ＆ 広告非表示アップグレードカード -->
+      <div id="plan-status-card" class="app-card" style="background:linear-gradient(135deg, #fff9ee, #fff); border:1.5px solid #d4af37;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:14px; font-weight:800; color:var(--primary-dark);">🌟 広告非表示プレミアムパス</span>
+          <span style="font-size:10px; background:#e07a5f; color:#fff; font-weight:700; padding:2px 8px; border-radius:10px;">ワンコイン500円</span>
+        </div>
+        <p style="font-size:12px; color:#555; line-height:1.6; margin-bottom:12px;">
+          現在のプラン：<strong style="color:var(--primary-dark);">フリープラン（完全無料）</strong><br>
+          ゲスト画面や保存完了画面のスポンサー表示（フォトブック等の案内枠）をすべて非表示にし、おふたりだけの完全オリジナル・ノイズゼロ空間で結婚式を演出できます。
+        </p>
+        <button class="btn-gold" style="padding:11px; font-size:13px;" onclick="upgradeToAdFree()">
+          ✨ 500円で広告を完全非表示にする（プレミアム適用）
+        </button>
+      </div>
+
+      <!-- QRコード発行カード -->
+      <div class="qr-card">
+        <h3 style="font-size:16px; font-weight:800; color:var(--primary-dark);">📱 ゲスト招待用QRコード</h3>
+        <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+          このQRコードを披露宴の各テーブルに置くだけで、ゲストが写真を送信できます。
+        </p>
+        <img id="qr-img" class="qr-img" src="" alt="招待QRコード">
+        <div class="qr-url-box" id="qr-url-text">https://...</div>
+        <button class="btn-dark" style="background:#fff; color:var(--primary-dark); border:2px solid var(--primary); padding:10px; font-size:13px;" onclick="copyGuestUrl()">
+          📋 招待URLをコピーする
+        </button>
+      </div>
+
+      <!-- 卓上カード印刷プレビュー -->
+      <div class="app-card">
+        <div class="card-title">📄 卓上QR案内カード（印刷プレビュー）</div>
+        <div class="print-card-preview">
+          <div class="print-card-title">- PHOTO & MOVIE SHARE -</div>
+          <div class="print-card-names" id="preview-names">Ken & Yui</div>
+          <div class="print-card-date" id="preview-date">2027.05.22 · The Tokyo Grand Hotel</div>
+          <img id="preview-qr" class="print-card-qr" src="" alt="卓上QR">
+          <div class="print-card-instructions">
+            カメラでQRコードを読み取って<br>写真や動画をシェアしてください🕊️✨<br>
+            <span style="font-size:10px; color:#999;">※アプリ不要・登録不要でお送りいただけます</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-dark" onclick="openDlModal()">
+        📥 オリジナル画質で一括ダウンロード
+      </button>
+
+      <button class="btn-gold" style="background:#fff; color:var(--primary-dark); border:2px solid var(--primary); margin-top:8px;" onclick="openEditModal()">
+        ✏️ 新郎新婦のお名前・挙式日を変更する
+      </button>
+      <button class="btn-gold" style="background:#fff; color:#c53030; border:1px solid #e0b4b4; margin-top:12px; font-size:12px;" onclick="resetAllPhotos()">
+        🗑️ アルバムの写真をすべて削除（0枚にリセット）
+      </button>
+    </div>
+
+    <!-- 設定モーダル -->
+    <div id="setup-modal" class="modal" onclick="closeSetupModal()">
+      <div class="modal-content" style="background:#fff; padding:24px; max-width:420px; width:90%; color:var(--text); text-align:left; border-radius:16px;" onclick="event.stopPropagation()">
+        <h3 style="font-size:18px; font-weight:800; margin-bottom:6px; color:var(--primary-dark);">💍 結婚式アルバムの設定</h3>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:18px;">
+          新郎新婦のお名前と挙式日を設定すると、専用のアルバムとQRコードが即時発行されます。
+        </p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="form-group">
+            <label class="form-label">新郎のお名前</label>
+            <input type="text" id="input-groom" class="form-input" placeholder="例：Ken / 健" value="Ken">
+          </div>
+          <div class="form-group">
+            <label class="form-label">新婦のお名前</label>
+            <input type="text" id="input-bride" class="form-input" placeholder="例：Yui / 結衣" value="Yui">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">挙式日</label>
+          <input type="date" id="input-date" class="form-input" value="2027-02-20">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">式場名・ホテル名（任意）</label>
+          <input type="text" id="input-venue" class="form-input" placeholder="例：Grand Hyatt Hotel" value="Grand Hyatt Hotel">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ゲストへのメッセージ（任意）</label>
+          <textarea id="input-msg" class="form-input" placeholder="本日はお越しいただきありがとうございます！...">本日はご列席いただきありがとうございます！皆様が撮影された写真や動画を、ぜひこちらからお気軽にお送りください📷✨</textarea>
+        </div>
+
+        <button class="btn-gold" onclick="saveWeddingSettings()">
+          設定を保存してQRコードを発行 ✨
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const CLOUD_DB_ID = urlParams.get('room') || 'marrypic_demo_room_clean';
+    const LOCAL_STORAGE_KEY = 'marrypic_saved_photos_' + CLOUD_DB_ID;
+
+    // IndexedDB for Uncompressed Raw Original Files
+    const DB_NAME = 'MarryPicOriginalsDB';
+    const STORE_NAME = 'original_files';
+
+    function openOriginalsDB() {
+      return new Promise((resolve) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+      });
+    }
+
+    async function storeOriginalFile(id, file) {
+      try {
+        const db = await openOriginalsDB();
+        if (!db) return;
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        store.put({ id, file, name: file.name, size: file.size, type: file.type });
+      } catch (e) {
+        console.warn('IndexedDB store error', e);
+      }
+    }
+
+    async function getOriginalFileById(id) {
+      try {
+        const db = await openOriginalsDB();
+        if (!db) return null;
+        return new Promise((resolve) => {
+          const tx = db.transaction(STORE_NAME, 'readonly');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.get(id);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => resolve(null);
+        });
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function getAllStoredOriginals() {
+      try {
+        const db = await openOriginalsDB();
+        if (!db) return [];
+        return new Promise((resolve) => {
+          const tx = db.transaction(STORE_NAME, 'readonly');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => resolve([]);
+        });
+      } catch (e) {
+        return [];
+      }
+    }
+
+    let weddingConfig = {
+      groom: 'Ken',
+      bride: 'Yui',
+      date: '2027-05-22',
+      venue: 'The Tokyo Grand Hotel',
+      msg: '本日はご列席いただきありがとうございます！皆様が撮影された写真や動画を、ぜひこちらからお気軽にお送りください📷✨'
+    };
+
+    // Clean initial state (zero photos)
+    let uploadedItems = [];
+    let selectedFiles = [];
+
+    // Fallback sample photos if completely empty
+    const sampleItems = [
+      { url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800', guest: '鈴木 健太 (A卓 友人)', msg: '結婚おめでとう！最高の式だね！末永くお幸せに！', time: '13:15', isSample: true },
+      { url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800', guest: '佐藤 彩花 (B卓 友人)', msg: 'ドレス姿本当に綺麗✨おふたりの笑顔に感動しました！', time: '13:28', isSample: true }
+    ];
+
+    // Slideshow state
+    let ssIndex = 0;
+    let ssTimer = null;
+    let ssProgressTimer = null;
+    let ssIsPlaying = true;
+    const SLIDE_DURATION = 4000;
+
+    let isAdFree = false;
+
+    function checkAdFreeState() {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('adfree') === '1' || p.get('premium') === '1') {
+        isAdFree = true;
+      } else if (localStorage.getItem('marrypic_adfree_' + CLOUD_DB_ID) === 'true') {
+        isAdFree = true;
+      }
+      updateAdDisplay();
+    }
+
+    function updateAdDisplay() {
+      const sponsorBox = document.getElementById('sponsor-tieup-box');
+      const planCard = document.getElementById('plan-status-card');
+      const headerBadges = document.querySelector('.header-badges');
+
+      if (isAdFree) {
+        if (sponsorBox) sponsorBox.style.display = 'none';
+        if (planCard) {
+          planCard.style.background = '#fdfaf3';
+          planCard.style.border = '1.5px solid #27ae60';
+          planCard.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-size:14px; font-weight:800; color:#27ae60;">✨ 広告非表示プレミアム適用中</span>
+              <span style="font-size:10px; background:#27ae60; color:#fff; font-weight:700; padding:2px 8px; border-radius:10px;">広告ゼロ</span>
+            </div>
+            <p style="font-size:12px; color:#555; line-height:1.5;">
+              このアルバムではゲスト画面・ダウンロード画面の広告や提携バナーが完全に非表示になっています。おふたりとゲストの思い出だけの洗練された空間をお楽しみいただけます🕊️
+            </p>
+          `;
+        }
+        if (headerBadges && !document.getElementById('badge-premium-tag')) {
+          const badge = document.createElement('span');
+          badge.id = 'badge-premium-tag';
+          badge.className = 'badge';
+          badge.style.background = '#eafaf1';
+          badge.style.color = '#27ae60';
+          badge.innerHTML = '✨ 広告なしプレミアム';
+          headerBadges.appendChild(badge);
+        }
+      } else {
+        if (sponsorBox) sponsorBox.style.display = 'flex';
+      }
+    }
+
+    async function upgradeToAdFree() {
+      if (!confirm('【広告非表示プレミアムパス（500円）】\nアルバム内のすべての広告・スポンサー枠を完全非表示にしますか？')) return;
+      isAdFree = true;
+      localStorage.setItem('marrypic_adfree_' + CLOUD_DB_ID, 'true');
+      updateAdDisplay();
+      showToast('✨ 広告非表示プレミアムを適用しました！');
+      alert('🎉 広告非表示プレミアムが適用されました！\nゲスト画面やダウンロード完了画面のスポンサー表示が完全に非表示になりました✨');
+    }
+
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('g')) weddingConfig.groom = params.get('g');
+      if (params.has('b')) weddingConfig.bride = params.get('b');
+      if (params.has('d')) weddingConfig.date = params.get('d');
+      if (params.has('v')) weddingConfig.venue = params.get('v');
+      if (params.has('m')) weddingConfig.msg = params.get('m');
+
+      applyConfigToUI();
+      generateQRCodes();
+
+      checkAdFreeState();
+
+      // 1. Instant local load
+      loadLocalPhotos();
+      updateGallery();
+      updateStats();
+
+      // 2. Initial cloud sync
+      await syncFromCloud(false);
+
+      // Auto sync every 8 seconds for live multi-device updates
+      setInterval(() => syncFromCloud(false), 8000);
+    }
+
+    function applyConfigToUI() {
+      document.getElementById('disp-wedding-title').textContent = `${weddingConfig.groom} & ${weddingConfig.bride} Wedding Party`;
+      document.getElementById('disp-wedding-meta').textContent = `${weddingConfig.date.replace(/-/g, '.')} · ${weddingConfig.venue}`;
+      document.getElementById('disp-welcome-msg').textContent = weddingConfig.msg;
+
+      document.getElementById('preview-names').textContent = `${weddingConfig.groom} & ${weddingConfig.bride}`;
+      document.getElementById('preview-date').textContent = `${weddingConfig.date.replace(/-/g, '.')} · ${weddingConfig.venue}`;
+      document.getElementById('ss-top-title').textContent = `${weddingConfig.groom} & ${weddingConfig.bride} Wedding`;
+
+      document.getElementById('input-groom').value = weddingConfig.groom;
+      document.getElementById('input-bride').value = weddingConfig.bride;
+      document.getElementById('input-date').value = weddingConfig.date;
+      document.getElementById('input-venue').value = weddingConfig.venue;
+      document.getElementById('input-msg').value = weddingConfig.msg;
+    }
+
+    function generateQRCodes() {
+      const baseUrl = window.location.origin + window.location.pathname;
+      const guestUrl = `${baseUrl}?room=${encodeURIComponent(CLOUD_DB_ID)}&g=${encodeURIComponent(weddingConfig.groom)}&b=${encodeURIComponent(weddingConfig.bride)}&d=${encodeURIComponent(weddingConfig.date)}&v=${encodeURIComponent(weddingConfig.venue)}`;
+      const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(guestUrl)}`;
+      
+      document.getElementById('qr-img').src = qrApi;
+      document.getElementById('preview-qr').src = qrApi;
+      document.getElementById('qr-url-text').textContent = guestUrl;
+    }
+
+    function saveLocalPhotos() {
+      try {
+        const slice = uploadedItems.slice(0, 30);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(slice));
+      } catch (e) {
+        console.warn('localStorage save error:', e);
+      }
+    }
+
+    function loadLocalPhotos() {
+      try {
+        // Clear all previous test uploads across all rooms
+        localStorage.removeItem('marrypic_saved_photos_ff808181a09d98f701a1c2e5ef8f7501');
+        localStorage.removeItem('marrypic_saved_photos_undefined');
+        localStorage.removeItem('marrypic_photos');
+        localStorage.removeItem('marrypic_saved_photos_marrypic_demo_room_v2');
+
+        const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (data) {
+          const arr = JSON.parse(data);
+          if (Array.isArray(arr) && arr.length > 0) {
+            uploadedItems = arr.filter(p => p && p.url && !p.url.includes('OOqOjwe') && !p.url.includes('hfn2I50') && !p.url.includes('R8pvR6A'));
+          }
+        }
+      } catch (e) {
+        console.warn('localStorage load error:', e);
+      }
+    }
+
+    async function syncFromCloud(showNotice) {
+      window.syncDebug = { started: true, time: new Date().toISOString() };
+      try {
+        let res = await fetch(`https://api.restful-api.dev/objects?id=${CLOUD_DB_ID}`);
+        if (!res.ok) {
+          res = await fetch(`https://api.restful-api.dev/objects/${CLOUD_DB_ID}`);
+        }
+        window.syncDebug.status = res.status;
+        window.syncDebug.ok = res.ok;
+        if (res.ok) {
+          const raw = await res.json();
+          const json = Array.isArray(raw) ? raw[0] : raw;
+          window.syncDebug.photosCount = (json && json.data && json.data.photos) ? json.data.photos.length : 'no photos';
+          if (json && json.data && Array.isArray(json.data.photos)) {
+            const cloudPhotos = json.data.photos.filter(p => p && p.url && !p.url.startsWith('blob:'));
+            
+            // Merge cloud photos with any local-only photos
+            const existingUrls = new Set(cloudPhotos.map(p => p.url));
+            const localOnly = uploadedItems.filter(p => !existingUrls.has(p.url));
+            
+            uploadedItems = [...localOnly, ...cloudPhotos];
+            saveLocalPhotos();
+            updateGallery();
+            updateStats();
+            if (showNotice) showToast('🔄 最新の写真を取得しました！');
+          }
+        }
+      } catch (e) {
+        window.syncDebug.error = e.toString();
+        console.warn('Sync failed', e);
+      }
+    }
+
+    async function resetAllPhotos() {
+      if (!confirm('アルバム内の写真をすべて削除して0枚に初期化しますか？')) return;
+      uploadedItems = [];
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      try {
+        await fetch(`https://api.restful-api.dev/objects/${CLOUD_DB_ID}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'marrypic_room_' + CLOUD_DB_ID,
+            data: { photos: [] }
+          })
+        });
+      } catch (e) {
+        console.warn('Cloud reset failed', e);
+      }
+      updateGallery();
+      updateStats();
+      showToast('🗑️ アルバムの写真をすべて削除しました');
+      switchTab('gallery');
+    }
+
+    function toggleSetupModal() { document.getElementById('setup-modal').classList.toggle('show'); }
+    function openEditModal() { document.getElementById('setup-modal').classList.add('show'); }
+    function closeSetupModal() { document.getElementById('setup-modal').classList.remove('show'); }
+
+    function saveWeddingSettings() {
+      weddingConfig.groom = document.getElementById('input-groom').value.trim() || '新郎';
+      weddingConfig.bride = document.getElementById('input-bride').value.trim() || '新婦';
+      weddingConfig.date = document.getElementById('input-date').value || '2027-02-20';
+      weddingConfig.venue = document.getElementById('input-venue').value.trim() || '披露宴会場';
+      weddingConfig.msg = document.getElementById('input-msg').value.trim() || '写真をお送りください！';
+
+      applyConfigToUI();
+      generateQRCodes();
+      closeSetupModal();
+
+      const newUrl = `${window.location.pathname}?room=${encodeURIComponent(CLOUD_DB_ID)}&g=${encodeURIComponent(weddingConfig.groom)}&b=${encodeURIComponent(weddingConfig.bride)}&d=${encodeURIComponent(weddingConfig.date)}&v=${encodeURIComponent(weddingConfig.venue)}`;
+      window.history.replaceState(null, '', newUrl);
+
+      showToast('✨ おふたりの名前とQRコードを更新しました！');
+    }
+
+    function copyGuestUrl() {
+      const urlText = document.getElementById('qr-url-text').textContent;
+      navigator.clipboard.writeText(urlText).then(() => {
+        showToast('📋 ゲスト招待URLをコピーしました！');
+      }).catch(() => { alert('URL: ' + urlText); });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2800);
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('tab-btn-' + name).classList.add('active');
+      document.getElementById('tab-' + name).classList.add('active');
+    }
+
+    function handleFileSelect(e) {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+      selectedFiles = files;
+      
+      const box = document.getElementById('selected-box');
+      const container = document.getElementById('thumb-container');
+      const countSpan = document.getElementById('selected-count');
+      
+      container.innerHTML = '';
+      countSpan.textContent = files.length;
+      box.style.display = 'block';
+
+      files.forEach(file => {
+        const url = URL.createObjectURL(file);
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'thumb-mini';
+        container.appendChild(img);
+      });
+    }
+
+    function clearSelected() {
+      selectedFiles = [];
+      document.getElementById('file-input').value = '';
+      document.getElementById('selected-box').style.display = 'none';
+      document.getElementById('thumb-container').innerHTML = '';
+    }
+
+    // High-speed client-side image compression (converts multi-MB iPhone photos to ~150KB JPEG in 0.1s)
+    function compressImageFile(file, maxWidth = 1200, quality = 0.8) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            canvas.toBlob((blob) => {
+              resolve({ blob, dataUrl });
+            }, 'image/jpeg', quality);
+          };
+          img.onerror = () => resolve(null);
+          img.src = e.target.result;
+        };
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Non-blocking background cloud upload (with 4 second max timeout so UI never freezes)
+    async function syncToCloudBackground(blob, guest, msg, time, origId, origSize) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+        const formData = new FormData();
+        formData.append('image', blob);
+
+        const res = await fetch('https://api.imgur.com/3/image', {
+          method: 'POST',
+          headers: { 'Authorization': 'Client-ID 546c25a59c58ad7' },
+          body: formData,
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json && json.data && json.data.link) {
+            const publicUrl = json.data.link;
+
+            // Push to shared restful-api cloud database
+            let getRes = await fetch(`https://api.restful-api.dev/objects?id=${CLOUD_DB_ID}`);
+            if (!getRes.ok) getRes = await fetch(`https://api.restful-api.dev/objects/${CLOUD_DB_ID}`);
+            let existing = [];
+            if (getRes.ok) {
+              const rawCur = await getRes.json();
+              const cur = Array.isArray(rawCur) ? rawCur[0] : rawCur;
+              existing = (cur && cur.data && Array.isArray(cur.data.photos)) ? cur.data.photos.filter(p => !p.url.startsWith('blob:')) : [];
+            }
+            const newItem = { url: publicUrl, guest, msg, time, origId, origSize: formatSize(origSize) };
+            const combined = [newItem, ...existing].slice(0, 30);
+            await fetch(`https://api.restful-api.dev/objects/${CLOUD_DB_ID}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: 'marrypic_wedding_ken_yui',
+                data: { photos: combined }
+              })
+            });
+          }
+        }
+      } catch (e) {
+        console.warn('Cloud background sync note:', e);
+      }
+    }
+
+    function formatSize(bytes) {
+      if (!bytes) return '高解像度';
+      if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    async function uploadPhotos() {
+      if (selectedFiles.length === 0) {
+        alert('まずは上の「カメラロールから写真を選ぶ」をタップして写真を選択してください！');
+        return;
+      }
+
+      const guestName = document.getElementById('guest-name').value.trim() || 'ゲスト';
+      const guestMsg = document.getElementById('guest-msg').value.trim();
+      const progressWrap = document.getElementById('progress-wrap');
+      const progressBar = document.getElementById('progress-bar');
+      const progressText = document.getElementById('progress-text');
+      const submitBtn = document.getElementById('submit-btn');
+
+      submitBtn.disabled = true;
+      progressWrap.style.display = 'block';
+
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const origId = 'orig_' + Date.now() + '_' + i;
+        
+        progressText.textContent = `オリジナル生データを保管中... (${i + 1}/${selectedFiles.length})`;
+        progressBar.style.width = Math.round(((i + 1) / selectedFiles.length) * 50) + '%';
+
+        // 1. Store Raw Uncompressed Original in IndexedDB
+        await storeOriginalFile(origId, file);
+
+        // 2. High-speed client compression for fast mobile display
+        const compressed = await compressImageFile(file);
+        const finalUrl = compressed ? compressed.dataUrl : URL.createObjectURL(file);
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const item = {
+          id: origId,
+          url: finalUrl,
+          guest: guestName,
+          msg: guestMsg,
+          time: timeStr,
+          origSize: formatSize(file.size),
+          origName: file.name
+        };
+
+        // Add to active memory
+        uploadedItems.unshift(item);
+
+        // 3. Background cloud sync
+        if (compressed && compressed.blob) {
+          syncToCloudBackground(compressed.blob, guestName, guestMsg, timeStr, origId, file.size);
+        }
+      }
+
+      progressBar.style.width = '100%';
+      progressText.textContent = '完了！✨';
+
+      // Save locally
+      saveLocalPhotos();
+
+      setTimeout(() => {
+        progressWrap.style.display = 'none';
+        progressBar.style.width = '0%';
+        submitBtn.disabled = false;
+        clearSelected();
+        document.getElementById('guest-msg').value = '';
+
+        updateGallery();
+        updateStats();
+
+        showToast('✨ 高画質オリジナルデータを完全保存しました！');
+        switchTab('gallery');
+      }, 250);
+    }
+
+    function updateGallery() {
+      const grid = document.getElementById('gallery-grid');
+      const emptyState = document.getElementById('empty-state');
+      const countLabel = document.getElementById('photo-count');
+
+      countLabel.textContent = uploadedItems.length;
+
+      if (uploadedItems.length === 0) {
+        emptyState.style.display = 'block';
+        grid.innerHTML = '';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      grid.innerHTML = '';
+
+      uploadedItems.forEach((item) => {
+        const thumb = document.createElement('div');
+        thumb.className = 'photo-thumb';
+        thumb.onclick = () => openModal(item);
+
+        thumb.innerHTML = `
+          <img src="${item.url}" alt="photo">
+          <span class="orig-badge">💎 オリジナル</span>
+          <span class="photo-tag">${item.guest}</span>
+        `;
+        grid.appendChild(thumb);
+      });
+    }
+
+    function updateStats() {
+      document.getElementById('stat-total').textContent = uploadedItems.length;
+      const guests = new Set(uploadedItems.map(i => i.guest).filter(Boolean));
+      document.getElementById('stat-guests').textContent = guests.size + '人';
+    }
+
+    let currentModalItem = null;
+
+    async function openModal(item) {
+      currentModalItem = item;
+      const modal = document.getElementById('modal');
+      const modalImg = document.getElementById('modal-img');
+      const caption = document.getElementById('modal-caption');
+      const dlBtn = document.getElementById('modal-dl-btn');
+      
+      modalImg.src = item.url;
+      const sizeNote = item.origSize ? ` [生データ容量: ${item.origSize}]` : '';
+      caption.innerHTML = `<strong>${item.guest} 様</strong> (${item.time})${sizeNote}<br>${item.msg ? '💬 ' + item.msg : ''}`;
+
+      // Check if raw original exists in IndexedDB
+      if (item.id) {
+        const origRecord = await getOriginalFileById(item.id);
+        if (origRecord && origRecord.file) {
+          dlBtn.innerHTML = `💎 無劣化オリジナル生データを保存 (${formatSize(origRecord.size)})`;
+        } else {
+          dlBtn.innerHTML = `💎 写真をスマホ・PCに保存する`;
+        }
+      } else {
+        dlBtn.innerHTML = `💎 写真をスマホ・PCに保存する`;
+      }
+
+      modal.classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('show');
+    }
+
+    async function downloadCurrentPhoto() {
+      if (!currentModalItem) return;
+      const item = currentModalItem;
+      const btn = document.getElementById('modal-dl-btn');
+      const origText = btn.innerHTML;
+      btn.innerHTML = '⏳ データを取得中...';
+      btn.style.pointerEvents = 'none';
+
+      try {
+        let blob = null;
+        let filename = `marrypic_${item.guest || 'guest'}_${Date.now()}.jpg`;
+
+        if (item.id) {
+          const origRecord = await getOriginalFileById(item.id);
+          if (origRecord && origRecord.file) {
+            blob = origRecord.file;
+            if (origRecord.name) filename = origRecord.name;
+          }
+        }
+
+        if (!blob && item.url) {
+          const res = await fetch(item.url);
+          if (!res.ok) throw new Error('ダウンロードに失敗しました');
+          blob = await res.blob();
+        }
+
+        if (!blob) throw new Error('画像データが見つかりません');
+
+        // 1. Try Web Share API (native iOS "画像を保存" into Camera Roll)
+        const mimeType = blob.type || 'image/jpeg';
+        const file = new File([blob], filename, { type: mimeType });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: '結婚式写真',
+              text: 'MarryPicから保存'
+            });
+            showToast('✨ 写真アプリへ保存または共有しました');
+            btn.innerHTML = origText;
+            btn.style.pointerEvents = 'auto';
+            return;
+          } catch (shareErr) {
+            if (shareErr.name !== 'AbortError') {
+              console.warn('Share error, fallback to direct download', shareErr);
+            }
+          }
+        }
+
+        // 2. Fallback: Blob URL download (works on all desktop & mobile browsers)
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        }, 4000);
+
+        showToast('✨ 写真の保存を開始しました！');
+      } catch (err) {
+        console.error('Download error:', err);
+        alert('保存処理に失敗しました。画像を長押しして「“写真”に追加」をお試しください。');
+      } finally {
+        btn.innerHTML = origText;
+        btn.style.pointerEvents = 'auto';
+      }
+    }
+
+    async function downloadPhotoByIndex(index) {
+      const item = uploadedItems[index];
+      if (!item) return;
+      currentModalItem = item;
+      await downloadCurrentPhoto();
+    }
+
+    /* DOWNLOAD ALL MODAL */
+    async function openDlModal() {
+      const modal = document.getElementById('dl-modal');
+      const container = document.getElementById('dl-items-container');
+      const summaryCount = document.getElementById('dl-summary-count');
+      const zipMsg = document.getElementById('zip-status-msg');
+      if (zipMsg) zipMsg.style.display = 'none';
+
+      summaryCount.textContent = `保管中の写真：${uploadedItems.length}枚`;
+      container.innerHTML = '';
+
+      if (uploadedItems.length === 0) {
+        container.innerHTML = `
+          <div style="font-size:12px; color:#888; text-align:center; padding:20px;">
+            まだ写真がアップロードされていません🕊️
+          </div>
+        `;
+        modal.classList.add('show');
+        return;
+      }
+
+      for (let idx = 0; idx < uploadedItems.length; idx++) {
+        const item = uploadedItems[idx];
+        const row = document.createElement('div');
+        row.className = 'download-list-item';
+        row.innerHTML = `
+          <div style="display:flex; align-items:center; gap:8px;">
+            <img src="${item.url}" style="width:38px; height:38px; border-radius:6px; object-fit:cover;">
+            <div>
+              <div style="font-weight:700; font-size:12px;">📷 写真 ${idx + 1} (${item.guest || 'ゲスト'})</div>
+              <div style="color:#888; font-size:10px;">${item.time || ''} ${item.origSize ? '· ' + item.origSize : ''}</div>
+            </div>
+          </div>
+          <button onclick="downloadPhotoByIndex(${idx})" style="background:#2c2c2c; color:#fff; border:none; padding:6px 12px; border-radius:12px; font-size:11px; font-weight:700; cursor:pointer;">
+            保存
+          </button>
+        `;
+        container.appendChild(row);
+      }
+
+      modal.classList.add('show');
+    }
+
+    function closeDlModal() {
+      document.getElementById('dl-modal').classList.remove('show');
+    }
+
+    async function downloadAllAsZip() {
+      if (typeof JSZip === 'undefined') {
+        alert('ZIP生成ライブラリの読み込み中です。数秒後に再度お試しください。');
+        return;
+      }
+
+      if (uploadedItems.length === 0) {
+        alert('ダウンロードする写真がまだありません。');
+        return;
+      }
+
+      const btn = document.getElementById('btn-batch-download');
+      const zipMsg = document.getElementById('zip-status-msg');
+      const origBtnText = btn.innerHTML;
+      btn.style.pointerEvents = 'none';
+
+      zipMsg.style.display = 'block';
+      zipMsg.style.background = '#fef9e7';
+      zipMsg.style.color = '#b7791f';
+      zipMsg.innerHTML = '⏳ 写真データを収集中... (0 / ' + uploadedItems.length + ')';
+
+      try {
+        const zip = new JSZip();
+        const folder = zip.folder("MarryPic_Wedding_Photos");
+
+        for (let i = 0; i < uploadedItems.length; i++) {
+          const item = uploadedItems[i];
+          zipMsg.innerHTML = `⏳ 写真データを収集中... (${i + 1} / ${uploadedItems.length})`;
+
+          let blob = null;
+          let filename = `photo_${String(i + 1).padStart(2, '0')}_${item.guest || 'guest'}.jpg`;
+
+          if (item.id) {
+            const orig = await getOriginalFileById(item.id);
+            if (orig && orig.file) {
+              blob = orig.file;
+              if (orig.name) filename = `photo_${String(i + 1).padStart(2, '0')}_${orig.name}`;
+            }
+          }
+
+          if (!blob && item.url) {
+            try {
+              const res = await fetch(item.url);
+              if (res.ok) {
+                blob = await res.blob();
+              }
+            } catch (fetchErr) {
+              console.warn('Failed to fetch image for zip', item.url, fetchErr);
+            }
+          }
+
+          if (blob) {
+            folder.file(filename, blob);
+          }
+        }
+
+        zipMsg.innerHTML = '🗜️ ZIPファイルを圧縮・パッケージ中...';
+
+        const zipBlob = await zip.generateAsync({
+          type: 'blob',
+          compression: 'DEFLATE',
+          compressionOptions: { level: 6 }
+        }, function updateCallback(metadata) {
+          zipMsg.innerHTML = `🗜️ ZIP生成中... ${Math.round(metadata.percent)}%`;
+        });
+
+        const now = new Date();
+        const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+        const zipFilename = `MarryPic_Photos_${dateStr}.zip`;
+
+        const blobUrl = URL.createObjectURL(zipBlob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = zipFilename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        }, 10000);
+
+        zipMsg.style.background = '#eafaf1';
+        zipMsg.style.color = '#27ae60';
+        zipMsg.innerHTML = `
+          ✅ ZIPのダウンロードを開始しました！<br>
+          <span style="font-size:11px; color:#555; font-weight:normal;">
+            ※iPhoneの場合は、画面に表示される「ダウンロード」をタップすると「ファイル」アプリ内の「ダウンロード」に保存されます（タップで解凍できます）。
+          </span>
+        `;
+        showToast('✨ 全枚数のZIPダウンロードを開始しました！');
+      } catch (err) {
+        console.error('ZIP generation error:', err);
+        zipMsg.style.background = '#fde8e8';
+        zipMsg.style.color = '#c53030';
+        zipMsg.innerHTML = '❌ ZIP生成中にエラーが発生しました。個別の保存ボタンをお試しください。';
+      } finally {
+        btn.innerHTML = origBtnText;
+        btn.style.pointerEvents = 'auto';
+      }
+    }
+
+    /* SLIDESHOW LOGIC */
+    function getSlideshowPool() {
+      return uploadedItems;
+    }
+
+    function startSlideshow() {
+      if (uploadedItems.length === 0) {
+        alert('📷 まだ写真が投稿されていません。\n「写真を送る」から写真をアップロードすると、スライドショーをお楽しみいただけます！');
+        return;
+      }
+      const pool = getSlideshowPool();
+      ssIndex = 0;
+      ssIsPlaying = true;
+      document.getElementById('ss-play-btn').textContent = '⏸️';
+      document.getElementById('slideshow-modal').classList.add('show');
+      renderSlide();
+      startSlideTimer();
+    }
+
+    function renderSlide() {
+      const pool = getSlideshowPool();
+      const item = pool[ssIndex];
+      const img = document.getElementById('ss-media');
+      const guestName = document.getElementById('ss-guest-name');
+      const photoTime = document.getElementById('ss-photo-time');
+      const guestMsg = document.getElementById('ss-guest-msg');
+      const counter = document.getElementById('ss-counter');
+
+      img.classList.remove('active');
+      setTimeout(() => {
+        img.src = item.url;
+        img.classList.add('active');
+      }, 100);
+
+      guestName.textContent = `${item.guest} 様`;
+      photoTime.textContent = item.time || '';
+      guestMsg.textContent = item.msg ? `💬 ${item.msg}` : '（写真をお届けしました🕊️）';
+      counter.textContent = `${ssIndex + 1} / ${pool.length}`;
+
+      resetProgressBar();
+    }
+
+    function resetProgressBar() {
+      clearInterval(ssProgressTimer);
+      const fill = document.getElementById('ss-progress-fill');
+      fill.style.width = '0%';
+      let elapsed = 0;
+      const step = 50;
+
+      if (!ssIsPlaying) return;
+
+      ssProgressTimer = setInterval(() => {
+        elapsed += step;
+        const pct = Math.min(100, (elapsed / SLIDE_DURATION) * 100);
+        fill.style.width = pct + '%';
+        if (elapsed >= SLIDE_DURATION) {
+          clearInterval(ssProgressTimer);
+        }
+      }, step);
+    }
+
+    function startSlideTimer() {
+      clearInterval(ssTimer);
+      if (!ssIsPlaying) return;
+      ssTimer = setInterval(() => {
+        nextSlide();
+      }, SLIDE_DURATION);
+    }
+
+    function nextSlide() {
+      const pool = getSlideshowPool();
+      ssIndex = (ssIndex + 1) % pool.length;
+      renderSlide();
+      startSlideTimer();
+    }
+
+    function prevSlide() {
+      const pool = getSlideshowPool();
+      ssIndex = (ssIndex - 1 + pool.length) % pool.length;
+      renderSlide();
+      startSlideTimer();
+    }
+
+    function toggleSlideshowPlay() {
+      ssIsPlaying = !ssIsPlaying;
+      const btn = document.getElementById('ss-play-btn');
+      btn.textContent = ssIsPlaying ? '⏸️' : '▶️';
+      if (ssIsPlaying) {
+        startSlideTimer();
+        resetProgressBar();
+      } else {
+        clearInterval(ssTimer);
+        clearInterval(ssProgressTimer);
+      }
+    }
+
+    function closeSlideshow() {
+      clearInterval(ssTimer);
+      clearInterval(ssProgressTimer);
+      document.getElementById('slideshow-modal').classList.remove('show');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
