@@ -185,7 +185,7 @@
   <!-- Download All Modal -->
   <div id="dl-modal" class="modal" onclick="closeDlModal()">
     <div class="modal-content" style="background:#fff; color:var(--text); padding:24px; text-align:left; max-width:440px;" onclick="event.stopPropagation()">
-      <h3 style="font-size:17px; font-weight:800; color:var(--primary-dark); margin-bottom:6px;">📥 写真・動画の一括保存</h3>
+      <h3 style="font-size:17px; font-weight:800; color:var(--primary-dark); margin-bottom:6px;">📥 写真の一括保存</h3>
       <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
         集まった写真をまとめてZIPファイルで一括ダウンロードできます。
       </p>
@@ -268,7 +268,7 @@
         <span class="badge badge-quality">📷 写真はアルバムに保存</span>
       </div>
       <p class="welcome-msg" id="disp-welcome-msg">
-        本日はご列席いただきありがとうございます！<br>皆様が撮影された写真や動画を、ぜひこちらからお気軽にお送りください📷✨
+        本日はご列席いただきありがとうございます！<br>皆様が撮影された写真を、ぜひこちらからお気軽にお送りください📷✨
       </p>
     </div>
 
@@ -403,14 +403,14 @@
           <div class="print-card-date" id="preview-date">2027.05.22 · The Tokyo Grand Hotel</div>
           <img id="preview-qr" class="print-card-qr" src="" alt="卓上QR">
           <div class="print-card-instructions">
-            カメラでQRコードを読み取って<br>写真や動画をシェアしてください🕊️✨<br>
+            カメラでQRコードを読み取って<br>写真をシェアしてください🕊️✨<br>
             <span style="font-size:10px; color:#999;">※アプリ不要・登録不要でお送りいただけます</span>
           </div>
         </div>
       </div>
 
       <button class="btn-dark" onclick="openDlModal()">
-        📥 オリジナル画質で一括ダウンロード
+        📥 高画質で一括ダウンロード
       </button>
 
       <button class="btn-gold" style="background:#fff; color:var(--primary-dark); border:2px solid var(--primary); margin-top:8px;" onclick="openEditModal()">
@@ -452,7 +452,7 @@
 
         <div class="form-group">
           <label class="form-label">ゲストへのメッセージ（任意）</label>
-          <textarea id="input-msg" class="form-input" placeholder="本日はお越しいただきありがとうございます！...">本日はご列席いただきありがとうございます！皆様が撮影された写真や動画を、ぜひこちらからお気軽にお送りください📷✨</textarea>
+          <textarea id="input-msg" class="form-input" placeholder="本日はお越しいただきありがとうございます！...">本日はご列席いただきありがとうございます！皆様が撮影された写真を、ぜひこちらからお気軽にお送りください📷✨</textarea>
         </div>
 
         <button class="btn-gold" onclick="saveWeddingSettings()">
@@ -534,7 +534,7 @@
       bride: 'Yui',
       date: '2027-05-22',
       venue: 'The Tokyo Grand Hotel',
-      msg: '本日はご列席いただきありがとうございます！皆様が撮影された写真や動画を、ぜひこちらからお気軽にお送りください📷✨'
+      msg: '本日はご列席いただきありがとうございます！皆様が撮影された写真を、ぜひこちらからお気軽にお送りください📷✨'
     };
 
     // Clean initial state (zero photos)
@@ -995,7 +995,7 @@
 
         thumb.innerHTML = `
           <img src="${item.url}" alt="photo">
-          <span class="orig-badge">💎 オリジナル</span>
+          <span class="orig-badge">💎 高画質</span>
           <span class="photo-tag">${item.guest}</span>
         `;
         grid.appendChild(thumb);
