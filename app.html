@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MarryPic（マリピク）- ふたりの結婚式写真共有アルバム</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <script src="config.js"></script>
   <style>
     :root {
       --primary: #c59b27;
@@ -107,7 +109,7 @@
     .print-card-title { font-size: 13px; letter-spacing: 2px; color: var(--primary-dark); font-weight: 700; margin-bottom: 6px; }
     .print-card-names { font-size: 18px; font-weight: 800; margin-bottom: 2px; }
     .print-card-date { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
-    .print-card-qr { width: 150px; height: 150px; margin: 0 auto 12px; display: block; }
+    .print-card-qr { width: 170px; height: 170px; margin: 0 auto 12px; display: block; }
     .print-card-instructions { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
 
     /* Toast */
@@ -202,19 +204,6 @@
       </button>
       <div id="zip-status-msg" style="display:none; font-size:12px; margin-top:10px; padding:12px; background:#eafaf1; color:#27ae60; border-radius:8px; text-align:center; font-weight:600; line-height:1.5;"></div>
 
-      <!-- Sponsor / Bridal Photo Album Tie-up -->
-      <div id="sponsor-tieup-box" style="background:linear-gradient(135deg, #fff9ee, #fdfaf3); border:1px solid #f0e6d2; border-radius:12px; padding:12px 14px; margin-top:14px; display:flex; align-items:center; gap:12px;">
-        <div style="font-size:26px; flex-shrink:0;">📖</div>
-        <div style="flex:1;">
-          <div style="font-size:10px; font-weight:700; color:var(--primary); letter-spacing:0.5px;">MARRYPIC × フォトブック提携限定</div>
-          <div style="font-size:12px; font-weight:800; color:#2c2c2c; margin-top:1px;">集まった写真で、両親へ送る最高品質アルバム</div>
-          <div style="font-size:10px; color:#777; margin-top:2px;">ハードカバー上質紙仕上げ · 【限定20%OFF】</div>
-        </div>
-        <button style="background:var(--primary-dark); color:#fff; border:none; padding:7px 12px; border-radius:16px; font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap;" onclick="alert('MarryPic限定クーポン（20%OFF）が適用されました✨ 提携フォトブック作成ページを開きます')">
-          クーポン
-        </button>
-      </div>
-
       <button class="btn-dark" style="background:#eee; color:#333; margin-top:8px;" onclick="closeDlModal()">
         閉じる
       </button>
@@ -251,20 +240,29 @@
   </div>
 
   <div class="container">
+    <!-- デモ表示のお知らせ -->
+    <div id="demo-banner" style="display:none; background:#fff4e5; border-bottom:1px solid #f0d9b5; padding:10px 16px; font-size:11px; color:#8a5a12; line-height:1.6;">
+      ⚠️ いまは<strong>デモ表示</strong>です（写真はこの端末にのみ保存され、他の端末とは共有されません）。<br>
+      正式なアルバムは<a href="index.html#purchase" style="color:#8a5a12; font-weight:700;">トップページ</a>から発行できます。
+    </div>
+
+    <!-- 同期エラー・保存先未設定のお知らせ -->
+    <div id="cloud-warning" style="display:none; background:#fff8f6; border-bottom:1px solid #f3cbc0; padding:10px 16px; font-size:11px; color:#a4523c; line-height:1.6;"></div>
+
     <!-- Top Bar -->
     <div class="top-bar">
       <div class="top-logo">💍 MarryPic</div>
-      <button class="btn-switch-mode" onclick="toggleSetupModal()">
-        ⚙️ 新郎新婦設定・QR作成
+      <button class="btn-switch-mode" id="btn-settings" onclick="toggleSetupModal()" style="display:none;">
+        ⚙️ アルバム設定・QR作成
       </button>
     </div>
 
     <!-- Wedding Header -->
     <div class="header">
-      <h1 class="wedding-title" id="disp-wedding-title">Ken & Yui Wedding Party</h1>
+      <h1 class="wedding-title" id="disp-wedding-title">Wedding Photo Album</h1>
       <div class="wedding-meta" id="disp-wedding-meta">2027.05.22 · The Tokyo Grand Hotel</div>
       <div class="header-badges">
-        <span class="badge badge-sync"><span class="sync-dot"></span> クラウドリアルタイム同期</span>
+        <span class="badge badge-sync" id="sync-badge"><span class="sync-dot"></span> クラウドリアルタイム同期</span>
         <span class="badge badge-quality">📷 写真はアルバムに保存</span>
       </div>
       <p class="welcome-msg" id="disp-welcome-msg">
@@ -366,18 +364,36 @@
         </p>
       </div>
 
-      <!-- プラン状態 ＆ 広告非表示アップグレードカード -->
-      <div id="plan-status-card" class="app-card" style="background:linear-gradient(135deg, #fff9ee, #fff); border:1.5px solid #d4af37;">
+      <!-- ご利用内容（買い切りプラン） -->
+      <div id="plan-card" class="app-card" style="background:linear-gradient(135deg, #fff9ee, #fff); border:1.5px solid #d4af37;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:14px; font-weight:800; color:var(--primary-dark);">🌟 広告非表示プレミアムパス</span>
-          <span style="font-size:10px; background:#e07a5f; color:#fff; font-weight:700; padding:2px 8px; border-radius:10px;">ワンコイン500円</span>
+          <span style="font-size:14px; font-weight:800; color:var(--primary-dark);">🎫 ご利用内容</span>
+          <span style="font-size:10px; background:#27ae60; color:#fff; font-weight:700; padding:2px 8px; border-radius:10px;">買い切り</span>
         </div>
-        <p style="font-size:12px; color:#555; line-height:1.6; margin-bottom:12px;">
-          現在のプラン：<strong style="color:var(--primary-dark);">フリープラン（完全無料）</strong><br>
-          保存画面のスポンサー表示（フォトブック等の案内枠）をすべて非表示にし、おふたりだけのシンプルな空間で結婚式を演出できます。
+        <p style="font-size:12px; color:#555; line-height:1.6;">
+          <strong style="color:var(--primary-dark);">500円（税込）買い切りプラン</strong><br>
+          広告なし・追加料金なし・自動更新なし。写真の保存やダウンロードに、あとから料金がかかることはありません。
         </p>
-        <button class="btn-gold" style="padding:11px; font-size:13px;" onclick="upgradeToAdFree()">
-          ✨ 500円で広告を完全非表示にする（プレミアム適用）
+      </div>
+
+      <!-- アルバムURLの控え -->
+      <div class="app-card">
+        <div class="card-title">🔗 アルバムのURL</div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px; line-height:1.6;">
+          ゲスト用URLは招待・QRコード用、管理用URLはおふたり専用です。<br>
+          <span style="font-size:11px; color:#c53030;">※ 管理用URLは他の人に教えないでください。</span>
+        </p>
+
+        <div style="font-size:12px; font-weight:800; color:var(--primary-dark); margin-bottom:4px;">① ゲスト用URL（配る用）</div>
+        <div class="qr-url-box" id="guest-url-text" style="margin:0 0 8px;">https://...</div>
+        <button class="btn-dark" style="background:#fff; color:var(--primary-dark); border:2px solid var(--primary); padding:10px; font-size:13px; margin-bottom:14px;" onclick="copyAlbumUrl('guest')">
+          📋 ゲスト用URLをコピー
+        </button>
+
+        <div style="font-size:12px; font-weight:800; color:var(--primary-dark); margin-bottom:4px;">② 管理用URL（自分用）</div>
+        <div class="qr-url-box" id="admin-url-text" style="margin:0 0 8px;">https://...</div>
+        <button class="btn-dark" style="background:#fff; color:var(--primary-dark); border:2px solid var(--primary); padding:10px; font-size:13px;" onclick="copyAlbumUrl('admin')">
+          📋 管理用URLをコピー
         </button>
       </div>
 
@@ -432,22 +448,22 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div class="form-group">
             <label class="form-label">新郎のお名前</label>
-            <input type="text" id="input-groom" class="form-input" placeholder="例：Ken / 健" value="Ken">
+            <input type="text" id="input-groom" class="form-input" placeholder="例：健太 / Taro">
           </div>
           <div class="form-group">
             <label class="form-label">新婦のお名前</label>
-            <input type="text" id="input-bride" class="form-input" placeholder="例：Yui / 結衣" value="Yui">
+            <input type="text" id="input-bride" class="form-input" placeholder="例：結衣 / Hanako">
           </div>
         </div>
 
         <div class="form-group">
           <label class="form-label">挙式日</label>
-          <input type="date" id="input-date" class="form-input" value="2027-02-20">
+          <input type="date" id="input-date" class="form-input">
         </div>
 
         <div class="form-group">
           <label class="form-label">式場名・ホテル名（任意）</label>
-          <input type="text" id="input-venue" class="form-input" placeholder="例：Grand Hyatt Hotel" value="Grand Hyatt Hotel">
+          <input type="text" id="input-venue" class="form-input" placeholder="例：Grand Hyatt Tokyo">
         </div>
 
         <div class="form-group">
@@ -460,919 +476,1151 @@
         </button>
       </div>
     </div>
+
+    <!-- Footer -->
+    <div style="text-align:center; padding:22px 16px 26px; border-top:1px solid #f0e6d2; background:#fffdf8;">
+      <div style="font-size:11px; color:var(--text-muted); line-height:1.8;">
+        <a href="legal.html#terms" style="color:#8a7440;">利用規約</a> ・
+        <a href="legal.html#privacy" style="color:#8a7440;">プライバシーポリシー</a> ・
+        <a href="legal.html#tokushoho" style="color:#8a7440;">特定商取引法に基づく表記</a><br>
+        <span style="font-size:10px; color:#999;">© 2026 MarryPic（マリピク）</span>
+      </div>
+    </div>
   </div>
 
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const CLOUD_DB_ID = urlParams.get('room') || 'marrypic_demo_room_clean';
-    const LOCAL_STORAGE_KEY = 'marrypic_saved_photos_' + CLOUD_DB_ID;
+/* =====================================================================
+   MarryPic（マリピク）アプリ本体  ―  500円買い切り・広告なし
+   ---------------------------------------------------------------------
+   ・アルバムの情報（お名前・挙式日・会場・メッセージ）は URL の #p= に
+     だけ入れて、どこにも送信しません。
+   ・写真そのものは画像保管サービスへ、写真の一覧（ゲスト名・メッセージ）
+     は暗号化して保存先（Supabase）へ入れます。
+   ・保存先が未設定（mode:'local'）のあいだは、この端末のブラウザにだけ
+     保存されます。
+   ===================================================================== */
 
-    // IndexedDB for Uncompressed Raw Original Files
-    const DB_NAME = 'MarryPicOriginalsDB';
-    const STORE_NAME = 'original_files';
+const MARRYPIC_CFG = window.MARRYPIC || {};
+const STORAGE_CFG = MARRYPIC_CFG.storage || { mode: 'local' };
+const MAX_PHOTOS = 30; // ベータ版の上限
+const PHOTO_TABLE = STORAGE_CFG.table || 'marrypic_photos';
 
-    function openOriginalsDB() {
-      return new Promise((resolve) => {
-        const req = indexedDB.open(DB_NAME, 1);
-        req.onupgradeneeded = (e) => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-          }
-        };
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => resolve(null);
-      });
+/* ---------------------------------------------------------------
+   1. URL からアルバム情報を読む
+   --------------------------------------------------------------- */
+function b64urlEncodeUtf8(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function b64urlDecodeUtf8(str) {
+  let s = String(str).replace(/-/g, '+').replace(/_/g, '/');
+  while (s.length % 4) s += '=';
+  const bin = atob(s);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+function readAlbumPayload() {
+  // 新形式: #p=base64url(JSON)  … [albumId, 新郎, 新婦, 挙式日, 会場, メッセージ, (管理キー)]
+  const hash = (window.location.hash || '').replace(/^#/, '');
+  if (hash) {
+    try {
+      const raw = new URLSearchParams(hash).get('p');
+      if (raw) {
+        const obj = JSON.parse(b64urlDecodeUtf8(raw));
+        if (Array.isArray(obj) && obj[0]) {
+          return { a: obj[0], g: obj[1] || '', b: obj[2] || '', d: obj[3] || '', s: obj[4] || '', m: obj[5] || '', k: obj[6] || '' };
+        }
+        if (obj && obj.a) return obj;
+      }
+    } catch (e) {
+      console.warn('アルバム情報の読み取りに失敗しました', e);
     }
+  }
+  // 旧形式: ?room=...（互換のため残す）
+  const q = new URLSearchParams(window.location.search);
+  if (q.get('room')) {
+    return {
+      v: 0,
+      a: q.get('room'),
+      g: q.get('g') || '',
+      b: q.get('b') || '',
+      d: q.get('d') || '',
+      s: q.get('v') || '',
+      m: q.get('m') || ''
+    };
+  }
+  return null;
+}
 
-    async function storeOriginalFile(id, file) {
+const PAYLOAD = readAlbumPayload();
+const HAS_ALBUM = !!(PAYLOAD && PAYLOAD.a);
+const ALBUM_ID = HAS_ALBUM ? String(PAYLOAD.a) : 'demo-' + Math.random().toString(36).slice(2, 10);
+const ADMIN_KEY = (PAYLOAD && PAYLOAD.k) ? String(PAYLOAD.k) : '';
+const IS_ADMIN = ADMIN_KEY.length >= 16;
+const CLOUD_READY = STORAGE_CFG.mode === 'cloud'
+  && !!STORAGE_CFG.supabaseUrl
+  && !!STORAGE_CFG.supabaseAnonKey
+  && !!window.crypto && !!window.crypto.subtle;
+
+const LOCAL_STORAGE_KEY = 'marrypic_photos_v2_' + ALBUM_ID;
+
+let weddingConfig = {
+  groom: (PAYLOAD && PAYLOAD.g) || '新郎',
+  bride: (PAYLOAD && PAYLOAD.b) || '新婦',
+  date: (PAYLOAD && PAYLOAD.d) || '',
+  venue: (PAYLOAD && PAYLOAD.s) || '',
+  msg: (PAYLOAD && PAYLOAD.m) || '本日はご列席いただきありがとうございます！皆様が撮影された写真を、ぜひこちらからお気軽にお送りください📷✨'
+};
+
+let uploadedItems = [];
+let selectedFiles = [];
+let currentModalItem = null;
+let syncing = false;
+
+/* ---------------------------------------------------------------
+   2. IndexedDB（原本を無劣化で保管）
+   --------------------------------------------------------------- */
+const DB_NAME = 'MarryPicOriginalsDB';
+const STORE_NAME = 'original_files';
+
+function openOriginalsDB() {
+  return new Promise((resolve) => {
+    try {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+    } catch (e) {
+      resolve(null);
+    }
+  });
+}
+
+async function storeOriginalFile(id, file) {
+  try {
+    const db = await openOriginalsDB();
+    if (!db) return;
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).put({ id: id, file: file, name: file.name, size: file.size, type: file.type });
+  } catch (e) {
+    console.warn('IndexedDB store error', e);
+  }
+}
+
+async function getOriginalFileById(id) {
+  try {
+    const db = await openOriginalsDB();
+    if (!db) return null;
+    return new Promise((resolve) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const req = tx.objectStore(STORE_NAME).get(id);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+    });
+  } catch (e) {
+    return null;
+  }
+}
+
+/* ---------------------------------------------------------------
+   3. 暗号化と保存先（Supabase）
+   --------------------------------------------------------------- */
+function bufToB64(buf) {
+  const bytes = new Uint8Array(buf);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(bin);
+}
+
+function b64ToBuf(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+async function sha256Hex(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  const bytes = new Uint8Array(buf);
+  let out = '';
+  for (let i = 0; i < bytes.length; i++) out += bytes[i].toString(16).padStart(2, '0');
+  return out;
+}
+
+let albumKeyCache = null;
+async function getAlbumKey() {
+  if (albumKeyCache) return albumKeyCache;
+  const enc = new TextEncoder();
+  const base = await crypto.subtle.importKey(
+    'raw', enc.encode('marrypic-album|' + ALBUM_ID), { name: 'HKDF' }, false, ['deriveKey']
+  );
+  albumKeyCache = await crypto.subtle.deriveKey(
+    { name: 'HKDF', hash: 'SHA-256', salt: enc.encode('marrypic-salt-v1'), info: enc.encode('album-photos') },
+    base,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+  return albumKeyCache;
+}
+
+async function encryptJson(obj) {
+  const key = await getAlbumKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = new TextEncoder().encode(JSON.stringify(obj));
+  const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, data);
+  const out = new Uint8Array(iv.length + cipher.byteLength);
+  out.set(iv, 0);
+  out.set(new Uint8Array(cipher), iv.length);
+  return bufToB64(out);
+}
+
+async function decryptJson(b64) {
+  const key = await getAlbumKey();
+  const bytes = b64ToBuf(b64);
+  if (bytes.length < 13) throw new Error('データが壊れています');
+  const iv = bytes.slice(0, 12);
+  const cipher = bytes.slice(12);
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, cipher);
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+async function getAlbumTag() {
+  return (await sha256Hex('marrypic-tag|' + ALBUM_ID)).slice(0, 20);
+}
+
+/* Supabase(PostgREST) への読み書き。anon public キーはブラウザ公開前提の鍵。 */
+const CloudStore = {
+  baseUrl: function () { return String(STORAGE_CFG.supabaseUrl || '').replace(/\/+$/, ''); },
+  endpoint: function () { return this.baseUrl() + '/rest/v1/' + PHOTO_TABLE; },
+  headers: function () {
+    return {
+      apikey: STORAGE_CFG.supabaseAnonKey,
+      Authorization: 'Bearer ' + STORAGE_CFG.supabaseAnonKey,
+      'Content-Type': 'application/json'
+    };
+  },
+  list: async function () {
+    const tag = await getAlbumTag();
+    const url = this.endpoint() + '?album_tag=eq.' + encodeURIComponent(tag)
+      + '&select=cipher&order=created_at.desc&limit=' + MAX_PHOTOS;
+    const res = await fetch(url, { headers: this.headers(), cache: 'no-store' });
+    if (!res.ok) throw new Error('写真の読み込みに失敗しました（' + res.status + '）');
+    const rows = await res.json();
+    const out = [];
+    for (let i = 0; i < rows.length; i++) {
       try {
-        const db = await openOriginalsDB();
-        if (!db) return;
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        store.put({ id, file, name: file.name, size: file.size, type: file.type });
+        out.push(await decryptJson(rows[i].cipher));
       } catch (e) {
-        console.warn('IndexedDB store error', e);
+        console.warn('写真データの復号に失敗しました', e);
       }
     }
+    return out;
+  },
+  add: async function (photo) {
+    const tag = await getAlbumTag();
+    const cipher = await encryptJson(photo);
+    const headers = this.headers();
+    headers.Prefer = 'return=minimal';
+    const res = await fetch(this.endpoint(), {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ album_tag: tag, cipher: cipher })
+    });
+    if (!res.ok) throw new Error('写真の保存に失敗しました（' + res.status + '）');
+  },
+  clear: async function () {
+    const tag = await getAlbumTag();
+    const res = await fetch(this.endpoint() + '?album_tag=eq.' + encodeURIComponent(tag), {
+      method: 'DELETE',
+      headers: this.headers()
+    });
+    if (!res.ok) throw new Error('写真の削除に失敗しました（' + res.status + '）');
+  }
+};
 
-    async function getOriginalFileById(id) {
-      try {
-        const db = await openOriginalsDB();
-        if (!db) return null;
-        return new Promise((resolve) => {
-          const tx = db.transaction(STORE_NAME, 'readonly');
-          const store = tx.objectStore(STORE_NAME);
-          const req = store.get(id);
-          req.onsuccess = () => resolve(req.result);
-          req.onerror = () => resolve(null);
-        });
-      } catch (e) {
-        return null;
-      }
+function toCloudItem(item) {
+  return { u: item.url, g: item.guest, m: item.msg, t: item.time, s: item.origSize, o: item.id };
+}
+
+function fromCloudItem(row) {
+  return {
+    url: row.u,
+    guest: row.g || 'ゲスト',
+    msg: row.m || '',
+    time: row.t || '',
+    origSize: row.s || '',
+    id: row.o || ''
+  };
+}
+
+/* ---------------------------------------------------------------
+   4. 画像のアップロード（Imgur / Supabase Storage）
+   --------------------------------------------------------------- */
+async function uploadImage(blob) {
+  const host = STORAGE_CFG.imageHost || 'imgur';
+
+  if (host === 'supabase') {
+    const base = String(STORAGE_CFG.supabaseUrl || '').replace(/\/+$/, '');
+    const bucket = STORAGE_CFG.bucket || 'marrypic-photos';
+    const path = (await getAlbumTag()) + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg';
+    const res = await fetch(base + '/storage/v1/object/' + bucket + '/' + path, {
+      method: 'POST',
+      headers: {
+        apikey: STORAGE_CFG.supabaseAnonKey,
+        Authorization: 'Bearer ' + STORAGE_CFG.supabaseAnonKey,
+        'Content-Type': blob.type || 'image/jpeg',
+        'x-upsert': 'false'
+      },
+      body: blob
+    });
+    if (!res.ok) throw new Error('画像の保存に失敗しました（' + res.status + '）');
+    return base + '/storage/v1/object/public/' + bucket + '/' + path;
+  }
+
+  // Imgur（お試し用）
+  const clientId = STORAGE_CFG.imgurClientId || '546c25a59c58ad7';
+  const form = new FormData();
+  form.append('image', blob);
+  const res = await fetch('https://api.imgur.com/3/image', {
+    method: 'POST',
+    headers: { Authorization: 'Client-ID ' + clientId },
+    body: form
+  });
+  if (!res.ok) throw new Error('画像の保存に失敗しました（' + res.status + '）');
+  const json = await res.json();
+  if (!json || !json.data || !json.data.link) throw new Error('画像の保存に失敗しました');
+  return json.data.link;
+}
+
+/* ---------------------------------------------------------------
+   5. 表示まわり
+   --------------------------------------------------------------- */
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/[&<>"']/g, function (m) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+  });
+}
+
+function formatSize(bytes) {
+  if (!bytes) return '高解像度';
+  if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function formatDateLabel(v) {
+  if (!v) return '';
+  const m = String(v).match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (m) return m[1] + '.' + ('0' + m[2]).slice(-2) + '.' + ('0' + m[3]).slice(-2);
+  return String(v);
+}
+
+function metaLine() {
+  const parts = [];
+  if (weddingConfig.date) parts.push(formatDateLabel(weddingConfig.date));
+  if (weddingConfig.venue) parts.push(weddingConfig.venue);
+  return parts.join(' · ');
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.style.display = 'block';
+  setTimeout(function () { toast.style.display = 'none'; }, 2800);
+}
+
+function showCloudWarning(msg) {
+  const el = document.getElementById('cloud-warning');
+  if (!el) return;
+  el.innerHTML = '⚠️ ' + escapeHtml(msg);
+  el.style.display = 'block';
+}
+
+function hideCloudWarning() {
+  const el = document.getElementById('cloud-warning');
+  if (el) el.style.display = 'none';
+}
+
+function applyConfigToUI() {
+  const title = HAS_ALBUM
+    ? weddingConfig.groom + ' & ' + weddingConfig.bride + ' Wedding'
+    : 'Wedding Photo Album（デモ）';
+  document.getElementById('disp-wedding-title').textContent = title;
+  document.getElementById('disp-wedding-meta').textContent = HAS_ALBUM ? metaLine() : 'デモ表示';
+  document.getElementById('disp-welcome-msg').textContent = weddingConfig.msg;
+
+  document.getElementById('preview-names').textContent = weddingConfig.groom + ' & ' + weddingConfig.bride;
+  document.getElementById('preview-date').textContent = metaLine();
+  document.getElementById('ss-top-title').textContent = weddingConfig.groom + ' & ' + weddingConfig.bride + ' Wedding';
+
+  document.getElementById('input-groom').value = (PAYLOAD && PAYLOAD.g) ? weddingConfig.groom : '';
+  document.getElementById('input-bride').value = (PAYLOAD && PAYLOAD.b) ? weddingConfig.bride : '';
+  document.getElementById('input-date').value = /^\d{4}-\d{2}-\d{2}$/.test(weddingConfig.date) ? weddingConfig.date : '';
+  document.getElementById('input-venue').value = (PAYLOAD && PAYLOAD.s) ? weddingConfig.venue : '';
+  document.getElementById('input-msg').value = (PAYLOAD && PAYLOAD.m) ? weddingConfig.msg : '';
+}
+
+/* --- URL と QR --------------------------------------------------- */
+function buildAlbumUrl(forAdmin) {
+  // URLを短くするため配列で持つ（QRコードが読み取りやすい）
+  const body = [ALBUM_ID, weddingConfig.groom, weddingConfig.bride, weddingConfig.date, weddingConfig.venue, weddingConfig.msg];
+  if (forAdmin && ADMIN_KEY) body.push(ADMIN_KEY);
+  return window.location.origin + window.location.pathname + '#p=' + b64urlEncodeUtf8(JSON.stringify(body));
+}
+
+function makeQrDataUrl(text, cellSize) {
+  try {
+    if (typeof qrcode !== 'function') return '';
+    const qr = qrcode(0, 'M');
+    qr.addData(text);
+    qr.make();
+    return qr.createDataURL(cellSize || 5, 4);
+  } catch (e) {
+    console.warn('QRコードの生成に失敗しました', e);
+    return '';
+  }
+}
+
+function generateQRCodes() {
+  const guestUrl = buildAlbumUrl(false);
+  const dataUrl = makeQrDataUrl(guestUrl, 5);
+
+  const qrImg = document.getElementById('qr-img');
+  const previewQr = document.getElementById('preview-qr');
+  if (dataUrl) {
+    qrImg.src = dataUrl;
+    previewQr.src = dataUrl;
+  } else {
+    qrImg.alt = 'QRコードを生成できませんでした';
+    previewQr.alt = 'QRコードを生成できませんでした';
+  }
+
+  document.getElementById('qr-url-text').textContent = guestUrl;
+  if (IS_ADMIN) {
+    document.getElementById('guest-url-text').textContent = guestUrl;
+    document.getElementById('admin-url-text').textContent = buildAlbumUrl(true);
+  }
+}
+
+function copyText(text, label) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () {
+      showToast('📋 ' + label + 'をコピーしました！');
+    }).catch(function () {
+      prompt(label + 'をコピーしてください', text);
+    });
+  } else {
+    prompt(label + 'をコピーしてください', text);
+  }
+}
+
+function copyGuestUrl() {
+  copyText(document.getElementById('qr-url-text').textContent, 'ゲスト用URL');
+}
+
+function copyAlbumUrl(kind) {
+  const el = document.getElementById(kind === 'admin' ? 'admin-url-text' : 'guest-url-text');
+  if (!el) return;
+  copyText(el.textContent, kind === 'admin' ? '管理用URL' : 'ゲスト用URL');
+}
+
+/* ---------------------------------------------------------------
+   6. 写真リスト（ローカル保存とクラウド同期）
+   --------------------------------------------------------------- */
+function saveLocalPhotos() {
+  try {
+    const slim = uploadedItems.slice(0, MAX_PHOTOS).map(function (p) {
+      return {
+        url: /^https?:\/\//.test(p.url || '') ? p.url : '',
+        guest: p.guest,
+        msg: p.msg,
+        time: p.time,
+        origSize: p.origSize,
+        origName: p.origName,
+        id: p.id
+      };
+    });
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(slim));
+  } catch (e) {
+    console.warn('localStorage save error:', e);
+  }
+}
+
+function loadLocalPhotos() {
+  try {
+    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!data) return;
+    const arr = JSON.parse(data);
+    if (Array.isArray(arr)) {
+      uploadedItems = arr.filter(function (p) { return p && (p.url || p.id); });
     }
+  } catch (e) {
+    console.warn('localStorage load error:', e);
+  }
+}
 
-    async function getAllStoredOriginals() {
-      try {
-        const db = await openOriginalsDB();
-        if (!db) return [];
-        return new Promise((resolve) => {
-          const tx = db.transaction(STORE_NAME, 'readonly');
-          const store = tx.objectStore(STORE_NAME);
-          const req = store.getAll();
-          req.onsuccess = () => resolve(req.result || []);
-          req.onerror = () => resolve([]);
-        });
-      } catch (e) {
-        return [];
-      }
+// 端末内に原本しかない写真は、IndexedDB から読み出して表示する
+async function hydrateLocalOriginals() {
+  const need = uploadedItems.filter(function (p) { return !p.url && p.id; });
+  for (let i = 0; i < need.length; i++) {
+    const rec = await getOriginalFileById(need[i].id);
+    if (rec && rec.file) {
+      try { need[i].url = URL.createObjectURL(rec.file); } catch (e) { console.warn(e); }
     }
+  }
+  if (need.length) updateGallery();
+}
 
-    let weddingConfig = {
-      groom: 'Ken',
-      bride: 'Yui',
-      date: '2027-05-22',
-      venue: 'The Tokyo Grand Hotel',
-      msg: '本日はご列席いただきありがとうございます！皆様が撮影された写真を、ぜひこちらからお気軽にお送りください📷✨'
+async function syncFromCloud(showNotice) {
+  if (!CLOUD_READY || !HAS_ALBUM) return;
+  if (syncing) return;
+  syncing = true;
+  try {
+    const rows = await CloudStore.list();
+    const cloud = rows.map(fromCloudItem);
+    const cloudUrls = {};
+    cloud.forEach(function (p) { cloudUrls[p.url] = true; });
+    const localOnly = uploadedItems.filter(function (p) { return !cloudUrls[p.url]; });
+    uploadedItems = cloud.concat(localOnly).slice(0, MAX_PHOTOS);
+    saveLocalPhotos();
+    updateGallery();
+    updateStats();
+    hideCloudWarning();
+    if (showNotice) showToast('🔄 最新の写真を取得しました！');
+  } catch (e) {
+    console.warn('cloud sync failed', e);
+    showCloudWarning('写真の同期に失敗しました。通信環境をご確認ください（' + (e && e.message ? e.message : e) + '）');
+  } finally {
+    syncing = false;
+  }
+}
+
+async function pushPhotoToCloud(localItem, blob) {
+  try {
+    const publicUrl = await uploadImage(blob);
+    localItem.url = publicUrl;
+    await CloudStore.add(toCloudItem(localItem));
+    saveLocalPhotos();
+    updateGallery();
+    return true;
+  } catch (e) {
+    console.warn('cloud save failed', e);
+    localItem.cloudFailed = true;
+    return false;
+  }
+}
+
+/* ---------------------------------------------------------------
+   7. 写真を送る
+   --------------------------------------------------------------- */
+function switchTab(name) {
+  if (name === 'manage' && !IS_ADMIN) return;
+  document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+  document.querySelectorAll('.tab-content').forEach(function (c) { c.classList.remove('active'); });
+  const btn = document.getElementById('tab-btn-' + name);
+  const content = document.getElementById('tab-' + name);
+  if (btn) btn.classList.add('active');
+  if (content) content.classList.add('active');
+}
+
+function handleFileSelect(e) {
+  const files = Array.from(e.target.files);
+  if (files.length === 0) return;
+  selectedFiles = files;
+
+  const box = document.getElementById('selected-box');
+  const container = document.getElementById('thumb-container');
+  container.innerHTML = '';
+  document.getElementById('selected-count').textContent = files.length;
+  box.style.display = 'block';
+
+  files.forEach(function (file) {
+    const url = URL.createObjectURL(file);
+    const img = document.createElement('img');
+    img.src = url;
+    img.className = 'thumb-mini';
+    container.appendChild(img);
+  });
+}
+
+function clearSelected() {
+  selectedFiles = [];
+  document.getElementById('file-input').value = '';
+  document.getElementById('selected-box').style.display = 'none';
+  document.getElementById('thumb-container').innerHTML = '';
+}
+
+// 端末内で高速に縮小（数MBのiPhone写真 → 約150KBのJPEG）
+function compressImageFile(file, maxWidth, quality) {
+  maxWidth = maxWidth || 1200;
+  quality = quality || 0.8;
+  return new Promise(function (resolve) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const img = new Image();
+      img.onload = function () {
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        canvas.toBlob(function (blob) {
+          resolve({ blob: blob, dataUrl: dataUrl });
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = function () { resolve(null); };
+      img.src = e.target.result;
+    };
+    reader.onerror = function () { resolve(null); };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadPhotos() {
+  if (selectedFiles.length === 0) {
+    alert('まずは上の「カメラロールから写真を選ぶ」をタップして写真を選択してください！');
+    return;
+  }
+
+  const guestName = document.getElementById('guest-name').value.trim() || 'ゲスト';
+  const guestMsg = document.getElementById('guest-msg').value.trim();
+  const progressWrap = document.getElementById('progress-wrap');
+  const progressBar = document.getElementById('progress-bar');
+  const progressText = document.getElementById('progress-text');
+  const submitBtn = document.getElementById('submit-btn');
+  const pushes = [];
+
+  submitBtn.disabled = true;
+  progressWrap.style.display = 'block';
+
+  for (let i = 0; i < selectedFiles.length; i++) {
+    const file = selectedFiles[i];
+    const origId = 'orig_' + Date.now() + '_' + i;
+
+    progressText.textContent = '写真を準備中... (' + (i + 1) + '/' + selectedFiles.length + ')';
+    progressBar.style.width = Math.round(((i + 1) / selectedFiles.length) * 60) + '%';
+
+    await storeOriginalFile(origId, file);
+
+    const compressed = await compressImageFile(file);
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const item = {
+      id: origId,
+      url: compressed ? compressed.dataUrl : URL.createObjectURL(file),
+      guest: guestName,
+      msg: guestMsg,
+      time: timeStr,
+      origSize: formatSize(file.size),
+      origName: file.name
     };
 
-    // Clean initial state (zero photos)
-    let uploadedItems = [];
-    let selectedFiles = [];
+    uploadedItems.unshift(item);
+    uploadedItems = uploadedItems.slice(0, MAX_PHOTOS);
 
-    // Fallback sample photos if completely empty
-    const sampleItems = [
-      { url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800', guest: '鈴木 健太 (A卓 友人)', msg: '結婚おめでとう！最高の式だね！末永くお幸せに！', time: '13:15', isSample: true },
-      { url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800', guest: '佐藤 彩花 (B卓 友人)', msg: 'ドレス姿本当に綺麗✨おふたりの笑顔に感動しました！', time: '13:28', isSample: true }
-    ];
-
-    // Slideshow state
-    let ssIndex = 0;
-    let ssTimer = null;
-    let ssProgressTimer = null;
-    let ssIsPlaying = true;
-    const SLIDE_DURATION = 4000;
-
-    let isAdFree = false;
-
-    function checkAdFreeState() {
-      const p = new URLSearchParams(window.location.search);
-      if (p.get('adfree') === '1' || p.get('premium') === '1') {
-        isAdFree = true;
-      } else if (localStorage.getItem('marrypic_adfree_' + CLOUD_DB_ID) === 'true') {
-        isAdFree = true;
-      }
-      updateAdDisplay();
+    if (CLOUD_READY && HAS_ALBUM && compressed && compressed.blob) {
+      pushes.push(pushPhotoToCloud(item, compressed.blob));
     }
-
-    function updateAdDisplay() {
-      const sponsorBox = document.getElementById('sponsor-tieup-box');
-      const planCard = document.getElementById('plan-status-card');
-      const headerBadges = document.querySelector('.header-badges');
-
-      if (isAdFree) {
-        if (sponsorBox) sponsorBox.style.display = 'none';
-        if (planCard) {
-          planCard.style.background = '#fdfaf3';
-          planCard.style.border = '1.5px solid #27ae60';
-          planCard.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <span style="font-size:14px; font-weight:800; color:#27ae60;">✨ 広告非表示プレミアム適用中</span>
-              <span style="font-size:10px; background:#27ae60; color:#fff; font-weight:700; padding:2px 8px; border-radius:10px;">広告ゼロ</span>
-            </div>
-            <p style="font-size:12px; color:#555; line-height:1.5;">
-              このアルバムではゲスト画面・ダウンロード画面の広告や提携バナーが完全に非表示になっています。おふたりとゲストの思い出だけの洗練された空間をお楽しみいただけます🕊️
-            </p>
-          `;
-        }
-        if (headerBadges && !document.getElementById('badge-premium-tag')) {
-          const badge = document.createElement('span');
-          badge.id = 'badge-premium-tag';
-          badge.className = 'badge';
-          badge.style.background = '#eafaf1';
-          badge.style.color = '#27ae60';
-          badge.innerHTML = '✨ 広告なしプレミアム';
-          headerBadges.appendChild(badge);
-        }
-      } else {
-        if (sponsorBox) sponsorBox.style.display = 'flex';
-      }
-    }
-
-    async function upgradeToAdFree() {
-      if (!confirm('【広告非表示プレミアムパス（500円）】\nアルバム内のすべての広告・スポンサー枠を完全非表示にしますか？')) return;
-      isAdFree = true;
-      localStorage.setItem('marrypic_adfree_' + CLOUD_DB_ID, 'true');
-      updateAdDisplay();
-      showToast('✨ 広告非表示プレミアムを適用しました！');
-      alert('🎉 広告非表示プレミアムが適用されました！\nゲスト画面やダウンロード完了画面のスポンサー表示が完全に非表示になりました✨');
-    }
-
-    async function init() {
-      const params = new URLSearchParams(window.location.search);
-      if (params.has('g')) weddingConfig.groom = params.get('g');
-      if (params.has('b')) weddingConfig.bride = params.get('b');
-      if (params.has('d')) weddingConfig.date = params.get('d');
-      if (params.has('v')) weddingConfig.venue = params.get('v');
-      if (params.has('m')) weddingConfig.msg = params.get('m');
-
-      applyConfigToUI();
-      generateQRCodes();
-
-      checkAdFreeState();
-
-      // 1. Instant local load
-      loadLocalPhotos();
-      updateGallery();
-      updateStats();
-
-      // 2. Initial cloud sync
-      await syncFromCloud(false);
-
-      // Auto sync every 8 seconds for live multi-device updates
-      setInterval(() => syncFromCloud(false), 8000);
-    }
-
-    function applyConfigToUI() {
-      document.getElementById('disp-wedding-title').textContent = `${weddingConfig.groom} & ${weddingConfig.bride} Wedding Party`;
-      document.getElementById('disp-wedding-meta').textContent = `${weddingConfig.date.replace(/-/g, '.')} · ${weddingConfig.venue}`;
-      document.getElementById('disp-welcome-msg').textContent = weddingConfig.msg;
-
-      document.getElementById('preview-names').textContent = `${weddingConfig.groom} & ${weddingConfig.bride}`;
-      document.getElementById('preview-date').textContent = `${weddingConfig.date.replace(/-/g, '.')} · ${weddingConfig.venue}`;
-      document.getElementById('ss-top-title').textContent = `${weddingConfig.groom} & ${weddingConfig.bride} Wedding`;
-
-      document.getElementById('input-groom').value = weddingConfig.groom;
-      document.getElementById('input-bride').value = weddingConfig.bride;
-      document.getElementById('input-date').value = weddingConfig.date;
-      document.getElementById('input-venue').value = weddingConfig.venue;
-      document.getElementById('input-msg').value = weddingConfig.msg;
-    }
-
-    function generateQRCodes() {
-      const baseUrl = window.location.origin + window.location.pathname;
-      const guestUrl = `${baseUrl}?room=${encodeURIComponent(CLOUD_DB_ID)}&g=${encodeURIComponent(weddingConfig.groom)}&b=${encodeURIComponent(weddingConfig.bride)}&d=${encodeURIComponent(weddingConfig.date)}&v=${encodeURIComponent(weddingConfig.venue)}`;
-      const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(guestUrl)}`;
-      
-      document.getElementById('qr-img').src = qrApi;
-      document.getElementById('preview-qr').src = qrApi;
-      document.getElementById('qr-url-text').textContent = guestUrl;
-    }
-
-    function saveLocalPhotos() {
-      try {
-        const slice = uploadedItems.slice(0, 30);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(slice));
-      } catch (e) {
-        console.warn('localStorage save error:', e);
-      }
-    }
-
-    function loadLocalPhotos() {
-      try {
-        // Clear all previous test uploads across all rooms
-        localStorage.removeItem('marrypic_saved_photos_ff808181a09d98f701a1c2e5ef8f7501');
-        localStorage.removeItem('marrypic_saved_photos_undefined');
-        localStorage.removeItem('marrypic_photos');
-        localStorage.removeItem('marrypic_saved_photos_marrypic_demo_room_v2');
-
-        const data = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (data) {
-          const arr = JSON.parse(data);
-          if (Array.isArray(arr) && arr.length > 0) {
-            uploadedItems = arr.filter(p => p && p.url && !p.url.includes('OOqOjwe') && !p.url.includes('hfn2I50') && !p.url.includes('R8pvR6A'));
-          }
-        }
-      } catch (e) {
-        console.warn('localStorage load error:', e);
-      }
-    }
-
-    async function syncFromCloud(showNotice) {
-      window.syncDebug = { started: true, time: new Date().toISOString() };
-      try {
-        let res = await fetch(`https://api.restful-api.dev/objects?id=${CLOUD_DB_ID}`);
-        if (!res.ok) {
-          res = await fetch(`https://api.restful-api.dev/objects/${CLOUD_DB_ID}`);
-        }
-        window.syncDebug.status = res.status;
-        window.syncDebug.ok = res.ok;
-        if (res.ok) {
-          const raw = await res.json();
-          const json = Array.isArray(raw) ? raw[0] : raw;
-          window.syncDebug.photosCount = (json && json.data && json.data.photos) ? json.data.photos.length : 'no photos';
-          if (json && json.data && Array.isArray(json.data.photos)) {
-            const cloudPhotos = json.data.photos.filter(p => p && p.url && !p.url.startsWith('blob:'));
-            
-            // Merge cloud photos with any local-only photos
-            const existingUrls = new Set(cloudPhotos.map(p => p.url));
-            const localOnly = uploadedItems.filter(p => !existingUrls.has(p.url));
-            
-            uploadedItems = [...localOnly, ...cloudPhotos];
-            saveLocalPhotos();
-            updateGallery();
-            updateStats();
-            if (showNotice) showToast('🔄 最新の写真を取得しました！');
-          }
-        }
-      } catch (e) {
-        window.syncDebug.error = e.toString();
-        console.warn('Sync failed', e);
-      }
-    }
-
-    async function resetAllPhotos() {
-      if (!confirm('アルバム内の写真をすべて削除して0枚に初期化しますか？')) return;
-      uploadedItems = [];
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-      try {
-        await fetch(`https://api.restful-api.dev/objects/${CLOUD_DB_ID}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: 'marrypic_room_' + CLOUD_DB_ID,
-            data: { photos: [] }
-          })
-        });
-      } catch (e) {
-        console.warn('Cloud reset failed', e);
-      }
-      updateGallery();
-      updateStats();
-      showToast('🗑️ アルバムの写真をすべて削除しました');
-      switchTab('gallery');
-    }
-
-    function toggleSetupModal() { document.getElementById('setup-modal').classList.toggle('show'); }
-    function openEditModal() { document.getElementById('setup-modal').classList.add('show'); }
-    function closeSetupModal() { document.getElementById('setup-modal').classList.remove('show'); }
-
-    function saveWeddingSettings() {
-      weddingConfig.groom = document.getElementById('input-groom').value.trim() || '新郎';
-      weddingConfig.bride = document.getElementById('input-bride').value.trim() || '新婦';
-      weddingConfig.date = document.getElementById('input-date').value || '2027-02-20';
-      weddingConfig.venue = document.getElementById('input-venue').value.trim() || '披露宴会場';
-      weddingConfig.msg = document.getElementById('input-msg').value.trim() || '写真をお送りください！';
-
-      applyConfigToUI();
-      generateQRCodes();
-      closeSetupModal();
-
-      const newUrl = `${window.location.pathname}?room=${encodeURIComponent(CLOUD_DB_ID)}&g=${encodeURIComponent(weddingConfig.groom)}&b=${encodeURIComponent(weddingConfig.bride)}&d=${encodeURIComponent(weddingConfig.date)}&v=${encodeURIComponent(weddingConfig.venue)}`;
-      window.history.replaceState(null, '', newUrl);
-
-      showToast('✨ おふたりの名前とQRコードを更新しました！');
-    }
-
-    function copyGuestUrl() {
-      const urlText = document.getElementById('qr-url-text').textContent;
-      navigator.clipboard.writeText(urlText).then(() => {
-        showToast('📋 ゲスト招待URLをコピーしました！');
-      }).catch(() => { alert('URL: ' + urlText); });
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 2800);
-    }
-
-    function switchTab(name) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      document.getElementById('tab-btn-' + name).classList.add('active');
-      document.getElementById('tab-' + name).classList.add('active');
-    }
-
-    function handleFileSelect(e) {
-      const files = Array.from(e.target.files);
-      if (files.length === 0) return;
-      selectedFiles = files;
-      
-      const box = document.getElementById('selected-box');
-      const container = document.getElementById('thumb-container');
-      const countSpan = document.getElementById('selected-count');
-      
-      container.innerHTML = '';
-      countSpan.textContent = files.length;
-      box.style.display = 'block';
-
-      files.forEach(file => {
-        const url = URL.createObjectURL(file);
-        const img = document.createElement('img');
-        img.src = url;
-        img.className = 'thumb-mini';
-        container.appendChild(img);
-      });
-    }
-
-    function clearSelected() {
-      selectedFiles = [];
-      document.getElementById('file-input').value = '';
-      document.getElementById('selected-box').style.display = 'none';
-      document.getElementById('thumb-container').innerHTML = '';
-    }
-
-    // High-speed client-side image compression (converts multi-MB iPhone photos to ~150KB JPEG in 0.1s)
-    function compressImageFile(file, maxWidth = 1200, quality = 0.8) {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = new Image();
-          img.onload = () => {
-            let width = img.width;
-            let height = img.height;
-            if (width > maxWidth) {
-              height = Math.round((height * maxWidth) / width);
-              width = maxWidth;
-            }
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-
-            const dataUrl = canvas.toDataURL('image/jpeg', quality);
-            canvas.toBlob((blob) => {
-              resolve({ blob, dataUrl });
-            }, 'image/jpeg', quality);
-          };
-          img.onerror = () => resolve(null);
-          img.src = e.target.result;
-        };
-        reader.onerror = () => resolve(null);
-        reader.readAsDataURL(file);
-      });
-    }
-
-    // Non-blocking background cloud upload (with 4 second max timeout so UI never freezes)
-    async function syncToCloudBackground(blob, guest, msg, time, origId, origSize) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-        const formData = new FormData();
-        formData.append('image', blob);
-
-        const res = await fetch('https://api.imgur.com/3/image', {
-          method: 'POST',
-          headers: { 'Authorization': 'Client-ID 546c25a59c58ad7' },
-          body: formData,
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
-        if (res.ok) {
-          const json = await res.json();
-          if (json && json.data && json.data.link) {
-            const publicUrl = json.data.link;
-
-            // Push to shared restful-api cloud database
-            let getRes = await fetch(`https://api.restful-api.dev/objects?id=${CLOUD_DB_ID}`);
-            if (!getRes.ok) getRes = await fetch(`https://api.restful-api.dev/objects/${CLOUD_DB_ID}`);
-            let existing = [];
-            if (getRes.ok) {
-              const rawCur = await getRes.json();
-              const cur = Array.isArray(rawCur) ? rawCur[0] : rawCur;
-              existing = (cur && cur.data && Array.isArray(cur.data.photos)) ? cur.data.photos.filter(p => !p.url.startsWith('blob:')) : [];
-            }
-            const newItem = { url: publicUrl, guest, msg, time, origId, origSize: formatSize(origSize) };
-            const combined = [newItem, ...existing].slice(0, 30);
-            await fetch(`https://api.restful-api.dev/objects/${CLOUD_DB_ID}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                name: 'marrypic_wedding_ken_yui',
-                data: { photos: combined }
-              })
-            });
-          }
-        }
-      } catch (e) {
-        console.warn('Cloud background sync note:', e);
-      }
-    }
-
-    function formatSize(bytes) {
-      if (!bytes) return '高解像度';
-      if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
-      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-    }
-
-    async function uploadPhotos() {
-      if (selectedFiles.length === 0) {
-        alert('まずは上の「カメラロールから写真を選ぶ」をタップして写真を選択してください！');
-        return;
-      }
-
-      const guestName = document.getElementById('guest-name').value.trim() || 'ゲスト';
-      const guestMsg = document.getElementById('guest-msg').value.trim();
-      const progressWrap = document.getElementById('progress-wrap');
-      const progressBar = document.getElementById('progress-bar');
-      const progressText = document.getElementById('progress-text');
-      const submitBtn = document.getElementById('submit-btn');
-
-      submitBtn.disabled = true;
-      progressWrap.style.display = 'block';
-
-      for (let i = 0; i < selectedFiles.length; i++) {
-        const file = selectedFiles[i];
-        const origId = 'orig_' + Date.now() + '_' + i;
-        
-        progressText.textContent = `オリジナル生データを保管中... (${i + 1}/${selectedFiles.length})`;
-        progressBar.style.width = Math.round(((i + 1) / selectedFiles.length) * 50) + '%';
-
-        // 1. Store Raw Uncompressed Original in IndexedDB
-        await storeOriginalFile(origId, file);
-
-        // 2. High-speed client compression for fast mobile display
-        const compressed = await compressImageFile(file);
-        const finalUrl = compressed ? compressed.dataUrl : URL.createObjectURL(file);
-        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-        const item = {
-          id: origId,
-          url: finalUrl,
-          guest: guestName,
-          msg: guestMsg,
-          time: timeStr,
-          origSize: formatSize(file.size),
-          origName: file.name
-        };
-
-        // Add to active memory
-        uploadedItems.unshift(item);
-
-        // 3. Background cloud sync
-        if (compressed && compressed.blob) {
-          syncToCloudBackground(compressed.blob, guestName, guestMsg, timeStr, origId, file.size);
-        }
-      }
-
-      progressBar.style.width = '100%';
-      progressText.textContent = '完了！✨';
-
-      // Save locally
-      saveLocalPhotos();
-
-      setTimeout(() => {
-        progressWrap.style.display = 'none';
-        progressBar.style.width = '0%';
-        submitBtn.disabled = false;
-        clearSelected();
-        document.getElementById('guest-msg').value = '';
-
-        updateGallery();
-        updateStats();
-
-        showToast('✨ 高画質オリジナルデータを完全保存しました！');
-        switchTab('gallery');
-      }, 250);
-    }
-
-    function updateGallery() {
-      const grid = document.getElementById('gallery-grid');
-      const emptyState = document.getElementById('empty-state');
-      const countLabel = document.getElementById('photo-count');
-
-      countLabel.textContent = uploadedItems.length;
-
-      if (uploadedItems.length === 0) {
-        emptyState.style.display = 'block';
-        grid.innerHTML = '';
-        return;
-      }
-
-      emptyState.style.display = 'none';
-      grid.innerHTML = '';
-
-      uploadedItems.forEach((item) => {
-        const thumb = document.createElement('div');
-        thumb.className = 'photo-thumb';
-        thumb.onclick = () => openModal(item);
-
-        thumb.innerHTML = `
-          <img src="${item.url}" alt="photo">
-          <span class="orig-badge">💎 高画質</span>
-          <span class="photo-tag">${item.guest}</span>
-        `;
-        grid.appendChild(thumb);
-      });
-    }
-
-    function updateStats() {
-      document.getElementById('stat-total').textContent = uploadedItems.length;
-      const guests = new Set(uploadedItems.map(i => i.guest).filter(Boolean));
-      document.getElementById('stat-guests').textContent = guests.size + '人';
-    }
-
-    let currentModalItem = null;
-
-    async function openModal(item) {
-      currentModalItem = item;
-      const modal = document.getElementById('modal');
-      const modalImg = document.getElementById('modal-img');
-      const caption = document.getElementById('modal-caption');
-      const dlBtn = document.getElementById('modal-dl-btn');
-      
-      modalImg.src = item.url;
-      const sizeNote = item.origSize ? ` [生データ容量: ${item.origSize}]` : '';
-      caption.innerHTML = `<strong>${item.guest} 様</strong> (${item.time})${sizeNote}<br>${item.msg ? '💬 ' + item.msg : ''}`;
-
-      // Check if raw original exists in IndexedDB
-      if (item.id) {
-        const origRecord = await getOriginalFileById(item.id);
-        if (origRecord && origRecord.file) {
-          dlBtn.innerHTML = `💎 無劣化オリジナル生データを保存 (${formatSize(origRecord.size)})`;
-        } else {
-          dlBtn.innerHTML = `💎 写真をスマホ・PCに保存する`;
-        }
-      } else {
-        dlBtn.innerHTML = `💎 写真をスマホ・PCに保存する`;
-      }
-
-      modal.classList.add('show');
-    }
-
-    function closeModal() {
-      document.getElementById('modal').classList.remove('show');
-    }
-
-    async function downloadCurrentPhoto() {
-      if (!currentModalItem) return;
-      const item = currentModalItem;
-      const btn = document.getElementById('modal-dl-btn');
-      const origText = btn.innerHTML;
-      btn.innerHTML = '⏳ データを取得中...';
-      btn.style.pointerEvents = 'none';
-
-      try {
-        let blob = null;
-        let filename = `marrypic_${item.guest || 'guest'}_${Date.now()}.jpg`;
-
-        if (item.id) {
-          const origRecord = await getOriginalFileById(item.id);
-          if (origRecord && origRecord.file) {
-            blob = origRecord.file;
-            if (origRecord.name) filename = origRecord.name;
-          }
-        }
-
-        if (!blob && item.url) {
-          const res = await fetch(item.url);
-          if (!res.ok) throw new Error('ダウンロードに失敗しました');
-          blob = await res.blob();
-        }
-
-        if (!blob) throw new Error('画像データが見つかりません');
-
-        // 1. Try Web Share API (native iOS "画像を保存" into Camera Roll)
-        const mimeType = blob.type || 'image/jpeg';
-        const file = new File([blob], filename, { type: mimeType });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: '結婚式写真',
-              text: 'MarryPicから保存'
-            });
-            showToast('✨ 写真アプリへ保存または共有しました');
-            btn.innerHTML = origText;
-            btn.style.pointerEvents = 'auto';
-            return;
-          } catch (shareErr) {
-            if (shareErr.name !== 'AbortError') {
-              console.warn('Share error, fallback to direct download', shareErr);
-            }
-          }
-        }
-
-        // 2. Fallback: Blob URL download (works on all desktop & mobile browsers)
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-          document.body.removeChild(a);
-          URL.revokeObjectURL(blobUrl);
-        }, 4000);
-
-        showToast('✨ 写真の保存を開始しました！');
-      } catch (err) {
-        console.error('Download error:', err);
-        alert('保存処理に失敗しました。画像を長押しして「“写真”に追加」をお試しください。');
-      } finally {
-        btn.innerHTML = origText;
-        btn.style.pointerEvents = 'auto';
-      }
-    }
-
-    async function downloadPhotoByIndex(index) {
-      const item = uploadedItems[index];
-      if (!item) return;
-      currentModalItem = item;
-      await downloadCurrentPhoto();
-    }
-
-    /* DOWNLOAD ALL MODAL */
-    async function openDlModal() {
-      const modal = document.getElementById('dl-modal');
-      const container = document.getElementById('dl-items-container');
-      const summaryCount = document.getElementById('dl-summary-count');
-      const zipMsg = document.getElementById('zip-status-msg');
-      if (zipMsg) zipMsg.style.display = 'none';
-
-      summaryCount.textContent = `保管中の写真：${uploadedItems.length}枚`;
-      container.innerHTML = '';
-
-      if (uploadedItems.length === 0) {
-        container.innerHTML = `
-          <div style="font-size:12px; color:#888; text-align:center; padding:20px;">
-            まだ写真がアップロードされていません🕊️
-          </div>
-        `;
-        modal.classList.add('show');
-        return;
-      }
-
-      for (let idx = 0; idx < uploadedItems.length; idx++) {
-        const item = uploadedItems[idx];
-        const row = document.createElement('div');
-        row.className = 'download-list-item';
-        row.innerHTML = `
-          <div style="display:flex; align-items:center; gap:8px;">
-            <img src="${item.url}" style="width:38px; height:38px; border-radius:6px; object-fit:cover;">
-            <div>
-              <div style="font-weight:700; font-size:12px;">📷 写真 ${idx + 1} (${item.guest || 'ゲスト'})</div>
-              <div style="color:#888; font-size:10px;">${item.time || ''} ${item.origSize ? '· ' + item.origSize : ''}</div>
-            </div>
-          </div>
-          <button onclick="downloadPhotoByIndex(${idx})" style="background:#2c2c2c; color:#fff; border:none; padding:6px 12px; border-radius:12px; font-size:11px; font-weight:700; cursor:pointer;">
-            保存
-          </button>
-        `;
-        container.appendChild(row);
-      }
-
-      modal.classList.add('show');
-    }
-
-    function closeDlModal() {
-      document.getElementById('dl-modal').classList.remove('show');
-    }
-
-    async function downloadAllAsZip() {
-      if (typeof JSZip === 'undefined') {
-        alert('ZIP生成ライブラリの読み込み中です。数秒後に再度お試しください。');
-        return;
-      }
-
-      if (uploadedItems.length === 0) {
-        alert('ダウンロードする写真がまだありません。');
-        return;
-      }
-
-      const btn = document.getElementById('btn-batch-download');
-      const zipMsg = document.getElementById('zip-status-msg');
-      const origBtnText = btn.innerHTML;
-      btn.style.pointerEvents = 'none';
-
-      zipMsg.style.display = 'block';
-      zipMsg.style.background = '#fef9e7';
-      zipMsg.style.color = '#b7791f';
-      zipMsg.innerHTML = '⏳ 写真データを収集中... (0 / ' + uploadedItems.length + ')';
-
-      try {
-        const zip = new JSZip();
-        const folder = zip.folder("MarryPic_Wedding_Photos");
-
-        for (let i = 0; i < uploadedItems.length; i++) {
-          const item = uploadedItems[i];
-          zipMsg.innerHTML = `⏳ 写真データを収集中... (${i + 1} / ${uploadedItems.length})`;
-
-          let blob = null;
-          let filename = `photo_${String(i + 1).padStart(2, '0')}_${item.guest || 'guest'}.jpg`;
-
-          if (item.id) {
-            const orig = await getOriginalFileById(item.id);
-            if (orig && orig.file) {
-              blob = orig.file;
-              if (orig.name) filename = `photo_${String(i + 1).padStart(2, '0')}_${orig.name}`;
-            }
-          }
-
-          if (!blob && item.url) {
-            try {
-              const res = await fetch(item.url);
-              if (res.ok) {
-                blob = await res.blob();
-              }
-            } catch (fetchErr) {
-              console.warn('Failed to fetch image for zip', item.url, fetchErr);
-            }
-          }
-
-          if (blob) {
-            folder.file(filename, blob);
-          }
-        }
-
-        zipMsg.innerHTML = '🗜️ ZIPファイルを圧縮・パッケージ中...';
-
-        const zipBlob = await zip.generateAsync({
-          type: 'blob',
-          compression: 'DEFLATE',
-          compressionOptions: { level: 6 }
-        }, function updateCallback(metadata) {
-          zipMsg.innerHTML = `🗜️ ZIP生成中... ${Math.round(metadata.percent)}%`;
-        });
-
-        const now = new Date();
-        const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
-        const zipFilename = `MarryPic_Photos_${dateStr}.zip`;
-
-        const blobUrl = URL.createObjectURL(zipBlob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = zipFilename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-          document.body.removeChild(a);
-          URL.revokeObjectURL(blobUrl);
-        }, 10000);
-
-        zipMsg.style.background = '#eafaf1';
-        zipMsg.style.color = '#27ae60';
-        zipMsg.innerHTML = `
-          ✅ ZIPのダウンロードを開始しました！<br>
-          <span style="font-size:11px; color:#555; font-weight:normal;">
-            ※iPhoneの場合は、画面に表示される「ダウンロード」をタップすると「ファイル」アプリ内の「ダウンロード」に保存されます（タップで解凍できます）。
-          </span>
-        `;
-        showToast('✨ 全枚数のZIPダウンロードを開始しました！');
-      } catch (err) {
-        console.error('ZIP generation error:', err);
-        zipMsg.style.background = '#fde8e8';
-        zipMsg.style.color = '#c53030';
-        zipMsg.innerHTML = '❌ ZIP生成中にエラーが発生しました。個別の保存ボタンをお試しください。';
-      } finally {
-        btn.innerHTML = origBtnText;
-        btn.style.pointerEvents = 'auto';
-      }
-    }
-
-    /* SLIDESHOW LOGIC */
-    function getSlideshowPool() {
-      return uploadedItems;
-    }
-
-    function startSlideshow() {
-      if (uploadedItems.length === 0) {
-        alert('📷 まだ写真が投稿されていません。\n「写真を送る」から写真をアップロードすると、スライドショーをお楽しみいただけます！');
-        return;
-      }
-      const pool = getSlideshowPool();
-      ssIndex = 0;
-      ssIsPlaying = true;
-      document.getElementById('ss-play-btn').textContent = '⏸️';
-      document.getElementById('slideshow-modal').classList.add('show');
-      renderSlide();
-      startSlideTimer();
-    }
-
-    function renderSlide() {
-      const pool = getSlideshowPool();
-      const item = pool[ssIndex];
-      const img = document.getElementById('ss-media');
-      const guestName = document.getElementById('ss-guest-name');
-      const photoTime = document.getElementById('ss-photo-time');
-      const guestMsg = document.getElementById('ss-guest-msg');
-      const counter = document.getElementById('ss-counter');
-
-      img.classList.remove('active');
-      setTimeout(() => {
-        img.src = item.url;
-        img.classList.add('active');
-      }, 100);
-
-      guestName.textContent = `${item.guest} 様`;
-      photoTime.textContent = item.time || '';
-      guestMsg.textContent = item.msg ? `💬 ${item.msg}` : '（写真をお届けしました🕊️）';
-      counter.textContent = `${ssIndex + 1} / ${pool.length}`;
-
-      resetProgressBar();
-    }
-
-    function resetProgressBar() {
-      clearInterval(ssProgressTimer);
-      const fill = document.getElementById('ss-progress-fill');
-      fill.style.width = '0%';
-      let elapsed = 0;
-      const step = 50;
-
-      if (!ssIsPlaying) return;
-
-      ssProgressTimer = setInterval(() => {
-        elapsed += step;
-        const pct = Math.min(100, (elapsed / SLIDE_DURATION) * 100);
-        fill.style.width = pct + '%';
-        if (elapsed >= SLIDE_DURATION) {
-          clearInterval(ssProgressTimer);
-        }
-      }, step);
-    }
-
-    function startSlideTimer() {
-      clearInterval(ssTimer);
-      if (!ssIsPlaying) return;
-      ssTimer = setInterval(() => {
-        nextSlide();
-      }, SLIDE_DURATION);
-    }
-
-    function nextSlide() {
-      const pool = getSlideshowPool();
-      ssIndex = (ssIndex + 1) % pool.length;
-      renderSlide();
-      startSlideTimer();
-    }
-
-    function prevSlide() {
-      const pool = getSlideshowPool();
-      ssIndex = (ssIndex - 1 + pool.length) % pool.length;
-      renderSlide();
-      startSlideTimer();
-    }
-
-    function toggleSlideshowPlay() {
-      ssIsPlaying = !ssIsPlaying;
-      const btn = document.getElementById('ss-play-btn');
-      btn.textContent = ssIsPlaying ? '⏸️' : '▶️';
-      if (ssIsPlaying) {
-        startSlideTimer();
-        resetProgressBar();
-      } else {
-        clearInterval(ssTimer);
-        clearInterval(ssProgressTimer);
-      }
-    }
-
-    function closeSlideshow() {
-      clearInterval(ssTimer);
-      clearInterval(ssProgressTimer);
-      document.getElementById('slideshow-modal').classList.remove('show');
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
+  }
+
+  progressText.textContent = 'アルバムに保存中...';
+  progressBar.style.width = '80%';
+  updateGallery();
+  updateStats();
+
+  let failed = 0;
+  if (pushes.length) {
+    const results = await Promise.allSettled(pushes);
+    results.forEach(function (r) { if (r.status === 'rejected' || r.value === false) failed++; });
+  }
+
+  progressBar.style.width = '100%';
+  progressText.textContent = '完了！✨';
+  saveLocalPhotos();
+
+  setTimeout(function () {
+    progressWrap.style.display = 'none';
+    progressBar.style.width = '0%';
+    submitBtn.disabled = false;
+    clearSelected();
+    document.getElementById('guest-msg').value = '';
+    updateGallery();
+    updateStats();
+
+    if (!CLOUD_READY || !HAS_ALBUM) {
+      showToast('📷 この端末に保存しました');
+    } else if (failed > 0) {
+      showToast('⚠️ ' + failed + '枚はアルバムに保存できませんでした');
+      showCloudWarning('一部の写真をアルバムに保存できませんでした。通信環境をご確認のうえ、もう一度お試しください。');
     } else {
-      init();
+      showToast('✨ アルバムに保存しました！');
+      hideCloudWarning();
     }
+    switchTab('gallery');
+  }, 250);
+}
+
+/* ---------------------------------------------------------------
+   8. ギャラリー・ダウンロード・スライドショー
+   --------------------------------------------------------------- */
+function updateGallery() {
+  const grid = document.getElementById('gallery-grid');
+  const emptyState = document.getElementById('empty-state');
+  document.getElementById('photo-count').textContent = uploadedItems.length;
+
+  if (uploadedItems.length === 0) {
+    emptyState.style.display = 'block';
+    grid.innerHTML = '';
+    return;
+  }
+
+  emptyState.style.display = 'none';
+  grid.innerHTML = '';
+
+  uploadedItems.forEach(function (item) {
+    if (!item.url) return;
+    const thumb = document.createElement('div');
+    thumb.className = 'photo-thumb';
+    thumb.onclick = function () { openModal(item); };
+    thumb.innerHTML = ''
+      + '<img src="' + escapeHtml(item.url) + '" alt="photo">'
+      + '<span class="orig-badge">💎 高画質</span>'
+      + '<span class="photo-tag">' + escapeHtml(item.guest) + '</span>';
+    grid.appendChild(thumb);
+  });
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = uploadedItems.length;
+  const guests = {};
+  uploadedItems.forEach(function (i) { if (i.guest) guests[i.guest] = true; });
+  document.getElementById('stat-guests').textContent = Object.keys(guests).length + '人';
+}
+
+async function openModal(item) {
+  currentModalItem = item;
+  document.getElementById('modal-img').src = item.url;
+  const sizeNote = item.origSize ? ' [生データ容量: ' + item.origSize + ']' : '';
+  const msg = item.msg ? '<br>💬 ' + escapeHtml(item.msg) : '';
+  document.getElementById('modal-caption').innerHTML =
+    '<strong>' + escapeHtml(item.guest) + ' 様</strong> (' + escapeHtml(item.time) + ')' + sizeNote + msg;
+
+  const dlBtn = document.getElementById('modal-dl-btn');
+  let label = '💎 写真をスマホ・PCに保存する';
+  if (item.id) {
+    const origRecord = await getOriginalFileById(item.id);
+    if (origRecord && origRecord.file) {
+      label = '💎 無劣化オリジナル生データを保存 (' + formatSize(origRecord.size) + ')';
+    }
+  }
+  dlBtn.innerHTML = label;
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
+async function downloadCurrentPhoto() {
+  if (!currentModalItem) return;
+  const item = currentModalItem;
+  const btn = document.getElementById('modal-dl-btn');
+  const origText = btn.innerHTML;
+  btn.innerHTML = '⏳ データを取得中...';
+  btn.style.pointerEvents = 'none';
+
+  try {
+    let blob = null;
+    let filename = 'marrypic_' + (item.guest || 'guest') + '_' + Date.now() + '.jpg';
+
+    if (item.id) {
+      const origRecord = await getOriginalFileById(item.id);
+      if (origRecord && origRecord.file) {
+        blob = origRecord.file;
+        if (origRecord.name) filename = origRecord.name;
+      }
+    }
+
+    if (!blob && item.url) {
+      const res = await fetch(item.url);
+      if (!res.ok) throw new Error('ダウンロードに失敗しました');
+      blob = await res.blob();
+    }
+    if (!blob) throw new Error('画像データが見つかりません');
+
+    const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: '結婚式写真', text: 'MarryPicから保存' });
+        showToast('✨ 写真アプリへ保存または共有しました');
+        return;
+      } catch (shareErr) {
+        if (shareErr.name !== 'AbortError') console.warn('Share error', shareErr);
+      }
+    }
+
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    }, 4000);
+    showToast('✨ 写真の保存を開始しました！');
+  } catch (err) {
+    console.error('Download error:', err);
+    alert('保存処理に失敗しました。画像を長押しして「“写真”に追加」をお試しください。');
+  } finally {
+    btn.innerHTML = origText;
+    btn.style.pointerEvents = 'auto';
+  }
+}
+
+async function downloadPhotoByIndex(index) {
+  const item = uploadedItems[index];
+  if (!item) return;
+  currentModalItem = item;
+  await downloadCurrentPhoto();
+}
+
+async function openDlModal() {
+  const modal = document.getElementById('dl-modal');
+  const container = document.getElementById('dl-items-container');
+  const zipMsg = document.getElementById('zip-status-msg');
+  if (zipMsg) zipMsg.style.display = 'none';
+
+  document.getElementById('dl-summary-count').textContent = '保管中の写真：' + uploadedItems.length + '枚';
+  container.innerHTML = '';
+
+  if (uploadedItems.length === 0) {
+    container.innerHTML = '<div style="font-size:12px; color:#888; text-align:center; padding:20px;">まだ写真がアップロードされていません🕊️</div>';
+    modal.classList.add('show');
+    return;
+  }
+
+  uploadedItems.forEach(function (item, idx) {
+    const row = document.createElement('div');
+    row.className = 'download-list-item';
+    row.innerHTML = ''
+      + '<div style="display:flex; align-items:center; gap:8px;">'
+      + '  <img src="' + escapeHtml(item.url || '') + '" style="width:38px; height:38px; border-radius:6px; object-fit:cover;">'
+      + '  <div>'
+      + '    <div style="font-weight:700; font-size:12px;">📷 写真 ' + (idx + 1) + '（' + escapeHtml(item.guest || 'ゲスト') + '）</div>'
+      + '    <div style="color:#888; font-size:10px;">' + escapeHtml(item.time || '') + (item.origSize ? ' · ' + escapeHtml(item.origSize) : '') + '</div>'
+      + '  </div>'
+      + '</div>'
+      + '<button onclick="downloadPhotoByIndex(' + idx + ')" style="background:#2c2c2c; color:#fff; border:none; padding:6px 12px; border-radius:12px; font-size:11px; font-weight:700; cursor:pointer;">保存</button>';
+    container.appendChild(row);
+  });
+
+  modal.classList.add('show');
+}
+
+function closeDlModal() {
+  document.getElementById('dl-modal').classList.remove('show');
+}
+
+async function downloadAllAsZip() {
+  if (typeof JSZip === 'undefined') {
+    alert('ZIP生成ライブラリの読み込み中です。数秒後に再度お試しください。');
+    return;
+  }
+  if (uploadedItems.length === 0) {
+    alert('ダウンロードする写真がまだありません。');
+    return;
+  }
+
+  const btn = document.getElementById('btn-batch-download');
+  const zipMsg = document.getElementById('zip-status-msg');
+  const origBtnText = btn.innerHTML;
+  btn.style.pointerEvents = 'none';
+  zipMsg.style.display = 'block';
+  zipMsg.style.background = '#fef9e7';
+  zipMsg.style.color = '#b7791f';
+  zipMsg.innerHTML = '⏳ 写真データを収集中... (0 / ' + uploadedItems.length + ')';
+
+  try {
+    const zip = new JSZip();
+    const folder = zip.folder('MarryPic_Wedding_Photos');
+
+    for (let i = 0; i < uploadedItems.length; i++) {
+      const item = uploadedItems[i];
+      zipMsg.innerHTML = '⏳ 写真データを収集中... (' + (i + 1) + ' / ' + uploadedItems.length + ')';
+
+      let blob = null;
+      let filename = 'photo_' + String(i + 1).padStart(2, '0') + '_' + (item.guest || 'guest') + '.jpg';
+
+      if (item.id) {
+        const orig = await getOriginalFileById(item.id);
+        if (orig && orig.file) {
+          blob = orig.file;
+          if (orig.name) filename = 'photo_' + String(i + 1).padStart(2, '0') + '_' + orig.name;
+        }
+      }
+      if (!blob && item.url) {
+        try {
+          const res = await fetch(item.url);
+          if (res.ok) blob = await res.blob();
+        } catch (fetchErr) {
+          console.warn('Failed to fetch image for zip', item.url, fetchErr);
+        }
+      }
+      if (blob) folder.file(filename, blob);
+    }
+
+    zipMsg.innerHTML = '🗜️ ZIPファイルを圧縮・パッケージ中...';
+
+    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } }, function (metadata) {
+      zipMsg.innerHTML = '🗜️ ZIP生成中... ' + Math.round(metadata.percent) + '%';
+    });
+
+    const now = new Date();
+    const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+    const blobUrl = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = 'MarryPic_Photos_' + dateStr + '.zip';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    }, 10000);
+
+    zipMsg.style.background = '#eafaf1';
+    zipMsg.style.color = '#27ae60';
+    zipMsg.innerHTML = '✅ ZIPのダウンロードを開始しました！<br>'
+      + '<span style="font-size:11px; color:#555; font-weight:normal;">'
+      + '※iPhoneの場合は、画面に表示される「ダウンロード」をタップすると「ファイル」アプリ内の「ダウンロード」に保存されます（タップで解凍できます）。</span>';
+    showToast('✨ 全枚数のZIPダウンロードを開始しました！');
+  } catch (err) {
+    console.error('ZIP generation error:', err);
+    zipMsg.style.background = '#fde8e8';
+    zipMsg.style.color = '#c53030';
+    zipMsg.innerHTML = '❌ ZIP生成中にエラーが発生しました。個別の保存ボタンをお試しください。';
+  } finally {
+    btn.innerHTML = origBtnText;
+    btn.style.pointerEvents = 'auto';
+  }
+}
+
+/* --- スライドショー --- */
+let ssIndex = 0;
+let ssTimer = null;
+let ssProgressTimer = null;
+let ssIsPlaying = true;
+const SLIDE_DURATION = 4000;
+
+function startSlideshow() {
+  if (uploadedItems.length === 0) {
+    alert('📷 まだ写真が投稿されていません。\n「写真を送る」から写真をアップロードすると、スライドショーをお楽しみいただけます！');
+    return;
+  }
+  ssIndex = 0;
+  ssIsPlaying = true;
+  document.getElementById('ss-play-btn').textContent = '⏸️';
+  document.getElementById('slideshow-modal').classList.add('show');
+  renderSlide();
+  startSlideTimer();
+}
+
+function renderSlide() {
+  const item = uploadedItems[ssIndex];
+  if (!item) return;
+  const img = document.getElementById('ss-media');
+  img.classList.remove('active');
+  setTimeout(function () {
+    img.src = item.url || '';
+    img.classList.add('active');
+  }, 100);
+  document.getElementById('ss-guest-name').textContent = (item.guest || 'ゲスト') + ' 様';
+  document.getElementById('ss-photo-time').textContent = item.time || '';
+  document.getElementById('ss-guest-msg').textContent = item.msg ? '💬 ' + item.msg : '（写真をお届けしました🕊️）';
+  document.getElementById('ss-counter').textContent = (ssIndex + 1) + ' / ' + uploadedItems.length;
+  resetProgressBar();
+}
+
+function resetProgressBar() {
+  clearInterval(ssProgressTimer);
+  const fill = document.getElementById('ss-progress-fill');
+  fill.style.width = '0%';
+  let elapsed = 0;
+  const step = 50;
+  if (!ssIsPlaying) return;
+  ssProgressTimer = setInterval(function () {
+    elapsed += step;
+    fill.style.width = Math.min(100, (elapsed / SLIDE_DURATION) * 100) + '%';
+    if (elapsed >= SLIDE_DURATION) clearInterval(ssProgressTimer);
+  }, step);
+}
+
+function startSlideTimer() {
+  clearInterval(ssTimer);
+  if (!ssIsPlaying) return;
+  ssTimer = setInterval(nextSlide, SLIDE_DURATION);
+}
+
+function nextSlide() {
+  if (uploadedItems.length === 0) return;
+  ssIndex = (ssIndex + 1) % uploadedItems.length;
+  renderSlide();
+  startSlideTimer();
+}
+
+function prevSlide() {
+  if (uploadedItems.length === 0) return;
+  ssIndex = (ssIndex - 1 + uploadedItems.length) % uploadedItems.length;
+  renderSlide();
+  startSlideTimer();
+}
+
+function toggleSlideshowPlay() {
+  ssIsPlaying = !ssIsPlaying;
+  document.getElementById('ss-play-btn').textContent = ssIsPlaying ? '⏸️' : '▶️';
+  if (ssIsPlaying) {
+    startSlideTimer();
+    resetProgressBar();
+  } else {
+    clearInterval(ssTimer);
+    clearInterval(ssProgressTimer);
+  }
+}
+
+function closeSlideshow() {
+  clearInterval(ssTimer);
+  clearInterval(ssProgressTimer);
+  document.getElementById('slideshow-modal').classList.remove('show');
+}
+
+/* ---------------------------------------------------------------
+   9. 管理（設定・リセット）
+   --------------------------------------------------------------- */
+function toggleSetupModal() { document.getElementById('setup-modal').classList.toggle('show'); }
+function openEditModal() { document.getElementById('setup-modal').classList.add('show'); }
+function closeSetupModal() { document.getElementById('setup-modal').classList.remove('show'); }
+
+function saveWeddingSettings() {
+  weddingConfig.groom = document.getElementById('input-groom').value.trim() || '新郎';
+  weddingConfig.bride = document.getElementById('input-bride').value.trim() || '新婦';
+  weddingConfig.date = document.getElementById('input-date').value || '';
+  weddingConfig.venue = document.getElementById('input-venue').value.trim() || '';
+  weddingConfig.msg = document.getElementById('input-msg').value.trim() || '写真をお送りください！';
+
+  applyConfigToUI();
+  generateQRCodes();
+  closeSetupModal();
+
+  // アドレスバーのURLも更新（ゲスト用URLは管理キーなし／管理用はこのURL）
+  if (window.history && window.history.replaceState) {
+    window.history.replaceState(null, '', buildAlbumUrl(true));
+  }
+  showToast('✨ おふたりの名前とQRコードを更新しました！');
+}
+
+async function resetAllPhotos() {
+  if (!confirm('アルバム内の写真をすべて削除して0枚に初期化しますか？\n（この操作は取り消せません）')) return;
+  uploadedItems = [];
+  try { localStorage.removeItem(LOCAL_STORAGE_KEY); } catch (e) { console.warn(e); }
+
+  if (CLOUD_READY && HAS_ALBUM) {
+    try {
+      await CloudStore.clear();
+    } catch (e) {
+      console.warn('Cloud reset failed', e);
+      alert('サーバー上の写真を削除できませんでした。通信環境をご確認ください。\n（' + (e && e.message ? e.message : e) + '）');
+    }
+  }
+
+  updateGallery();
+  updateStats();
+  showToast('🗑️ アルバムの写真をすべて削除しました');
+  switchTab('gallery');
+}
+
+/* ---------------------------------------------------------------
+   10. 初期化
+   --------------------------------------------------------------- */
+async function init() {
+  // ゲストには管理機能を見せない
+  if (!IS_ADMIN) {
+    const manageTab = document.getElementById('tab-btn-manage');
+    if (manageTab) manageTab.style.display = 'none';
+    const settingsBtn = document.getElementById('btn-settings');
+    if (settingsBtn) settingsBtn.style.display = 'none';
+    const planCard = document.getElementById('plan-card');
+    if (planCard) planCard.style.display = 'none';
+  } else {
+    const settingsBtn = document.getElementById('btn-settings');
+    if (settingsBtn) settingsBtn.style.display = 'block';
+  }
+
+  if (!HAS_ALBUM) {
+    const banner = document.getElementById('demo-banner');
+    if (banner) banner.style.display = 'block';
+  }
+
+  // 同期状態のバッジ
+  const syncBadge = document.getElementById('sync-badge');
+  if (syncBadge) {
+    if (CLOUD_READY && HAS_ALBUM) {
+      syncBadge.innerHTML = '<span class="sync-dot"></span> クラウドリアルタイム同期';
+    } else {
+      syncBadge.className = 'badge';
+      syncBadge.style.color = '#8a7440';
+      syncBadge.style.background = '#fdfaf3';
+      syncBadge.textContent = '📱 この端末に保存';
+    }
+  }
+
+  applyConfigToUI();
+  generateQRCodes();
+
+  loadLocalPhotos();
+  updateGallery();
+  updateStats();
+  await hydrateLocalOriginals();
+
+  if (!CLOUD_READY) {
+    if (HAS_ALBUM) {
+      showCloudWarning('この端末にのみ保存されます（写真の共有は準備中です）。');
+    }
+    return;
+  }
+
+  await syncFromCloud(false);
+  setInterval(function () { syncFromCloud(false); }, 8000);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
   </script>
 </body>
 </html>

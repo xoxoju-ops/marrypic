@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MarryPic（マリピク）| アプリ不要・QRコードだけの結婚式写真共有サービス</title>
-  <meta name="description" content="アプリ不要・ログイン不要。テーブルのQRコードを読み取るだけで、ゲストが撮った写真がアルバムに集まる結婚式写真共有サービス「MarryPic（マリピク）」。基本はずっと0円。広告非表示オプションは500円（買い切り）です。">
+  <title>MarryPic（マリピク）| QRコードだけの結婚式写真共有・1組500円（税込）買い切り</title>
+  <meta name="description" content="アプリ不要・登録不要。テーブルのQRコードを読み取るだけで、ゲストの写真がアルバムに集まる結婚式写真共有サービス「MarryPic（マリピク）」。1組500円（税込）の買い切りで、広告なし・追加料金なしです。">
   <style>
     :root {
       --primary: #c59b27;
@@ -39,6 +39,8 @@
     /* Buttons */
     .btn-cta { display: block; width: 100%; max-width: 400px; margin: 0 auto 12px; background: linear-gradient(135deg, #d4af37, #aa820a); color: #fff; text-decoration: none; padding: 18px 20px; border-radius: 40px; font-size: 16px; font-weight: 800; text-align: center; box-shadow: 0 6px 16px rgba(197, 155, 39, 0.4); border: none; cursor: pointer; transition: transform 0.1s; }
     .btn-cta:active { transform: scale(0.98); }
+    .btn-cta[disabled] { background: #d8d2c4; box-shadow: none; cursor: not-allowed; }
+    .btn-ghost { display: block; width: 100%; background: #fff; color: var(--primary-dark); border: 2px solid var(--primary); padding: 12px 16px; border-radius: 30px; font-size: 13px; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; margin-bottom: 10px; }
     .btn-sub { display: inline-block; color: var(--text-muted); font-size: 13px; text-decoration: underline; margin-top: 6px; }
 
     /* Problems */
@@ -56,14 +58,14 @@
     .feature-tag { display: inline-block; background: var(--primary-light); color: var(--primary-dark); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-top: 10px; }
 
     /* Pricing */
-    .pricing-card { background: #fff; border: 2px solid var(--primary); border-radius: var(--radius); padding: 28px 20px; text-align: center; position: relative; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(197, 155, 39, 0.12); }
-    .badge-pop { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; font-size: 12px; font-weight: 800; padding: 4px 16px; border-radius: 20px; }
-    .price-name { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-    .price-num { font-size: 36px; font-weight: 800; color: var(--primary-dark); line-height: 1; margin: 14px 0 6px; }
-    .price-num small { font-size: 16px; font-weight: 600; }
-    .price-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
-    .price-list { text-align: left; border-top: 1px solid #eee; padding-top: 16px; margin-bottom: 24px; }
-    .price-list li { list-style: none; font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .plan-card { background: #fff; border: 2px solid var(--primary); border-radius: var(--radius); padding: 28px 20px; position: relative; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(197, 155, 39, 0.12); }
+    .badge-pop { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; font-size: 12px; font-weight: 800; padding: 4px 16px; border-radius: 20px; white-space: nowrap; }
+    .price-name { font-size: 18px; font-weight: 800; text-align: center; margin-bottom: 4px; }
+    .price-num { font-size: 40px; font-weight: 800; color: var(--primary-dark); line-height: 1; text-align: center; margin: 14px 0 6px; }
+    .price-num small { font-size: 15px; font-weight: 700; }
+    .price-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; text-align: center; }
+    .price-list { text-align: left; border-top: 1px solid #eee; padding-top: 16px; }
+    .price-list li { list-style: none; font-size: 13px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 8px; }
     .price-list li::before { content: "✔"; color: var(--primary); font-weight: bold; }
 
     /* Steps */
@@ -78,9 +80,36 @@
     .faq-q::before { content: "Q"; color: var(--primary); font-weight: 800; }
     .faq-a { font-size: 13px; color: var(--text-muted); line-height: 1.6; padding-left: 20px; }
 
+    /* Purchase area */
+    .form-box { background: #fdfaf3; border: 1px solid var(--card-border); padding: 22px 18px; border-radius: var(--radius); margin-bottom: 12px; }
+    .form-box h4 { font-size: 15px; font-weight: 800; color: var(--primary-dark); margin-bottom: 6px; text-align: center; }
+    .form-lead { font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 16px; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+    .field input, .field textarea { width: 100%; padding: 11px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; background: #fff; font-family: inherit; }
+    .field textarea { height: 70px; resize: vertical; }
+    .small-note { font-size: 11px; color: var(--text-muted); text-align: center; line-height: 1.6; }
+    .small-note a { color: var(--primary-dark); }
+    .notice-box { background: #fff4e5; border: 1px solid #f0d9b5; border-radius: var(--radius); padding: 20px 18px; margin-bottom: 14px; text-align: center; }
+    .notice-box .notice-title { font-size: 15px; font-weight: 800; color: #a26b13; margin-bottom: 6px; }
+    .notice-box p { font-size: 12px; color: #7a6236; line-height: 1.7; }
+    .result-box { display: none; background: #fff; border: 2px solid var(--primary); border-radius: var(--radius); padding: 22px 18px; }
+    .result-box .result-emoji { font-size: 30px; text-align: center; margin-bottom: 4px; }
+    .result-box h4 { font-size: 17px; font-weight: 800; color: var(--primary-dark); margin-bottom: 6px; text-align: center; }
+    .result-box .result-lead { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; text-align: center; }
+    .url-block { margin-bottom: 14px; }
+    .url-block .url-label { font-size: 12px; font-weight: 800; color: var(--primary-dark); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+    .url-block .url-label span.tag { font-size: 10px; background: var(--primary-light); border: 1px solid var(--card-border); border-radius: 10px; padding: 2px 8px; color: #8a7440; font-weight: 700; }
+    .url-text { background: #f9f9f9; border: 1px dashed #c59b27; padding: 10px; border-radius: 8px; font-size: 11px; word-break: break-all; color: #333; line-height: 1.5; }
+    .url-block .hint { font-size: 10px; color: #999; margin-top: 4px; line-height: 1.5; }
+    .warn-box { background: #fff8f6; border: 1px solid #f3cbc0; border-radius: 10px; padding: 1px 12px 8px; margin-top: 14px; }
+    .warn-box p { font-size: 11px; color: #a4523c; line-height: 1.6; }
+
     /* Footer */
     .footer { text-align: center; padding: 40px 20px; background: #fff9ee; border-top: 1px solid var(--card-border); }
     .footer p { font-size: 12px; color: var(--text-muted); }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 10px 16px; justify-content: center; margin: 16px 0 18px; }
+    .footer-links a { font-size: 12px; color: var(--primary-dark); text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -88,24 +117,25 @@
   <div class="container">
     <!-- HERO -->
     <header class="hero">
-      <div class="badge-hero">💍 ずっと完全無料！アプリ不要の結婚式写真共有</div>
+      <div class="badge-hero">💍 1組500円（税込）買い切り・広告なし</div>
       <h1 class="hero-h1">
         式場の写真共有、高すぎませんか？🥹<br>
-        <span class="highlight">ずっと無料・QRコードを読み取るだけ。</span><br>
+        <span class="highlight">QRコードを読み取るだけ。</span><br>
         ゲストの写真が、その場でどんどん集まる。
       </h1>
       <p class="hero-sub">
         メッセージアプリに送ってもらうと、画質が落ちてしまう。<br>
         クラウドのアルバムは、ログインで年配のゲストが迷ってしまう。<br>
-        そんな声から生まれた、アプリも会員登録もいらない写真共有です。
+        そんな声から生まれた、アプリも会員登録もいらない写真共有です。<br>
+        <strong style="color:#a17c18;">料金は、1組500円（税込）の買い切りだけ。</strong>
       </p>
 
       <div class="hero-img-wrap">
         <img src="https://i.imgur.com/BXSVJmk.png" alt="MarryPic アプリ画面イメージ">
       </div>
 
-      <a href="#monitor" class="btn-cta">🎁【完全無料】今すぐアルバムを発行する</a>
-      <a href="https://xoxoju-ops.github.io/marrypic/app.html" target="_blank" class="btn-sub">📱 スマホで動くデモ画面を試す →</a>
+      <a href="#purchase" class="btn-cta">💍 500円でアルバムを発行する</a>
+      <a href="app.html" target="_blank" class="btn-sub">📱 スマホで動くデモ画面を試す →</a>
     </header>
 
     <!-- PROBLEMS -->
@@ -184,123 +214,133 @@
       </div>
     </section>
 
-    <!-- PRICING & INSTANT CREATION -->
-    <section class="section problems-bg" id="monitor">
+    <!-- PRICING & PURCHASE -->
+    <section class="section problems-bg" id="purchase">
       <h2 class="section-title">
-        <span>PRICING & PLANS</span>
-        選べる2つの料金プラン
+        <span>PRICING</span>
+        料金は、この1プランだけ
       </h2>
 
-      <!-- 2 Plan Cards -->
-      <div style="display:flex; flex-direction:column; gap:16px; margin-bottom:24px;">
-        <!-- Plan 1: Free -->
-        <div style="background:#fff; border:2px solid var(--primary); border-radius:var(--radius); padding:22px 20px; position:relative; box-shadow:0 4px 15px rgba(197,155,39,0.1);">
-          <div style="position:absolute; top:-12px; left:20px; background:var(--primary-dark); color:#fff; font-size:11px; font-weight:800; padding:3px 12px; border-radius:12px;">基本プラン</div>
-          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; margin-top:4px;">
-            <div style="font-size:18px; font-weight:800; color:var(--text);">🕊️ フリープラン</div>
-            <div style="font-size:30px; font-weight:900; color:var(--primary-dark);">0<small style="font-size:14px; font-weight:700;">円 / ずっと無料</small></div>
-          </div>
-          <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px; line-height:1.5;">
-            基本機能はすべて0円。ゲストが送った写真は、そのままアルバムに集まります。
-          </p>
-          <ul class="price-list" style="margin-bottom:0; padding-top:12px; font-size:12px;">
-            <li>写真のアップロード（追加料金なし）</li>
-            <li>ゲストはアプリ・会員登録なしでQRコードから送信</li>
-            <li>自動スライドショー・みんなの写真一覧</li>
-            <li>1枚ずつの保存／ZIPで一括ダウンロード</li>
-            <li>卓上QR案内カード（印刷用プレビュー）</li>
-            <li>自動課金・サブスクへの切り替えは一切なし</li>
-            <li style="color:#888;">※保存画面等に提携サービスのご案内枠が表示されます</li>
-          </ul>
-        </div>
-
-        <!-- Plan 2: Ad-Free Premium Pass -->
-        <div style="background:linear-gradient(135deg, #fff9ee, #fff); border:1.5px solid #d4c5a0; border-radius:var(--radius); padding:22px 20px; position:relative;">
-          <div style="position:absolute; top:-12px; left:20px; background:#e07a5f; color:#fff; font-size:11px; font-weight:800; padding:3px 12px; border-radius:12px;">こだわり派のおふたりへ</div>
-          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; margin-top:4px;">
-            <div style="font-size:18px; font-weight:800; color:#2c2c2c;">✨ 広告非表示プレミアム</div>
-            <div style="font-size:30px; font-weight:900; color:#e07a5f;">500<small style="font-size:14px; font-weight:700;">円（買い切り）</small></div>
-          </div>
-          <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px; line-height:1.5;">
-            ダウンロード画面などに表示される提携サービスのご案内枠を、すべて非表示にできます。
-          </p>
-          <ul class="price-list" style="margin-bottom:0; padding-top:12px; font-size:12px;">
-            <li>フリープランの全機能がそのまま利用可能</li>
-            <li><strong>提携サービスのご案内枠を【完全非表示】</strong></li>
-            <li>おふたりとゲストの写真だけのシンプルな画面</li>
-            <li>アルバム発行後、管理画面からいつでも切り替え可能</li>
-          </ul>
-        </div>
+      <div class="plan-card">
+        <div class="badge-pop">買い切り・追加料金なし</div>
+        <div class="price-name">💍 MarryPic アルバム発行</div>
+        <div class="price-num">500<small>円（税込）／1組</small></div>
+        <div class="price-sub">一度のお支払いで、結婚式が終わっても使えます</div>
+        <ul class="price-list">
+          <li>写真のアップロード（無制限・追加料金なし）</li>
+          <li>ゲストはアプリ・会員登録なしでQRコードから送信</li>
+          <li>自動スライドショー・みんなの写真一覧</li>
+          <li>1枚ずつの保存／ZIPで一括ダウンロード</li>
+          <li>卓上QR案内カード（印刷用プレビュー）</li>
+          <li><strong>広告・提携サービスの案内枠は一切表示されません</strong></li>
+          <li>自動更新・サブスク・隠れた追加料金は一切なし</li>
+        </ul>
       </div>
 
-      <!-- 発行フォーム -->
-      <div style="background:#fdfaf3; border:1px solid #f0e6d2; padding:22px 18px; border-radius:var(--radius); margin-bottom:12px;">
-        <h4 style="font-size:15px; font-weight:800; color:var(--primary-dark); margin-bottom:6px; text-align:center;" id="form-heading-text">
-          💍 おふたりの結婚式情報を入力（無料・約1分）
-        </h4>
-        <p style="font-size:11px; color:var(--text-muted); text-align:center; margin-bottom:16px;" id="form-sub-text">
-          入力後、その場でおふたり専用のアルバムURL（フリープラン0円）が即時発行されます
+      <!-- 販売準備中（設定が済むまで表示） -->
+      <div class="notice-box" id="notice-state" style="display:none;">
+        <div class="notice-title">ただいま公開準備中です</div>
+        <p>
+          お支払いの受付を開始するまで、もうしばらくお待ちください。<br>
+          ご質問は <a href="mailto:xoxo.junaaaa@gmail.com" style="color:#a26b13;">xoxo.junaaaa@gmail.com</a> まで。
         </p>
-        
+      </div>
+
+      <!-- 入力フォーム -->
+      <div class="form-box" id="form-state">
+        <h4 id="form-heading">💍 おふたりの結婚式情報を入力（約1分）</h4>
+        <p class="form-lead" id="form-lead">お支払いのあと、その場で専用アルバムURLが発行されます</p>
+
         <form id="create-album-form" onsubmit="handleCreateAlbum(event)">
-          <div style="margin-bottom:12px;">
-            <label style="display:block; font-size:11px; font-weight:700; margin-bottom:4px; color:var(--text);">新郎のお名前（ローマ字）</label>
-            <input id="input-groom" type="text" placeholder="例：Taro" required style="width:100%; padding:11px 12px; border:1px solid #ccc; border-radius:8px; font-size:14px; background:#fff;">
+          <div class="field">
+            <label for="input-groom">新郎のお名前</label>
+            <input id="input-groom" type="text" placeholder="例：Taro / 健太" required maxlength="30">
           </div>
-          <div style="margin-bottom:12px;">
-            <label style="display:block; font-size:11px; font-weight:700; margin-bottom:4px; color:var(--text);">新婦のお名前（ローマ字）</label>
-            <input id="input-bride" type="text" placeholder="例：Hanako" required style="width:100%; padding:11px 12px; border:1px solid #ccc; border-radius:8px; font-size:14px; background:#fff;">
+          <div class="field">
+            <label for="input-bride">新婦のお名前</label>
+            <input id="input-bride" type="text" placeholder="例：Hanako / 結衣" required maxlength="30">
           </div>
-          <div style="margin-bottom:12px;">
-            <label style="display:block; font-size:11px; font-weight:700; margin-bottom:4px; color:var(--text);">挙式日（または予定時期）</label>
-            <input id="input-date" type="text" placeholder="例：2027年5月 / 2027-05-22 / 未定" required style="width:100%; padding:11px 12px; border:1px solid #ccc; border-radius:8px; font-size:14px; background:#fff;">
+          <div class="field">
+            <label for="input-date">挙式日（または予定時期）</label>
+            <input id="input-date" type="text" placeholder="例：2027-05-22 / 2027年5月 / 未定" required maxlength="30">
           </div>
-          <div style="margin-bottom:18px;">
-            <label style="display:block; font-size:11px; font-weight:700; margin-bottom:4px; color:var(--text);">披露宴会場名</label>
-            <input id="input-venue" type="text" placeholder="例：グランドハイアット東京" required style="width:100%; padding:11px 12px; border:1px solid #ccc; border-radius:8px; font-size:14px; background:#fff;">
+          <div class="field">
+            <label for="input-venue">披露宴会場名（任意・あとから変更できます）</label>
+            <input id="input-venue" type="text" placeholder="例：グランドハイアット東京" maxlength="40">
+          </div>
+          <div class="field">
+            <label for="input-message">ゲストへのメッセージ（任意・短めがおすすめ）</label>
+            <textarea id="input-message" placeholder="本日はご列席いただきありがとうございます！ぜひ写真を送ってください📷" maxlength="120"></textarea>
           </div>
 
-          <button type="submit" id="btn-create-submit" class="btn-cta" style="margin-bottom:8px;">
-            💍 専用アルバムと卓上QRを発行する（無料） ✨
+          <button type="submit" id="btn-create-submit" class="btn-cta" style="margin-bottom:10px;">
+            💳 500円で決済してアルバムを発行する
           </button>
-          <div style="text-align:center; font-size:11px; color:var(--text-muted);">
-            ※ 入力後、その場でおふたり専用のアルバムURLが発行されます<br>
-            ※ ご入力いただいた情報は、アルバムの発行とご連絡のためにのみ使用します
+          <div class="small-note">
+            決済はStripeの安全なページで行われます。クレジットカード情報を当サービスが保存することはありません。<br>
+            デジタルコンテンツのため、決済後の返品・返金はお受けできません（<a href="legal.html#tokushoho" target="_blank">特定商取引法に基づく表記</a>）。
           </div>
         </form>
 
-        <!-- 発行完了表示エリア -->
-        <div id="result-box" style="display:none; background:#fff; border:2px solid var(--primary); border-radius:12px; padding:20px; text-align:center;">
-          <div style="font-size:28px; margin-bottom:6px;">🎉</div>
-          <h4 style="font-size:16px; font-weight:800; color:var(--primary-dark); margin-bottom:6px;">おふたり専用アルバムが完成しました！</h4>
-          <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px; line-height:1.5;">
-            おめでとうございます！以下の専用URLからアルバムの確認や卓上QRコードの印刷が可能です🕊️
-          </p>
-
-          <div style="background:#f9f9f9; border:1px dashed #c59b27; padding:10px; border-radius:8px; font-size:11px; word-break:break-all; margin-bottom:12px; color:#333;" id="issued-url-text"></div>
-
-          <button onclick="copyIssuedUrl()" style="background:var(--primary-dark); color:#fff; border:none; padding:12px 20px; border-radius:24px; font-size:13px; font-weight:700; cursor:pointer; width:100%; margin-bottom:8px;">
-            📋 専用URLをコピーする
+        <div style="text-align:center; margin-top:14px;">
+          <button type="button" id="btn-restore" onclick="toggleRestore()" style="background:none; border:none; color:#8a8a8a; font-size:11px; text-decoration:underline; cursor:pointer;">
+            すでにお支払い済みでURLが表示されない方はこちら
           </button>
-          <a id="issued-link-btn" href="#" target="_blank" style="display:block; background:#fff; color:var(--primary-dark); border:2px solid var(--primary); padding:10px 20px; border-radius:24px; font-size:13px; font-weight:700; text-decoration:none; margin-bottom:12px;">
-            🚀 今すぐアルバムを開く
-          </a>
+        </div>
 
-          <!-- 広告非表示プレミアムのご案内 -->
-          <div style="background:#fff9ee; border:1px solid #f0e6d2; border-radius:10px; padding:12px; text-align:left;">
-            <div style="font-size:12px; font-weight:800; color:var(--primary-dark); margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-              <span>✨ 広告非表示プレミアムパス（500円）のご案内</span>
-            </div>
-            <p style="font-size:11px; color:#666; line-height:1.5;">
-              「提携サービスの案内枠を出したくない」というおふたりは、アルバム管理画面からいつでもワンコイン500円（買い切り）で広告を非表示にできます。
-            </p>
+        <div id="restore-box" style="display:none; margin-top:14px; background:#fff; border:1px solid var(--card-border); border-radius:10px; padding:14px;">
+          <p style="font-size:12px; color:#555; line-height:1.6; margin-bottom:8px;">
+            決済完了メールに記載の注文ID（<code>cs_...</code>で始まる文字列）を入力してください。同じアルバムURLを再発行できます。
+          </p>
+          <div class="field" style="margin-bottom:8px;">
+            <input id="input-session" type="text" placeholder="cs_live_..." style="width:100%; padding:11px 12px; border:1px solid #ccc; border-radius:8px; font-size:13px;">
           </div>
+          <button type="button" class="btn-ghost" onclick="applyManualSession()">この注文IDで再発行する</button>
         </div>
       </div>
 
-      <div style="font-size:11px; color:var(--text-muted); text-align:center; line-height:1.6;">
-        ※ フリープランはずっと0円でご利用いただけます<br>
-        ※ 現在はベータ版として運用しており、1つのアルバムに保存できる写真は最新30枚までです
+      <!-- 発行完了 -->
+      <div class="result-box" id="result-state">
+        <div class="result-emoji">🎉</div>
+        <h4>アルバムを発行しました！</h4>
+        <p class="result-lead">
+          下の2つのURLが、おふたりのアルバムです。<br>
+          <strong>いまこの画面を閉じると再表示できない</strong>ので、ブックマーク保存かスクリーンショットをおすすめします。
+        </p>
+
+        <div class="url-block">
+          <div class="url-label">① ゲスト用URL（QRコード・招待用）<span class="tag">みんなに配る</span></div>
+          <div class="url-text" id="guest-url-text"></div>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <button type="button" class="btn-ghost" style="margin:0; font-size:12px;" onclick="copyIssued('guest')">📋 ゲスト用URLをコピー</button>
+            <a id="guest-open-link" class="btn-ghost" style="margin:0; font-size:12px;" href="#" target="_blank">ゲスト画面を開く</a>
+          </div>
+        </div>
+
+        <div class="url-block">
+          <div class="url-label">② 管理用URL（おふたり専用）<span class="tag">他の人に教えない</span></div>
+          <div class="url-text" id="admin-url-text"></div>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <button type="button" class="btn-ghost" style="margin:0; font-size:12px;" onclick="copyIssued('admin')">📋 管理用URLをコピー</button>
+            <a id="admin-open-link" class="btn-ghost" style="margin:0; font-size:12px;" href="#" target="_blank">管理画面を開く</a>
+          </div>
+          <div class="hint">※ 管理用URLでは、写真の一括保存・削除・お名前の変更ができます。</div>
+        </div>
+
+        <div class="warn-box">
+          <p>
+            ⚠️ <strong>管理用URLは、ゲストや他の人に教えないでください。</strong><br>
+            ゲスト用URLを知っている人は、写真の閲覧と送信ができます。<br>
+            注文ID：<span id="order-id-text" style="word-break:break-all;"></span>（お問い合わせの際に必要です）
+          </p>
+        </div>
+
+        <a href="#purchase" class="btn-sub" style="display:block; text-align:center; margin-top:14px;" onclick="showFormState()">← 入力画面に戻る</a>
+      </div>
+
+      <div class="small-note" style="margin-top:14px;">
+        ※ 現在はベータ版として提供しており、1つのアルバムに保存できる写真は最新30枚までです。<br>
+        ※ 写真は外部の画像保管サービスに保存され、アルバムURLを知る方は閲覧できます。
       </div>
     </section>
 
@@ -315,7 +355,7 @@
         <div class="step-badge">1</div>
         <div class="step-body">
           <h4>WEBで結婚式を登録（約1分）</h4>
-          <p>おふたりのお名前と挙式日を入力するだけで、専用のアルバムとQRコードが即時発行されます。</p>
+          <p>おふたりのお名前と挙式日を入力してお支払いすると、専用のアルバムとQRコードがその場で発行されます。</p>
         </div>
       </div>
 
@@ -339,9 +379,14 @@
     <!-- FAQ -->
     <section class="section problems-bg">
       <h2 class="section-title">
-        <span>Q & A</span>
+        <span>Q &amp; A</span>
         よくあるご質問
       </h2>
+
+      <div class="faq-item">
+        <div class="faq-q">料金は本当に500円だけですか？</div>
+        <div class="faq-a">はい。1組（1アルバム）500円（税込）の買い切りで、追加料金はありません。自動更新・月額課金・サブスクへの切り替えも一切ありません。広告や提携サービスの案内枠も表示されません。</div>
+      </div>
 
       <div class="faq-item">
         <div class="faq-q">ゲストの人数や写真の枚数に上限はありますか？</div>
@@ -359,13 +404,18 @@
       </div>
 
       <div class="faq-item">
-        <div class="faq-q">あとから自動で月額課金されたりしませんか？</div>
-        <div class="faq-a">一切ありません。クレジットカードのご登録も不要で、自動的に有料プランへ切り替わることはありません。</div>
+        <div class="faq-q">支払い方法を教えてください。</div>
+        <div class="faq-a">クレジットカード（Visa・Mastercard・JCB・American Express 等）でのお支払いです。決済はStripeの安全なページで行われ、カード情報を当サービスが取得・保存することはありません。</div>
       </div>
 
       <div class="faq-item">
-        <div class="faq-q">広告を消したいときはどうすればいいですか？</div>
-        <div class="faq-a">アルバム管理画面から、広告非表示プレミアム（500円・買い切り）に切り替えられます。ダウンロード画面などに表示される提携サービスのご案内枠が非表示になります。</div>
+        <div class="faq-q">返金はできますか？</div>
+        <div class="faq-a">デジタルコンテンツの性質上、決済完了後の返品・返金はお受けできません。アルバムURLが表示されないなどの不具合があった場合は、注文IDを添えてご連絡いただければ再発行いたします。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">アルバムURLをなくしてしまったら？</div>
+        <div class="faq-a">決済完了メールの注文ID（cs_...）があれば、このページの「すでにお支払い済みでURLが表示されない方はこちら」から同じURLを再発行できます。</div>
       </div>
     </section>
 
@@ -373,164 +423,272 @@
     <footer class="footer">
       <h3 style="font-size:18px; font-weight:700; margin-bottom:12px;">一生に一度の、大切な一日。</h3>
       <p style="margin-bottom:20px;">ゲストが撮ってくれた笑顔や涙を、1枚も逃さず残しましょう。</p>
-      <a href="#monitor" class="btn-cta" style="margin-bottom:16px;">無料でアルバムを発行する 💍</a>
-      <p>© 2026 MarryPic All Rights Reserved.</p>
+      <a href="#purchase" class="btn-cta" style="margin-bottom:16px;">500円でアルバムを発行する 💍</a>
+      <div class="footer-links">
+        <a href="legal.html#terms" target="_blank">利用規約</a>
+        <a href="legal.html#privacy" target="_blank">プライバシーポリシー</a>
+        <a href="legal.html#tokushoho" target="_blank">特定商取引法に基づく表記</a>
+        <a href="mailto:xoxo.junaaaa@gmail.com">お問い合わせ</a>
+      </div>
+      <p>運営：MarryPic（マリピク）／川村 寿菜</p>
+      <p style="margin-top:4px;">© 2026 MarryPic All Rights Reserved.</p>
     </footer>
   </div>
 
+  <script src="config.js"></script>
   <script>
-    const APP_BASE_URL = 'https://xoxoju-ops.github.io/marrypic/app.html';
-    const MASTER_REGISTRY_ID = 'ff808181a09d98f701a1c50aa3907c7e';
-    const NOTIFY_TOPIC = 'marrypic-juna-alerts-8291';
-    let isMonitorFull = false;
+    /* =====================================================================
+       MarryPic LP : 500円買い切り / Stripe決済 → アルバムURL発行
+       ---------------------------------------------------------------------
+       【しくみ】
+       1. お客様が入力 → Stripeの決済ページへ（client_reference_id だけ渡す）
+       2. Stripeの「決済後のリダイレクト先」に
+            https://xoxoju-ops.github.io/marrypic/?session_id={CHECKOUT_SESSION_ID}
+          を設定しておくと、決済後にこのページへ戻ってくる
+       3. 戻ってきたときの session_id から、アルバムIDと管理キーを計算して
+          URLを発行（入力されたお名前等はURLの中にだけ入り、どこにも送らない）
+       ===================================================================== */
 
-    // Load live counter on startup
-    async function loadMonitorCount() {
-      try {
-        const res = await fetch(`https://api.restful-api.dev/objects?id=${MASTER_REGISTRY_ID}`);
-        if (res.ok) {
-          const raw = await res.json();
-          const json = Array.isArray(raw) ? raw[0] : raw;
-          if (json && json.data && Array.isArray(json.data.signups)) {
-            const count = json.data.signups.length;
-            // Record count
-            console.log('Current registered couples:', count);
-          }
-        }
-      } catch (err) {
-        console.warn('Monitor count load error:', err);
+    const CFG = window.MARRYPIC || {};
+    const STORAGE_CFG = CFG.storage || { mode: 'local' };
+    const STRIPE_PAYMENT_LINK_URL = (CFG.stripePaymentLink || '').trim();
+    const SUPPORT_EMAIL = CFG.supportEmail || 'xoxo.junaaaa@gmail.com';
+    const DRAFT_KEY = 'marrypic_draft_v2';
+    const APP_URL = new URL('app.html', window.location.href).href;
+
+    // 販売できる状態か（Stripeリンク＋クラウド保存先がそろっている）
+    const CAN_SELL = /^https:\/\/buy\.stripe\.com\//.test(STRIPE_PAYMENT_LINK_URL) && STORAGE_CFG.mode === 'cloud';
+
+    let currentSessionId = '';
+    let manualSessionId = '';
+    let issued = { guest: '', admin: '' };
+    let issuing = false;
+
+    /* ---------- 文字列ユーティリティ ---------- */
+    function b64urlEncodeUtf8(str) {
+      const bytes = new TextEncoder().encode(str);
+      let bin = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) {
+        bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
       }
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     }
-    loadMonitorCount();
 
+    async function sha256Hex(text) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      const bytes = new Uint8Array(buf);
+      let out = '';
+      for (let i = 0; i < bytes.length; i++) out += bytes[i].toString(16).padStart(2, '0');
+      return out;
+    }
+
+    /* ---------- 注文ID → アルバムID / 管理キー ---------- */
+    async function deriveAlbumIds(sessionId) {
+      const h = await sha256Hex('marrypic/order/v1|' + sessionId);
+      return { albumId: 'a' + h.slice(0, 24), adminKey: h.slice(24, 56) };
+    }
+
+    function buildAlbumUrls(ids, data) {
+      const base = APP_URL + '#p=';
+      // URLを短くするため配列で持つ（QRコードが読み取りやすい）
+      // [albumId, 新郎, 新婦, 挙式日, 会場, メッセージ, (管理キー)]
+      const body = [ids.albumId, data.groom, data.bride, data.date, data.venue, data.message];
+      const adminBody = body.concat([ids.adminKey]);
+      return {
+        guest: base + b64urlEncodeUtf8(JSON.stringify(body)),
+        admin: base + b64urlEncodeUtf8(JSON.stringify(adminBody))
+      };
+    }
+
+    /* ---------- 画面の状態 ---------- */
+    function readSessionFromUrl() {
+      const v = new URLSearchParams(window.location.search).get('session_id') || '';
+      return /^cs_[A-Za-z0-9_]+$/.test(v) ? v : '';
+    }
+
+    function readDraft() {
+      try {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        if (!raw) return null;
+        const d = JSON.parse(raw);
+        if (!d || !d.groom) return null;
+        return d;
+      } catch (e) { return null; }
+    }
+
+    function fillForm(data) {
+      if (!data) return;
+      document.getElementById('input-groom').value = data.groom || '';
+      document.getElementById('input-bride').value = data.bride || '';
+      document.getElementById('input-date').value = data.date || '';
+      document.getElementById('input-venue').value = data.venue || '';
+      document.getElementById('input-message').value = data.message || '';
+    }
+
+    function readForm() {
+      return {
+        groom: document.getElementById('input-groom').value.trim(),
+        bride: document.getElementById('input-bride').value.trim(),
+        date: document.getElementById('input-date').value.trim(),
+        venue: document.getElementById('input-venue').value.trim(),
+        message: document.getElementById('input-message').value.trim()
+      };
+    }
+
+    function showNoticeState() {
+      document.getElementById('notice-state').style.display = 'block';
+      document.getElementById('form-state').style.display = 'none';
+      document.getElementById('result-state').style.display = 'none';
+    }
+
+    function showFormState() {
+      document.getElementById('notice-state').style.display = 'none';
+      document.getElementById('form-state').style.display = 'block';
+      document.getElementById('result-state').style.display = 'none';
+    }
+
+    function showResultState() {
+      document.getElementById('notice-state').style.display = 'none';
+      document.getElementById('form-state').style.display = 'none';
+      document.getElementById('result-state').style.display = 'block';
+      document.getElementById('result-state').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function toggleRestore() {
+      const box = document.getElementById('restore-box');
+      box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function applyManualSession() {
+      const v = document.getElementById('input-session').value.trim();
+      if (!/^cs_[A-Za-z0-9_]+$/.test(v)) {
+        alert('注文IDは「cs_」で始まる文字列です。決済完了メールをご確認ください。');
+        return;
+      }
+      manualSessionId = v;
+      document.getElementById('form-heading').textContent = '💍 お支払い済みの方：アルバム情報を入力';
+      document.getElementById('form-lead').textContent = '入力後「アルバムを発行する」を押すと、同じアルバムURLが再発行されます';
+      document.getElementById('btn-create-submit').textContent = '✨ アルバムを発行する';
+      document.getElementById('restore-box').style.display = 'none';
+    }
+
+    /* ---------- 発行 ---------- */
     async function handleCreateAlbum(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btn-create-submit');
-      const origText = btn.innerHTML;
-      btn.innerHTML = '⏳ 専用ルームを作成中...';
-      btn.style.pointerEvents = 'none';
+      if (e && e.preventDefault) e.preventDefault();
+      if (issuing) return;
 
-      const groom = document.getElementById('input-groom').value.trim();
-      const bride = document.getElementById('input-bride').value.trim();
-      const date = document.getElementById('input-date').value.trim();
-      const venue = document.getElementById('input-venue').value.trim();
+      const data = readForm();
+      if (!data.groom || !data.bride || !data.date) {
+        alert('新郎・新婦のお名前と挙式日を入力してください。');
+        return;
+      }
+
+      const sessionId = currentSessionId || manualSessionId;
+      if (sessionId) {
+        await issueAndShow(sessionId, data);
+        return;
+      }
+
+      if (!CAN_SELL) {
+        alert('ただいま販売の準備中です。もうしばらくお待ちください。');
+        return;
+      }
+
+      // 決済へ（入力内容はこの端末に控えておき、決済後に同じ内容で発行する）
+      try { localStorage.setItem(DRAFT_KEY, JSON.stringify(data)); } catch (err) { console.warn(err); }
+      const orderRef = 'mp' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      const sep = STRIPE_PAYMENT_LINK_URL.indexOf('?') === -1 ? '?' : '&';
+
+      const btn = document.getElementById('btn-create-submit');
+      btn.disabled = true;
+      btn.textContent = '⏳ 決済ページへ移動します...';
+
+      window.location.href = STRIPE_PAYMENT_LINK_URL + sep + 'client_reference_id=' + encodeURIComponent(orderRef);
+    }
+
+    async function issueAndShow(sessionId, data) {
+      if (issuing) return;
+      issuing = true;
+      const btn = document.getElementById('btn-create-submit');
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⏳ アルバムを発行しています...';
 
       try {
-        let roomId = 'room_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-        try {
-          const res = await fetch('https://api.restful-api.dev/objects', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name: `marrypic_${groom}_${bride}`,
-              data: { photos: [] }
-            })
-          });
-          if (res.ok) {
-            const json = await res.json();
-            if (json && json.id) roomId = json.id;
-          }
-        } catch (apiErr) {
-          console.warn('API create fallback:', apiErr);
+        if (!window.crypto || !window.crypto.subtle) {
+          throw new Error('このブラウザでは発行できません。HTTPSのページからお試しください。');
         }
+        const ids = await deriveAlbumIds(sessionId);
+        const urls = buildAlbumUrls(ids, data);
+        issued = urls;
 
-        const albumUrl = `${APP_BASE_URL}?room=${encodeURIComponent(roomId)}&g=${encodeURIComponent(groom)}&b=${encodeURIComponent(bride)}&d=${encodeURIComponent(date)}&v=${encodeURIComponent(venue)}`;
+        document.getElementById('guest-url-text').textContent = urls.guest;
+        document.getElementById('admin-url-text').textContent = urls.admin;
+        document.getElementById('guest-open-link').href = urls.guest;
+        document.getElementById('admin-open-link').href = urls.admin;
+        document.getElementById('order-id-text').textContent = sessionId;
 
-        // Master monitor registry update & Notification
-        let currentList = [];
-        try {
-          const masterRes = await fetch(`https://api.restful-api.dev/objects?id=${MASTER_REGISTRY_ID}`);
-          if (masterRes.ok) {
-            const rawMaster = await masterRes.json();
-            const masterJson = Array.isArray(rawMaster) ? rawMaster[0] : rawMaster;
-            currentList = (masterJson && masterJson.data && Array.isArray(masterJson.data.signups)) ? masterJson.data.signups : [];
-            
-            const newEntry = {
-              groom,
-              bride,
-              date,
-              venue,
-              roomId,
-              url: albumUrl,
-              time: new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })
-            };
-            currentList.push(newEntry);
+        try { localStorage.setItem('marrypic_last_order', sessionId); } catch (err) { console.warn(err); }
 
-            await fetch(`https://api.restful-api.dev/objects/${MASTER_REGISTRY_ID}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                name: 'marrypic_monitor_master_list',
-                data: { signups: currentList }
-              })
-            });
-          }
-        } catch (regErr) {
-          console.warn('Master registry sync failed:', regErr);
-        }
-
-        const newCount = currentList.length || 1;
-        const remain = Math.max(0, 30 - newCount);
-
-        // 🔔 1. スマホプッシュ通知（ntfy.sh JSON API）
-        try {
-          fetch('https://ntfy.sh/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              topic: NOTIFY_TOPIC,
-              title: `💍 MarryPic モニター申込が入りました！（${newCount}/30組）`,
-              message: `新郎新婦: ${groom} & ${bride} 様\n挙式日: ${date || '未定'}\n会場: ${venue || '未定'}\n進捗: ${newCount}組目（残り${remain}組）`,
-              priority: 4,
-              tags: ['ring', 'tada', 'wedding'],
-              click: albumUrl
-            })
-          }).catch(e => console.warn('ntfy send error:', e));
-        } catch (notifErr) {
-          console.warn('Push notif error:', notifErr);
-        }
-
-        // ✉️ 2. メール通知（FormSubmit）
-        try {
-          fetch('https://formsubmit.co/ajax/xoxo.junaaaa@gmail.com', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({
-              _subject: `💍【MarryPic】新規モニター申込が入りました！（${newCount}/30組）`,
-              新郎新婦: `${groom} & ${bride} 様`,
-              挙式日: date,
-              披露宴会場: venue,
-              進捗状況: `${newCount}組目（残り${remain}組）`,
-              専用アルバムURL: albumUrl,
-              申込日時: new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })
-            })
-          }).catch(e => console.warn('email send error:', e));
-        } catch (mailErr) {
-          console.warn('Email notif error:', mailErr);
-        }
-
-        document.getElementById('issued-url-text').textContent = albumUrl;
-        document.getElementById('issued-link-btn').href = albumUrl;
-
-        document.getElementById('create-album-form').style.display = 'none';
-        document.getElementById('result-box').style.display = 'block';
-
-        document.getElementById('result-box').scrollIntoView({ behavior: 'smooth' });
+        showResultState();
       } catch (err) {
-        console.error('Create album error:', err);
-        alert('発行中にエラーが発生しました。もう一度お試しください。');
-        btn.innerHTML = origText;
-        btn.style.pointerEvents = 'auto';
+        console.error('issue error', err);
+        alert('アルバムの発行に失敗しました。\n' + (err && err.message ? err.message : '') + '\n\n' + SUPPORT_EMAIL + ' までご連絡ください。');
+      } finally {
+        issuing = false;
+        btn.disabled = false;
+        btn.textContent = original;
       }
     }
 
-    function copyIssuedUrl() {
-      const url = document.getElementById('issued-url-text').textContent;
-      navigator.clipboard.writeText(url).then(() => {
-        alert('専用URLをクリップボードにコピーしました！✨\nこのURLを保存して、アルバム管理や印刷にお使いください。');
-      }).catch(() => {
-        alert('専用URL: ' + url);
-      });
+    function copyIssued(kind) {
+      const text = kind === 'admin' ? issued.admin : issued.guest;
+      if (!text) return;
+      const label = kind === 'admin' ? '管理用URL' : 'ゲスト用URL';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          alert(label + 'をコピーしました！\nメモ帳やメールに貼り付けて保存してください。');
+        }).catch(function () {
+          prompt(label + 'をコピーしてください', text);
+        });
+      } else {
+        prompt(label + 'をコピーしてください', text);
+      }
+    }
+
+    /* ---------- 初期表示 ---------- */
+    function init() {
+      currentSessionId = readSessionFromUrl();
+      const draft = readDraft();
+
+      // 1) Stripeの決済から戻ってきた場合（お支払い済み）
+      if (currentSessionId) {
+        showFormState();
+        document.getElementById('form-heading').textContent = '🎉 お支払いありがとうございます！';
+        document.getElementById('btn-create-submit').textContent = '✨ アルバムを発行する';
+        if (draft) {
+          fillForm(draft);
+          document.getElementById('form-lead').textContent = '入力内容を確認して「アルバムを発行する」を押してください';
+          issueAndShow(currentSessionId, draft);
+        } else {
+          document.getElementById('form-lead').textContent = 'アルバムに載せるおふたりの情報を入力してください';
+        }
+        return;
+      }
+
+      // 2) これから購入する場合（Stripeリンクと保存先が未設定なら販売しない）
+      if (!CAN_SELL) {
+        showNoticeState();
+        return;
+      }
+      showFormState();
+      if (draft) fillForm(draft);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
     }
   </script>
 </body>
