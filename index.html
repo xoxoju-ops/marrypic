@@ -681,7 +681,7 @@
         }
         const verifiedIds = await verifyCheckoutOnServer(sessionId);
         if (!verifiedIds && (CFG.functions || {}).requireVerifiedPayment) {
-          throw new Error('ただいま決済の確認ができないため、アルバムを発行できません。しばらくしてからお試しいただくか、' + SUPPORT_EMAIL + ' までご連絡ください。');
+          throw new Error('ただいま決済の確認ができないため、アルバムを発行できません。しばらくしてからお試しください。');
         }
         const ids = verifiedIds || await deriveAlbumIds(sessionId);
         const urls = buildAlbumUrls(ids, data);
