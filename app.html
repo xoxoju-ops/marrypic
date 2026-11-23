@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MarryPic（マリピク）- ふたりの結婚式写真共有アルバム</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- ZIPはこのファイル内の軽量実装（Store方式）を使うため、外部CDNは読み込みません -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
   <script src="config.js"></script>
   <style>
@@ -326,6 +326,14 @@
         ▶️ スライドショーで見る（自動再生）
       </button>
 
+      <button class="btn-dark" style="background:linear-gradient(135deg,#2c2c2c,#1a1a1a); color:#fdfaf3; border:1px solid var(--primary); padding:13px; font-size:13px; font-weight:800; border-radius:30px;" onclick="saveAllPhotosAsZip('gallery')">
+        📦 まとめて保存（ZIP）
+      </button>
+      <div style="font-size:11px; color:#999; text-align:center; margin:6px 0 14px;">
+        表示中の写真をZIPファイルにまとめて保存します
+      </div>
+      <div id="zip-gallery-status" style="display:none; font-size:12px; margin-bottom:14px; padding:10px; border-radius:8px; line-height:1.6;"></div>
+
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <span style="font-size:15px; font-weight:700;">みんなの写真</span>
         <button style="background:#fdfaf3; border:1px solid #ddd; font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer;" onclick="syncFromCloud(true)">🔄 最新を取得</button>
@@ -359,8 +367,8 @@
           <span style="font-size:11px; background:#27ae60; color:#fff; padding:2px 8px; border-radius:10px;">高画質</span>
         </div>
         <p style="font-size:12px; color:var(--text-muted); line-height:1.5;">
-          ゲストが送ってくれた写真は、アルバムに高画質で保存されます。1枚ずつ、またはZIPでまとめてダウンロードして、印刷やフォトアルバム作りにお使いいただけます。<br>
-          <span style="font-size:11px; color:#999;">※ 撮影時の原本データは、送信したゲストの端末内に保存されます。</span>
+          ゲストが送ってくれた写真は、アルバムに保存されます（長辺1600px・JPEG）。1枚ずつ、またはZIPでまとめてダウンロードして、印刷やフォトアルバム作りにお使いいただけます。<br>
+          <span style="font-size:11px; color:#999;">※ 撮影時のオリジナルデータは、送信したゲストの端末内に残ります。1アルバム100枚まで。</span>
         </p>
       </div>
 
@@ -434,8 +442,7 @@
       </button>
       <button class="btn-gold" style="background:#fff; color:#c53030; border:1px solid #e0b4b4; margin-top:12px; font-size:12px;" onclick="resetAllPhotos()">
         🗑️ アルバムの写真をすべて削除（0枚にリセット）
-      </button>
-    </div>
+      </button>    </div>
 
     <!-- 設定モーダル -->
     <div id="setup-modal" class="modal" onclick="closeSetupModal()">
@@ -502,8 +509,23 @@
 
 const MARRYPIC_CFG = window.MARRYPIC || {};
 const STORAGE_CFG = MARRYPIC_CFG.storage || { mode: 'local' };
-const MAX_PHOTOS = 30; // ベータ版の上限
+const MAX_PHOTOS = 100; // 1アルバムの上限（2026-11-23 に 30 → 100 へ拡張）
 const PHOTO_TABLE = STORAGE_CFG.table || 'marrypic_photos';
+
+/* 圧縮の設定（ゲストのiPhone写真をアップロード前に自動で縮小） */
+const COMPRESS_MAX_SIDE = 1600;   // 長辺の最大ピクセル
+const COMPRESS_QUALITY = 0.82;    // JPEG品質
+
+/* Supabase Edge Functions（決済確認・削除） */
+const FN_CFG = MARRYPIC_CFG.functions || {};
+function functionsUrl(name) {
+  if (!STORAGE_CFG.supabaseUrl || !name) return '';
+  return String(STORAGE_CFG.supabaseUrl).replace(/\/+$/, '') + '/functions/v1/' + name;
+}
+function functionsHeaders() {
+  const key = STORAGE_CFG.supabaseAnonKey || '';
+  return { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' };
+}
 
 /* ---------------------------------------------------------------
    1. URL からアルバム情報を読む
@@ -731,26 +753,23 @@ const CloudStore = {
     }
     return out;
   },
-  add: async function (photo) {
+  add: async function (photo, storagePath) {
     const tag = await getAlbumTag();
     const cipher = await encryptJson(photo);
     const headers = this.headers();
     headers.Prefer = 'return=minimal';
+    const body = { album_tag: tag, cipher: cipher };
+    // 画像本体のパスは削除（Edge Function delete-photos）で使う
+    if (storagePath) body.storage_path = storagePath;
     const res = await fetch(this.endpoint(), {
       method: 'POST',
       headers: headers,
-      body: JSON.stringify({ album_tag: tag, cipher: cipher })
+      body: JSON.stringify(body)
     });
     if (!res.ok) throw new Error('写真の保存に失敗しました（' + res.status + '）');
-  },
-  clear: async function () {
-    const tag = await getAlbumTag();
-    const res = await fetch(this.endpoint() + '?album_tag=eq.' + encodeURIComponent(tag), {
-      method: 'DELETE',
-      headers: this.headers()
-    });
-    if (!res.ok) throw new Error('写真の削除に失敗しました（' + res.status + '）');
   }
+  // 削除は CloudStore ではなく Edge Function delete-photos が行う
+  // （anon キーには DELETE 権限・DELETE ポリシーを与えていないため）
 };
 
 function toCloudItem(item) {
@@ -789,7 +808,7 @@ async function uploadImage(blob) {
       body: blob
     });
     if (!res.ok) throw new Error('画像の保存に失敗しました（' + res.status + '）');
-    return base + '/storage/v1/object/public/' + bucket + '/' + path;
+    return { url: base + '/storage/v1/object/public/' + bucket + '/' + path, path: path };
   }
 
   // Imgur（お試し用）
@@ -804,7 +823,7 @@ async function uploadImage(blob) {
   if (!res.ok) throw new Error('画像の保存に失敗しました（' + res.status + '）');
   const json = await res.json();
   if (!json || !json.data || !json.data.link) throw new Error('画像の保存に失敗しました');
-  return json.data.link;
+  return { url: json.data.link, path: '' };
 }
 
 /* ---------------------------------------------------------------
@@ -1012,9 +1031,14 @@ async function syncFromCloud(showNotice) {
 
 async function pushPhotoToCloud(localItem, blob) {
   try {
-    const publicUrl = await uploadImage(blob);
-    localItem.url = publicUrl;
-    await CloudStore.add(toCloudItem(localItem));
+    const uploaded = await uploadImage(blob);
+    const previousUrl = localItem.url;
+    localItem.url = uploaded.url;
+    localItem.storagePath = uploaded.path || '';
+    await CloudStore.add(toCloudItem(localItem), uploaded.path || '');
+    if (previousUrl && previousUrl.indexOf('blob:') === 0) {
+      try { URL.revokeObjectURL(previousUrl); } catch (e) { /* noop */ }
+    }
     saveLocalPhotos();
     updateGallery();
     return true;
@@ -1065,42 +1089,105 @@ function clearSelected() {
   document.getElementById('thumb-container').innerHTML = '';
 }
 
-// 端末内で高速に縮小（数MBのiPhone写真 → 約150KBのJPEG）
-function compressImageFile(file, maxWidth, quality) {
-  maxWidth = maxWidth || 1200;
-  quality = quality || 0.8;
-  return new Promise(function (resolve) {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const img = new Image();
-      img.onload = function () {
-        let width = img.width;
-        let height = img.height;
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        canvas.toBlob(function (blob) {
-          resolve({ blob: blob, dataUrl: dataUrl });
-        }, 'image/jpeg', quality);
-      };
-      img.onerror = function () { resolve(null); };
-      img.src = e.target.result;
-    };
-    reader.onerror = function () { resolve(null); };
-    reader.readAsDataURL(file);
+/* ---------------------------------------------------------------
+   端末内で縮小・圧縮（iPhoneの数MB写真 → 約200〜400KBのJPEG）
+   - 長辺 1600px / JPEG品質 0.82
+   - EXIFの向き（縦向きで撮った写真）を反映して描画する：
+     createImageBitmap(file, { imageOrientation:'from-image' }) を優先し、
+     使えない環境では <img> での描画に切り替える（現代のSafari/Chromeは
+     <img> でもEXIF向きを自動適用する）。
+   --------------------------------------------------------------- */
+async function decodeImageForCanvas(file) {
+  if (typeof createImageBitmap === 'function') {
+    try {
+      return await createImageBitmap(file, { imageOrientation: 'from-image' });
+    } catch (e) {
+      try { return await createImageBitmap(file); } catch (e2) { /* 次へ */ }
+    }
+  }
+  const objUrl = (function () {
+    try { return URL.createObjectURL(file); } catch (e) { return ''; }
+  })();
+  if (!objUrl) return null;
+  try {
+    const img = new Image();
+    await new Promise(function (resolve, reject) {
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = objUrl;
+    });
+    return img;
+  } catch (e) {
+    return null;
+  } finally {
+    setTimeout(function () { try { URL.revokeObjectURL(objUrl); } catch (e) {} }, 10000);
+  }
+}
+
+async function compressImageFile(file, maxSide, quality) {
+  maxSide = maxSide || COMPRESS_MAX_SIDE;
+  quality = quality || COMPRESS_QUALITY;
+  try {
+    return await compressImageFileInner(file, maxSide, quality);
+  } catch (e) {
+    console.warn('画像の圧縮に失敗しました', e);
+    return null;
+  }
+}
+
+async function compressImageFileInner(file, maxSide, quality) {
+  const source = await decodeImageForCanvas(file);
+  if (!source) return null;
+
+  let width = source.width || source.naturalWidth;
+  let height = source.height || source.naturalHeight;
+  if (!width || !height) {
+    if (source.close) source.close();
+    return null;
+  }
+
+  // 長辺を maxSide に合わせる（小さい写真は拡大しない）
+  const longSide = Math.max(width, height);
+  const scale = longSide > maxSide ? maxSide / longSide : 1;
+  const outW = Math.max(1, Math.round(width * scale));
+  const outH = Math.max(1, Math.round(height * scale));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = outW;
+  canvas.height = outH;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';          // 透過PNGをJPEGにしたときの黒背景を防ぐ
+  ctx.fillRect(0, 0, outW, outH);
+  ctx.drawImage(source, 0, 0, outW, outH);
+  if (source.close) source.close();
+
+  const blob = await new Promise(function (resolve) {
+    if (canvas.toBlob) {
+      canvas.toBlob(function (b) { resolve(b); }, 'image/jpeg', quality);
+    } else {
+      resolve(null);
+    }
   });
+  if (!blob) return null;
+  return { blob: blob, width: outW, height: outH };
 }
 
 async function uploadPhotos() {
   if (selectedFiles.length === 0) {
     alert('まずは上の「カメラロールから写真を選ぶ」をタップして写真を選択してください！');
     return;
+  }
+
+  // アルバムの上限（100枚）をこえる分は先に伝える
+  const remaining = Math.max(0, MAX_PHOTOS - uploadedItems.length);
+  if (remaining === 0) {
+    alert('このアルバムは ' + MAX_PHOTOS + '枚までです。これ以上は保存できません。');
+    return;
+  }
+  let filesToSend = selectedFiles;
+  if (selectedFiles.length > remaining) {
+    alert('このアルバムは ' + MAX_PHOTOS + '枚までです。\n選択したうち先頭の ' + remaining + '枚を送信します。');
+    filesToSend = selectedFiles.slice(0, remaining);
   }
 
   const guestName = document.getElementById('guest-name').value.trim() || 'ゲスト';
@@ -1114,12 +1201,12 @@ async function uploadPhotos() {
   submitBtn.disabled = true;
   progressWrap.style.display = 'block';
 
-  for (let i = 0; i < selectedFiles.length; i++) {
-    const file = selectedFiles[i];
+  for (let i = 0; i < filesToSend.length; i++) {
+    const file = filesToSend[i];
     const origId = 'orig_' + Date.now() + '_' + i;
 
-    progressText.textContent = '写真を準備中... (' + (i + 1) + '/' + selectedFiles.length + ')';
-    progressBar.style.width = Math.round(((i + 1) / selectedFiles.length) * 60) + '%';
+    progressText.textContent = '写真を準備中... (' + (i + 1) + '/' + filesToSend.length + ')';
+    progressBar.style.width = Math.round(((i + 1) / filesToSend.length) * 60) + '%';
 
     await storeOriginalFile(origId, file);
 
@@ -1128,7 +1215,7 @@ async function uploadPhotos() {
 
     const item = {
       id: origId,
-      url: compressed ? compressed.dataUrl : URL.createObjectURL(file),
+      url: compressed && compressed.blob ? URL.createObjectURL(compressed.blob) : URL.createObjectURL(file),
       guest: guestName,
       msg: guestMsg,
       time: timeStr,
@@ -1344,88 +1431,248 @@ function closeDlModal() {
   document.getElementById('dl-modal').classList.remove('show');
 }
 
-async function downloadAllAsZip() {
-  if (typeof JSZip === 'undefined') {
-    alert('ZIP生成ライブラリの読み込み中です。数秒後に再度お試しください。');
-    return;
+/* --- 軽量ZIP（Store方式）-----------------------------------------
+   外部ライブラリを使わず、このファイルだけでZIPを作る。
+   写真はJPEGなので再圧縮しても小さくならない → 無圧縮(Store)で十分。
+   IntelのiPhone Safariでも動くように、完成したBlobを
+   共有シート（忍び保存）か通常のダウンロードで渡す。
+   --------------------------------------------------------------- */
+const ZIP_CRC_TABLE = (function () {
+  const table = new Uint32Array(256);
+  for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    table[i] = c >>> 0;
   }
+  return table;
+})();
+
+function zipCrc32(bytes) {
+  let crc = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) {
+    crc = ZIP_CRC_TABLE[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+  }
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+
+function zipDosDateTime(date) {
+  const d = date || new Date();
+  const year = Math.max(1980, d.getFullYear());
+  return {
+    time: ((d.getHours() & 0x1F) << 11) | ((d.getMinutes() & 0x3F) << 5) | ((d.getSeconds() >> 1) & 0x1F),
+    date: (((year - 1980) & 0x7F) << 9) | (((d.getMonth() + 1) & 0x0F) << 5) | (d.getDate() & 0x1F)
+  };
+}
+
+/* entries: [{ name: string, data: Uint8Array, date?: Date }] */
+function zipParts(entries) {
+  const encoder = new TextEncoder();
+  const parts = [];
+  const central = [];
+  let offset = 0;
+  const now = zipDosDateTime(new Date());
+
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
+    const nameBytes = encoder.encode(entry.name);
+    const data = entry.data;
+    const crc = zipCrc32(data);
+    const stamp = entry.date ? zipDosDateTime(entry.date) : now;
+
+    const local = new Uint8Array(30 + nameBytes.length);
+    const lv = new DataView(local.buffer);
+    lv.setUint32(0, 0x04034b50, true);   // local file header
+    lv.setUint16(4, 20, true);           // version needed
+    lv.setUint16(6, 0x0800, true);       // bit 11: UTF-8 filename
+    lv.setUint16(8, 0, true);            // method 0 = store
+    lv.setUint16(10, stamp.time, true);
+    lv.setUint16(12, stamp.date, true);
+    lv.setUint32(14, crc, true);
+    lv.setUint32(18, data.length, true);
+    lv.setUint32(22, data.length, true);
+    lv.setUint16(26, nameBytes.length, true);
+    lv.setUint16(28, 0, true);           // extra field length
+    local.set(nameBytes, 30);
+    parts.push(local);
+    parts.push(data);
+
+    const cd = new Uint8Array(46 + nameBytes.length);
+    const cv = new DataView(cd.buffer);
+    cv.setUint32(0, 0x02014b50, true);   // central directory header
+    cv.setUint16(4, 20, true);           // version made by
+    cv.setUint16(6, 20, true);           // version needed
+    cv.setUint16(8, 0x0800, true);       // UTF-8
+    cv.setUint16(10, 0, true);           // store
+    cv.setUint16(12, stamp.time, true);
+    cv.setUint16(14, stamp.date, true);
+    cv.setUint32(16, crc, true);
+    cv.setUint32(20, data.length, true);
+    cv.setUint32(24, data.length, true);
+    cv.setUint16(28, nameBytes.length, true);
+    cv.setUint16(30, 0, true);           // extra length
+    cv.setUint16(32, 0, true);           // comment length
+    cv.setUint16(34, 0, true);           // disk number
+    cv.setUint16(36, 0, true);           // internal attributes
+    cv.setUint32(38, 0, true);           // external attributes
+    cv.setUint32(42, offset, true);      // offset of local header
+    cd.set(nameBytes, 46);
+    central.push(cd);
+
+    offset += local.length + data.length;
+  }
+
+  let centralSize = 0;
+  for (let i = 0; i < central.length; i++) centralSize += central[i].length;
+
+  const eocd = new Uint8Array(22);
+  const ev = new DataView(eocd.buffer);
+  ev.setUint32(0, 0x06054b50, true);     // end of central directory
+  ev.setUint16(8, central.length, true);
+  ev.setUint16(10, central.length, true);
+  ev.setUint32(12, centralSize, true);
+  ev.setUint32(16, offset, true);
+
+  return parts.concat(central, [eocd]);
+}
+
+function zipBlob(entries) {
+  return new Blob(zipParts(entries), { type: 'application/zip' });
+}
+
+function safeFileName(name, fallback) {
+  const cleaned = String(name || '')
+    .replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return (cleaned || fallback).slice(0, 40);
+}
+
+/* 表示中の写真を [{name, data}] に集める（端末にあれば無劣化の原本を使う） */
+async function collectPhotoEntries(onProgress) {
+  const entries = [];
+  const total = uploadedItems.length;
+  const pad = String(total).length < 3 ? 3 : String(total).length;
+
+  for (let i = 0; i < total; i++) {
+    const item = uploadedItems[i];
+    if (onProgress) onProgress(i + 1, total);
+    let blob = null;
+
+    if (item.id) {
+      const orig = await getOriginalFileById(item.id);
+      if (orig && orig.file) blob = orig.file;
+    }
+    if (!blob && item.url) {
+      try {
+        const res = await fetch(item.url);
+        if (res.ok) blob = await res.blob();
+      } catch (e) {
+        console.warn('ZIP: 画像の取得に失敗', item.url, e);
+      }
+    }
+    if (!blob) continue;
+
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    const label = safeFileName(item.guest, 'guest');
+    const seq = String(i + 1).padStart(pad, '0');
+    entries.push({ name: 'photo_' + seq + '_' + label + '.jpg', data: bytes });
+  }
+  return entries;
+}
+
+async function deliverZipBlob(blob, filename) {
+  // iPhone Safari：共有シートから「ファイルに保存」が確実
+  if (navigator.canShare && typeof File === 'function') {
+    try {
+      const file = new File([blob], filename, { type: 'application/zip' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'MarryPic 写真' });
+        return 'share';
+      }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return 'cancelled';
+      console.warn('share failed, falling back to download', e);
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () {
+    try { document.body.removeChild(a); } catch (e) { /* noop */ }
+    URL.revokeObjectURL(url);
+  }, 10000);
+  return 'download';
+}
+
+/* ギャラリー／一括保存モーダルの両方から呼ばれる */
+async function saveAllPhotosAsZip(target) {
+  const isGallery = target === 'gallery';
+  const statusEl = document.getElementById(isGallery ? 'zip-gallery-status' : 'zip-status-msg');
+  const btn = isGallery
+    ? document.querySelector('button[onclick="saveAllPhotosAsZip(\'gallery\')"]')
+    : document.getElementById('btn-batch-download');
+
+  function setStatus(html, tone) {
+    if (!statusEl) return;
+    statusEl.style.display = 'block';
+    statusEl.innerHTML = html;
+    if (tone === 'busy') { statusEl.style.background = '#fef9e7'; statusEl.style.color = '#b7791f'; }
+    else if (tone === 'ok') { statusEl.style.background = '#eafaf1'; statusEl.style.color = '#27ae60'; }
+    else if (tone === 'error') { statusEl.style.background = '#fde8e8'; statusEl.style.color = '#c53030'; }
+  }
+
   if (uploadedItems.length === 0) {
-    alert('ダウンロードする写真がまだありません。');
+    alert('保存できる写真がまだありません🕊️');
     return;
   }
 
-  const btn = document.getElementById('btn-batch-download');
-  const zipMsg = document.getElementById('zip-status-msg');
-  const origBtnText = btn.innerHTML;
-  btn.style.pointerEvents = 'none';
-  zipMsg.style.display = 'block';
-  zipMsg.style.background = '#fef9e7';
-  zipMsg.style.color = '#b7791f';
-  zipMsg.innerHTML = '⏳ 写真データを収集中... (0 / ' + uploadedItems.length + ')';
+  if (btn) btn.style.pointerEvents = 'none';
+  setStatus('⏳ 写真データを集めています... (0 / ' + uploadedItems.length + ')', 'busy');
 
   try {
-    const zip = new JSZip();
-    const folder = zip.folder('MarryPic_Wedding_Photos');
+    const entries = await collectPhotoEntries(function (done, total) {
+      setStatus('⏳ 写真データを集めています... (' + done + ' / ' + total + ')', 'busy');
+    });
 
-    for (let i = 0; i < uploadedItems.length; i++) {
-      const item = uploadedItems[i];
-      zipMsg.innerHTML = '⏳ 写真データを収集中... (' + (i + 1) + ' / ' + uploadedItems.length + ')';
-
-      let blob = null;
-      let filename = 'photo_' + String(i + 1).padStart(2, '0') + '_' + (item.guest || 'guest') + '.jpg';
-
-      if (item.id) {
-        const orig = await getOriginalFileById(item.id);
-        if (orig && orig.file) {
-          blob = orig.file;
-          if (orig.name) filename = 'photo_' + String(i + 1).padStart(2, '0') + '_' + orig.name;
-        }
-      }
-      if (!blob && item.url) {
-        try {
-          const res = await fetch(item.url);
-          if (res.ok) blob = await res.blob();
-        } catch (fetchErr) {
-          console.warn('Failed to fetch image for zip', item.url, fetchErr);
-        }
-      }
-      if (blob) folder.file(filename, blob);
+    if (entries.length === 0) {
+      setStatus('❌ 写真データを取得できませんでした。通信環境をご確認のうえ、もう一度お試しください。', 'error');
+      return;
     }
 
-    zipMsg.innerHTML = '🗜️ ZIPファイルを圧縮・パッケージ中...';
-
-    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } }, function (metadata) {
-      zipMsg.innerHTML = '🗜️ ZIP生成中... ' + Math.round(metadata.percent) + '%';
-    });
+    setStatus('🗜️ ZIPファイルにまとめています... (' + entries.length + '枚)', 'busy');
+    const blob = zipBlob(entries);
 
     const now = new Date();
     const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
-    const blobUrl = URL.createObjectURL(zipBlob);
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = 'MarryPic_Photos_' + dateStr + '.zip';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function () {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-    }, 10000);
+    const filename = 'MarryPic_Photos_' + dateStr + '.zip';
 
-    zipMsg.style.background = '#eafaf1';
-    zipMsg.style.color = '#27ae60';
-    zipMsg.innerHTML = '✅ ZIPのダウンロードを開始しました！<br>'
+    const how = await deliverZipBlob(blob, filename);
+    if (how === 'cancelled') {
+      setStatus('保存をキャンセルしました。', 'busy');
+      return;
+    }
+
+    const sizeLabel = formatSize(blob.size);
+    setStatus('✅ ' + entries.length + '枚をZIPにまとめました（' + sizeLabel + '）。<br>'
       + '<span style="font-size:11px; color:#555; font-weight:normal;">'
-      + '※iPhoneの場合は、画面に表示される「ダウンロード」をタップすると「ファイル」アプリ内の「ダウンロード」に保存されます（タップで解凍できます）。</span>';
-    showToast('✨ 全枚数のZIPダウンロードを開始しました！');
+      + (how === 'share'
+        ? '共有シートで「ファイルに保存」を選ぶと、「ファイル」アプリに保存されます。'
+        : 'iPhoneの場合は、画面に表示される「ダウンロード」をタップすると「ファイル」アプリに保存されます。')
+      + '</span>', 'ok');
+    showToast('✨ ' + entries.length + '枚のZIP保存を開始しました！');
   } catch (err) {
     console.error('ZIP generation error:', err);
-    zipMsg.style.background = '#fde8e8';
-    zipMsg.style.color = '#c53030';
-    zipMsg.innerHTML = '❌ ZIP生成中にエラーが発生しました。個別の保存ボタンをお試しください。';
+    setStatus('❌ ZIPの作成中にエラーが発生しました。1枚ずつの保存をお試しください。', 'error');
   } finally {
-    btn.innerHTML = origBtnText;
-    btn.style.pointerEvents = 'auto';
+    if (btn) btn.style.pointerEvents = 'auto';
   }
+}
+
+async function downloadAllAsZip() {
+  return saveAllPhotosAsZip('modal');
 }
 
 /* --- スライドショー --- */
@@ -1541,19 +1788,95 @@ function saveWeddingSettings() {
   showToast('✨ おふたりの名前とQRコードを更新しました！');
 }
 
-async function resetAllPhotos() {
-  if (!confirm('アルバム内の写真をすべて削除して0枚に初期化しますか？\n（この操作は取り消せません）')) return;
-  uploadedItems = [];
-  try { localStorage.removeItem(LOCAL_STORAGE_KEY); } catch (e) { console.warn(e); }
+async function removeOriginalsByIds(ids) {
+  if (!ids || !ids.length) return;
+  try {
+    const db = await openOriginalsDB();
+    if (!db) return;
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    ids.forEach(function (id) { try { store.delete(id); } catch (e) { /* noop */ } });
+  } catch (e) {
+    console.warn('IndexedDB delete error', e);
+  }
+}
 
+/* 管理キーをサーバー側の台帳へ登録する（β版の移行用・何度呼んでもOK） */
+async function registerAlbumAdminKey() {
+  if (!IS_ADMIN || !HAS_ALBUM || !CLOUD_READY) return false;
+  const url = functionsUrl(FN_CFG.deletePhotos || 'delete-photos');
+  if (!url) return false;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: functionsHeaders(),
+      body: JSON.stringify({ op: 'register', album_id: ALBUM_ID, admin_key: ADMIN_KEY })
+    });
+    if (!res.ok) {
+      console.warn('admin key register failed', res.status);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.warn('admin key register error', e);
+    return false;
+  }
+}
+
+/* 削除は Edge Function 経由で「DB行 + Storageの画像本体」両方を消す */
+async function deleteAlbumOnServer() {
+  if (!IS_ADMIN) throw new Error('管理用URLからのみ削除できます');
+  const url = functionsUrl(FN_CFG.deletePhotos || 'delete-photos');
+  if (!url || !HAS_ALBUM) throw new Error('削除用の設定がありません');
+  const base = { album_id: ALBUM_ID, admin_key: ADMIN_KEY };
+
+  // 1) 管理キーの登録（未登録のアルバムのみ。既に別のキーが登録済みなら purge で 403）
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: functionsHeaders(),
+      body: JSON.stringify(Object.assign({ op: 'register' }, base))
+    });
+  } catch (e) {
+    console.warn('register before purge failed', e);
+  }
+
+  // 2) 本体削除
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: functionsHeaders(),
+    body: JSON.stringify(Object.assign({ op: 'purge' }, base))
+  });
+  let data = {};
+  try { data = await res.json(); } catch (e) { /* noop */ }
+  if (!res.ok) {
+    throw new Error(data.message || ('写真の削除に失敗しました（' + res.status + '）'));
+  }
+  return data;
+}
+
+async function resetAllPhotos() {
+  if (!IS_ADMIN) {
+    alert('写真をすべて削除できるのは、管理用URLを開いているお二人だけです。');
+    return;
+  }
+  if (!confirm('アルバム内の写真をすべて削除して0枚に初期化しますか？\n（クラウド上の画像データも削除されます。この操作は取り消せません）')) return;
+
+  // 先にサーバー側を消す。失敗したらローカルも消さない（実態と表示をずらさない）
   if (CLOUD_READY && HAS_ALBUM) {
     try {
-      await CloudStore.clear();
+      await deleteAlbumOnServer();
     } catch (e) {
       console.warn('Cloud reset failed', e);
-      alert('サーバー上の写真を削除できませんでした。通信環境をご確認ください。\n（' + (e && e.message ? e.message : e) + '）');
+      alert('サーバー上の写真を削除できませんでした。\n（' + (e && e.message ? e.message : e) + '）\n通信環境をご確認のうえ、もう一度お試しください。');
+      return;
     }
   }
+
+  const oldIds = uploadedItems.map(function (p) { return p.id; }).filter(function (id) { return !!id; });
+  uploadedItems = [];
+  try { localStorage.removeItem(LOCAL_STORAGE_KEY); } catch (e) { console.warn(e); }
+  await removeOriginalsByIds(oldIds);
 
   updateGallery();
   updateStats();
@@ -1613,6 +1936,9 @@ async function init() {
 
   await syncFromCloud(false);
   setInterval(function () { syncFromCloud(false); }, 8000);
+
+  // 管理用URLで開いたときは、管理キーをサーバーへ登録しておく（削除の本人確認用）
+  if (IS_ADMIN && CLOUD_READY && HAS_ALBUM) registerAlbumAdminKey();
 }
 
 if (document.readyState === 'loading') {

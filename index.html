@@ -227,7 +227,7 @@
         <div class="price-num">500<small>円（税込）／1組</small></div>
         <div class="price-sub">一度のお支払いで、結婚式が終わっても使えます</div>
         <ul class="price-list">
-          <li>写真のアップロード（ベータ版は最新30枚まで・追加料金なし）</li>
+          <li>写真のアップロード（ベータ版は100枚まで・追加料金なし）</li>
           <li>ゲストはアプリ・会員登録なしでQRコードから送信</li>
           <li>自動スライドショー・みんなの写真一覧</li>
           <li>1枚ずつの保存／ZIPで一括ダウンロード</li>
@@ -339,7 +339,7 @@
       </div>
 
       <div class="small-note" style="margin-top:14px;">
-        ※ 現在はベータ版として提供しており、1つのアルバムに保存できる写真は最新30枚までです。<br>
+        ※ 現在はベータ版として提供しており、1つのアルバムに保存できる写真は100枚までです。<br>
         ※ 写真は外部の画像保管サービスに保存され、アルバムURLを知る方は閲覧できます。
       </div>
     </section>
@@ -390,7 +390,7 @@
 
       <div class="faq-item">
         <div class="faq-q">ゲストの人数や写真の枚数に上限はありますか？</div>
-        <div class="faq-a">ゲストの人数に上限はなく、追加料金もかかりません。なお現在はベータ版として運用しているため、1つのアルバムに保存できる写真は最新30枚までとなっています。</div>
+        <div class="faq-a">ゲストの人数に上限はなく、追加料金もかかりません。なお現在はベータ版として運用しているため、1つのアルバムに保存できる写真は100枚までとなっています。</div>
       </div>
 
       <div class="faq-item">
@@ -486,6 +486,67 @@
     async function deriveAlbumIds(sessionId) {
       const h = await sha256Hex('marrypic/order/v1|' + sessionId);
       return { albumId: 'a' + h.slice(0, 24), adminKey: h.slice(24, 56) };
+    }
+
+    /* ---------- サーバー側での決済確認（Supabase Edge Function） ----------
+       ・verifyCheckout が有効（Stripeの制限付きキー設定済み）なら、
+         支払い済みかをサーバーで確認したうえでIDを発行してもらう。
+       ・503 not_configured（キー未設定）の間だけ、従来のブラウザ計算にフォールバック。
+       ・402（未払い・金額不一致）はフォールバックせずエラー。          */
+    function fnUrl(name) {
+      if (!STORAGE_CFG.supabaseUrl || !name) return '';
+      return String(STORAGE_CFG.supabaseUrl).replace(/\/+$/, '') + '/functions/v1/' + name;
+    }
+
+    function fnHeaders() {
+      const key = STORAGE_CFG.supabaseAnonKey || '';
+      return { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' };
+    }
+
+    async function verifyCheckoutOnServer(sessionId) {
+      const url = fnUrl((CFG.functions || {}).verifyCheckout || 'verify-checkout');
+      if (!url) return null;
+      let res;
+      try {
+        res = await fetch(url, {
+          method: 'POST',
+          headers: fnHeaders(),
+          body: JSON.stringify({ session_id: sessionId })
+        });
+      } catch (e) {
+        console.warn('verify-checkout 通信失敗', e);
+        return null;
+      }
+      // 503（キー未設定）や 5xx（Function側の障害）は「確認機能が使えない」とみなす。
+      // 設定で requireVerifiedPayment=true にしていない限り、発行自体は止めない（既存客を止めないため）。
+      if (res.status === 503 || res.status >= 500) return null;
+      let data = {};
+      try { data = await res.json(); } catch (e) { /* noop */ }
+      if (res.status === 402) {
+        throw new Error(data.message || 'お支払いを確認できませんでした。決済完了メールの注文IDをご確認ください。');
+      }
+      if (!res.ok) {
+        throw new Error('決済の確認に失敗しました（' + res.status + '）');
+      }
+      if (!data.album_id || !data.admin_key) throw new Error('発行データを受け取れませんでした。');
+      return { albumId: data.album_id, adminKey: data.admin_key, verified: true };
+    }
+
+    /* 管理キーをサーバーの台帳へ登録（削除の本人確認用） */
+    async function registerAdminKey(ids) {
+      const url = fnUrl((CFG.functions || {}).deletePhotos || 'delete-photos');
+      if (!url) return false;
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: fnHeaders(),
+          body: JSON.stringify({ op: 'register', album_id: ids.albumId, admin_key: ids.adminKey })
+        });
+        return res.ok;
+      } catch (e) {
+        console.warn('admin key register failed', e);
+        return false;
+      }
     }
 
     function buildAlbumUrls(ids, data) {
@@ -618,9 +679,17 @@
         if (!window.crypto || !window.crypto.subtle) {
           throw new Error('このブラウザでは発行できません。HTTPSのページからお試しください。');
         }
-        const ids = await deriveAlbumIds(sessionId);
+        const verifiedIds = await verifyCheckoutOnServer(sessionId);
+        if (!verifiedIds && (CFG.functions || {}).requireVerifiedPayment) {
+          throw new Error('ただいま決済の確認ができないため、アルバムを発行できません。しばらくしてからお試しいただくか、' + SUPPORT_EMAIL + ' までご連絡ください。');
+        }
+        const ids = verifiedIds || await deriveAlbumIds(sessionId);
         const urls = buildAlbumUrls(ids, data);
         issued = urls;
+
+        // 管理キーをサーバーの台帳へ（決済確認済みならすでに登録済み）
+        // 発行直後に登録しておくことで、ゲスト用URLを配る前に本人確認の基礎が備わる
+        if (!verifiedIds) await registerAdminKey(ids);
 
         document.getElementById('guest-url-text').textContent = urls.guest;
         document.getElementById('admin-url-text').textContent = urls.admin;

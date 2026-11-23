@@ -42,6 +42,19 @@ window.MARRYPIC = {
     imgurClientId: '546c25a59c58ad7'
   },
 
-  /* 3) お問い合わせ先（LP・規約ページの表示と一致させてください） */
+  /* 3) Supabase Edge Functions（決済確認・削除）
+     - verifyCheckout : 決済済みかをサーバー側で照合し、アルバムIDと管理キーを発行（①）
+     - deletePhotos   : 管理キーが一致したときだけ DB行＋画像本体を削除（②）
+     いずれも Supabase の functions/v1 に自動でデプロイ済み。
+     verifyCheckout は Stripe の制限付きキー（STRIPE_RESTRICTED_KEY）を
+     Supabase の Secrets に入れた時点から有効になります。               */
+  functions: {
+    verifyCheckout: 'verify-checkout',
+    deletePhotos: 'delete-photos',
+    // true にすると、決済確認ができないときは LP で発行しない（本番の完全版）
+    requireVerifiedPayment: true
+  },
+
+  /* 4) お問い合わせ先（LP・規約ページの表示と一致させてください） */
   supportEmail: 'xoxo.junaaaa@gmail.com'
 };
