@@ -289,8 +289,11 @@
         </div>
 
         <div id="restore-box" style="display:none; margin-top:14px; background:#fff; border:1px solid var(--card-border); border-radius:10px; padding:14px;">
-          <p style="font-size:12px; color:#555; line-height:1.6; margin-bottom:8px;">
-            決済完了メールに記載の注文ID（<code>cs_...</code>で始まる文字列）を入力してください。同じアルバムURLを再発行できます。
+          <p style="font-size:12px; color:#555; line-height:1.6; margin-bottom:10px;">
+            決済完了後にURLが表示されなかった場合は、お支払い時の<strong>メールアドレス</strong>と<strong>決済日時</strong>を添えて <a href="mailto:xoxo.junaaaa@gmail.com?subject=MarryPic%20%E3%82%A2%E3%83%AB%E3%83%90%E3%83%A0URL%E5%86%8D%E7%99%BA%E8%A1%8C%E3%81%AE%E3%81%94%E4%BE%9D%E9%A0%BC" style="color:#a26b13; word-break:break-all;">xoxo.junaaaa@gmail.com</a> までご連絡ください。確認のうえ再発行いたします。
+          </p>
+          <p style="font-size:11px; color:#777; line-height:1.6; margin-bottom:8px;">
+            発行完了画面やサポート案内でお持ちの注文ID（<code>cs_...</code>）で再発行する場合：
           </p>
           <div class="field" style="margin-bottom:8px;">
             <input id="input-session" type="text" placeholder="cs_live_..." style="width:100%; padding:11px 12px; border:1px solid #ccc; border-radius:8px; font-size:13px;">
@@ -410,12 +413,12 @@
 
       <div class="faq-item">
         <div class="faq-q">返金はできますか？</div>
-        <div class="faq-a">デジタルコンテンツの性質上、決済完了後の返品・返金はお受けできません。アルバムURLが表示されないなどの不具合があった場合は、注文IDを添えてご連絡いただければ再発行いたします。</div>
+        <div class="faq-a">デジタルコンテンツの性質上、決済完了後の返品・返金はお受けできません。アルバムURLが表示されないなどの不具合があった場合は、お支払い時のメールアドレスと決済日時を添えてご連絡いただければ再発行いたします。</div>
       </div>
 
       <div class="faq-item">
         <div class="faq-q">アルバムURLをなくしてしまったら？</div>
-        <div class="faq-a">決済完了メールの注文ID（cs_...）があれば、このページの「すでにお支払い済みでURLが表示されない方はこちら」から同じURLを再発行できます。</div>
+        <div class="faq-a">お支払い時のメールアドレスと決済日時を添えて xoxo.junaaaa@gmail.com までご連絡ください。確認のうえ、同じアルバムURLを再発行いたします。（※発行完了画面の注文IDをお控えの場合は、このページの「すでにお支払い済みでURLが表示されない方はこちら」からも再発行できます）</div>
       </div>
     </section>
 
@@ -523,7 +526,7 @@
       let data = {};
       try { data = await res.json(); } catch (e) { /* noop */ }
       if (res.status === 402) {
-        throw new Error(data.message || 'お支払いを確認できませんでした。決済完了メールの注文IDをご確認ください。');
+        throw new Error(data.message || 'お支払い状況を確認できませんでした。解決しない場合はお支払い時のメールアドレスと決済日時を添えてお問い合わせください。');
       }
       if (!res.ok) {
         throw new Error('決済の確認に失敗しました（' + res.status + '）');
@@ -623,7 +626,7 @@
     function applyManualSession() {
       const v = document.getElementById('input-session').value.trim();
       if (!/^cs_[A-Za-z0-9_]+$/.test(v)) {
-        alert('注文IDは「cs_」で始まる文字列です。決済完了メールをご確認ください。');
+        alert('注文IDは「cs_」で始まる文字列です。発行完了画面でお控えの注文ID、またはサポートからご案内した注文IDをご確認ください。');
         return;
       }
       manualSessionId = v;
