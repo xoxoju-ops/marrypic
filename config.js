@@ -55,6 +55,6 @@ window.MARRYPIC = {
     requireVerifiedPayment: true
   },
 
-  /* 4) お問い合わせ先（LP・規約ページの表示と一致させてください） */
-  supportEmail: 'xoxo.junaaaa@gmail.com'
+  /* 4) お問い合わせ先（特商法表記に記載する専用アドレス。LP・規約ページには表示しません） */
+  supportEmail: '729juna@gmail.com'
 };
