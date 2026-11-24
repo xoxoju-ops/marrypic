@@ -4,252 +4,1008 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MarryPic（マリピク）| QRコードだけの結婚式写真共有・1組500円（税込）買い切り</title>
-  <meta name="description" content="アプリ不要・登録不要。テーブルのQRコードを読み取るだけで、ゲストの写真がアルバムに集まる結婚式写真共有サービス「MarryPic（マリピク）」。1組500円（税込）の買い切りで、広告なし・追加料金なしです。">
+  <meta name="description" content="アプリ不要・登録不要。テーブルのQRコードを読み取るだけで、ゲストの写真がアルバムに集まる結婚式写真共有サービス「MarryPic（マリピク）」。1組500円（税込）の買い切りで、広告なし・追加料金なし。写真は最大100枚まで、長辺1600pxに自動最適化して保存します。">
   <style>
+    /* =========================================================
+       Design tokens
+       ========================================================= */
     :root {
-      --primary: #c59b27;
-      --primary-dark: #a17c18;
-      --primary-light: #fdfaf3;
-      --accent: #e07a5f;
-      --text: #2c2c2c;
-      --text-muted: #666666;
-      --bg: #ffffff;
-      --bg-soft: #faf7f0;
-      --card-border: #f0e6d2;
-      --radius: 16px;
+      --blue: #4F6DF5;
+      --blue-2: #5B7CFA;
+      --blue-3: #7C94FF;
+      --blue-dark: #3A54C8;
+      --blue-ink: #20307A;
+      --blue-soft: #EEF2FF;
+      --blue-mist: #F4F6FC;
+      --warm: #F8F7F4;
+      --green: #10B981;
+      --green-dark: #059669;
+      --text: #1B2333;
+      --muted: #667085;
+      --line: #E6E9F5;
+      --radius: 18px;
+      --radius-lg: 24px;
+      --shadow-sm: 0 4px 14px rgba(43, 65, 160, .06);
+      --shadow: 0 10px 30px rgba(43, 65, 160, .10);
+      --column: 480px;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Yu Gothic", sans-serif; }
-    body { background: var(--bg); color: var(--text); line-height: 1.7; overflow-x: hidden; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+      color: var(--text);
+      background: #E9EBF9;
+      line-height: 1.7;
+      overflow-x: hidden;
+      padding-bottom: 92px;
+    }
+    img, svg { display: block; max-width: 100%; }
+    a { color: inherit; }
 
-    /* Layout */
-    .container { max-width: 600px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 30px rgba(0,0,0,0.05); }
-    .section { padding: 48px 24px; }
-    .section-title { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 28px; line-height: 1.4; }
-    .section-title span { color: var(--primary); display: block; font-size: 14px; font-weight: 600; letter-spacing: 1px; margin-bottom: 6px; }
+    /* =========================================================
+       Background decoration (desktop gutters)
+       ========================================================= */
+    .bg-deco { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .bg-deco i { position: absolute; display: block; border-radius: 50%; background: #7B92F7; opacity: .55; }
+    .bg-deco i:nth-child(1) { width: 88vw; height: 72vh; left: -26vw; bottom: -34vh; }
+    .bg-deco i:nth-child(2) { width: 96vw; height: 80vh; right: -30vw; bottom: -46vh; opacity: .38; }
 
-    /* Hero */
-    .hero { background: linear-gradient(180deg, #fff9ee 0%, #ffffff 100%); padding: 48px 20px 36px; text-align: center; border-bottom: 1px solid var(--card-border); }
-    .badge-hero { display: inline-block; background: #fff; border: 1px solid var(--primary); color: var(--primary-dark); font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px; margin-bottom: 16px; }
-    .hero-h1 { font-size: 26px; font-weight: 800; line-height: 1.4; margin-bottom: 16px; }
-    .hero-h1 span.highlight { color: var(--primary); }
-    .hero-sub { font-size: 14px; color: var(--text-muted); line-height: 1.8; margin-bottom: 28px; }
-    .hero-img-wrap { border-radius: var(--radius); overflow: hidden; box-shadow: 0 10px 25px rgba(197, 155, 39, 0.15); margin-bottom: 28px; border: 2px solid #fff; }
-    .hero-img-wrap img { width: 100%; display: block; }
+    /* =========================================================
+       Center column
+       ========================================================= */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: var(--column);
+      margin: 0 auto;
+      background: #fff;
+      min-height: 100vh;
+      box-shadow: 0 0 60px rgba(43, 65, 160, .12);
+    }
 
-    /* Buttons */
-    .btn-cta { display: block; width: 100%; max-width: 400px; margin: 0 auto 12px; background: linear-gradient(135deg, #d4af37, #aa820a); color: #fff; text-decoration: none; padding: 18px 20px; border-radius: 40px; font-size: 16px; font-weight: 800; text-align: center; box-shadow: 0 6px 16px rgba(197, 155, 39, 0.4); border: none; cursor: pointer; transition: transform 0.1s; }
-    .btn-cta:active { transform: scale(0.98); }
-    .btn-cta[disabled] { background: #d8d2c4; box-shadow: none; cursor: not-allowed; }
-    .btn-ghost { display: block; width: 100%; background: #fff; color: var(--primary-dark); border: 2px solid var(--primary); padding: 12px 16px; border-radius: 30px; font-size: 13px; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; margin-bottom: 10px; }
-    .btn-sub { display: inline-block; color: var(--text-muted); font-size: 13px; text-decoration: underline; margin-top: 6px; }
+    /* =========================================================
+       Desktop side panels
+       ========================================================= */
+    .side-nav, .side-qr { display: none; }
+    @media (min-width: 1180px) {
+      .side-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        position: fixed;
+        left: calc(50% - 480px);
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+        width: 150px;
+      }
+      .side-nav a {
+        font-size: 13px;
+        color: #3B4573;
+        text-decoration: none;
+        letter-spacing: .04em;
+        opacity: .78;
+        transition: opacity .2s, color .2s;
+      }
+      .side-nav a:hover { opacity: 1; color: var(--blue); }
+      .side-qr {
+        display: block;
+        position: fixed;
+        right: calc(50% - 470px);
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+        width: 200px;
+        text-align: center;
+      }
+      .side-qr .sq-logo { font-size: 18px; font-weight: 800; letter-spacing: .10em; color: #2A3153; }
+      .side-qr .sq-logo small { display: block; font-size: 8px; letter-spacing: .22em; color: #8B94B8; margin-top: 4px; }
+      .side-qr .sq-qr { width: 132px; height: 132px; margin: 16px auto 12px; padding: 8px; background: #fff; border-radius: 10px; box-shadow: 0 6px 18px rgba(43,65,160,.10); }
+      .side-qr p { font-size: 11px; color: #5C6488; line-height: 1.8; }
+      .side-qr .sq-url { font-size: 9.5px; color: #8B94B8; word-break: break-all; margin-top: 6px; }
+    }
 
-    /* Problems */
-    .problems-bg { background: var(--bg-soft); }
-    .problem-card { background: #fff; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; border: 1px solid #eee; display: flex; align-items: flex-start; gap: 14px; }
-    .problem-icon { font-size: 24px; flex-shrink: 0; line-height: 1; }
-    .problem-text h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: #d9534f; }
-    .problem-text p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    /* =========================================================
+       Sticky top bar
+       ========================================================= */
+    .topbar {
+      position: sticky; top: 0; z-index: 40;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; padding: 12px 18px;
+      background: rgba(255, 255, 255, .93);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(230, 233, 245, .9);
+    }
+    .logo { text-decoration: none; line-height: 1; display: flex; flex-direction: column; }
+    .logo b { font-size: 19px; font-weight: 800; letter-spacing: .04em; color: #1B2333; }
+    .logo span { font-size: 7.5px; font-weight: 700; letter-spacing: .2em; color: #9AA2C0; margin-top: 4px; }
+    .topbar-actions { display: flex; align-items: center; gap: 8px; }
+    .topbar-link { display: none; font-size: 12px; font-weight: 700; color: #4A5375; text-decoration: none; }
+    @media (min-width: 380px) { .topbar-link { display: inline-block; } }
+    .btn-top {
+      display: inline-block; background: var(--blue); color: #fff; text-decoration: none;
+      font-size: 12px; font-weight: 800; padding: 9px 18px; border-radius: 999px;
+      box-shadow: 0 5px 14px rgba(79, 109, 245, .32);
+    }
 
-    /* Features */
-    .feature-box { background: #fff; border: 1px solid var(--card-border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-    .feature-num { font-size: 12px; font-weight: 800; color: var(--primary); letter-spacing: 1px; margin-bottom: 6px; }
-    .feature-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; line-height: 1.4; }
-    .feature-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
-    .feature-tag { display: inline-block; background: var(--primary-light); color: var(--primary-dark); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-top: 10px; }
+    /* =========================================================
+       Hero
+       ========================================================= */
+    .hero-top { position: relative; background: #fff; padding-top: 14px; overflow: hidden; }
+    .hero-top::before {
+      content: ""; position: absolute; inset: 0 0 40% 0;
+      background: radial-gradient(120% 80% at 50% 0%, #F1F4FF 0%, rgba(255,255,255,0) 70%);
+    }
+    .collage { position: relative; display: flex; justify-content: center; gap: 10px; padding: 0 10px; }
+    .snap {
+      width: 82px; height: 100px; border-radius: 10px; border: 3px solid #fff;
+      background: #eee; box-shadow: 0 10px 22px rgba(43, 65, 160, .16);
+      overflow: hidden; position: relative;
+    }
+    .snap::before {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 13px;
+      background: #fff; z-index: 2;
+    }
+    .snap::after {
+      content: ""; position: absolute; left: 50%; bottom: 5px; width: 34px; height: 3px;
+      transform: translateX(-50%); border-radius: 2px; background: #DCE2F2; z-index: 3;
+    }
+    .snap::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(160deg, rgba(255,255,255,.45), rgba(255,255,255,0) 55%);
+    }
+    .snap:nth-child(1) { transform: rotate(-5deg) translateY(8px); }
+    .snap:nth-child(2) { transform: rotate(2deg) translateY(-2px); width: 90px; height: 108px; }
+    .snap:nth-child(3) { transform: rotate(5deg) translateY(10px); }
+    /* 写真に見立てたグラデーション */
+    .ph1 { background: radial-gradient(70% 55% at 50% 20%, rgba(255,255,255,.55), rgba(255,255,255,0) 72%), linear-gradient(165deg, #FBE2D2 0%, #E8A88C 55%, #C4785A 100%); }
+    .ph2 { background: radial-gradient(70% 55% at 50% 20%, rgba(255,255,255,.6), rgba(255,255,255,0) 72%), linear-gradient(165deg, #EEE6F9 0%, #C6B6E6 60%, #9E8BC9 100%); }
+    .ph3 { background: radial-gradient(70% 55% at 50% 20%, rgba(255,255,255,.55), rgba(255,255,255,0) 72%), linear-gradient(165deg, #FCEBCB 0%, #EFC17B 60%, #D5A254 100%); }
+    .ph4 { background: radial-gradient(70% 55% at 50% 20%, rgba(255,255,255,.5), rgba(255,255,255,0) 72%), linear-gradient(165deg, #DFEDE1 0%, #A6C4AC 60%, #7FA189 100%); }
+    .ph5 { background: radial-gradient(70% 55% at 50% 20%, rgba(255,255,255,.55), rgba(255,255,255,0) 72%), linear-gradient(165deg, #FAE1E7 0%, #DCA1AE 60%, #BE7E8C 100%); }
+    .ph6 { background: radial-gradient(70% 55% at 50% 20%, rgba(255,255,255,.55), rgba(255,255,255,0) 72%), linear-gradient(165deg, #E1E9FB 0%, #AFC2E8 60%, #8AA0CF 100%); }
+    .ph7 { background: radial-gradient(70% 55% at 50% 20%, rgba(255,255,255,.5), rgba(255,255,255,0) 72%), linear-gradient(165deg, #F6EEDF 0%, #DCC9A8 60%, #BFA684 100%); }
+    .ph8 { background: radial-gradient(70% 55% at 50% 20%, rgba(255,255,255,.5), rgba(255,255,255,0) 72%), linear-gradient(165deg, #E8E4F6 0%, #B7AEDC 60%, #8F86BF 100%); }
+    .ph9 { background: radial-gradient(70% 55% at 50% 20%, rgba(255,255,255,.5), rgba(255,255,255,0) 72%), linear-gradient(165deg, #F7E3D9 0%, #D9A892 60%, #B27F69 100%); }
 
-    /* Pricing */
-    .plan-card { background: #fff; border: 2px solid var(--primary); border-radius: var(--radius); padding: 28px 20px; position: relative; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(197, 155, 39, 0.12); }
-    .badge-pop { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; font-size: 12px; font-weight: 800; padding: 4px 16px; border-radius: 20px; white-space: nowrap; }
-    .price-name { font-size: 18px; font-weight: 800; text-align: center; margin-bottom: 4px; }
-    .price-num { font-size: 40px; font-weight: 800; color: var(--primary-dark); line-height: 1; text-align: center; margin: 14px 0 6px; }
-    .price-num small { font-size: 15px; font-weight: 700; }
-    .price-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; text-align: center; }
-    .price-list { text-align: left; border-top: 1px solid #eee; padding-top: 16px; }
-    .price-list li { list-style: none; font-size: 13px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 8px; }
-    .price-list li::before { content: "✔"; color: var(--primary); font-weight: bold; }
+    .hero-blue {
+      position: relative; margin-top: -14px; padding: 26px 20px 0;
+      color: #fff; text-align: center;
+      background:
+        radial-gradient(90% 60% at 15% 0%, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 60%),
+        linear-gradient(168deg, #6B8AFF 0%, #5B7CFA 32%, #4F6DF5 62%, #3E57D4 100%);
+      border-radius: 26px 26px 0 0;
+      overflow: hidden;
+    }
+    .hero-blue::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background-image: radial-gradient(rgba(255,255,255,.20) 1px, transparent 1px);
+      background-size: 22px 22px; opacity: .35;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,0) 55%);
+      -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,0) 55%);
+    }
 
-    /* Steps */
-    .step-item { display: flex; gap: 16px; margin-bottom: 20px; }
-    .step-badge { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .step-body h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-    .step-body p { font-size: 13px; color: var(--text-muted); }
+    /* スマホモックアップ */
+    .phones { position: relative; height: 296px; margin: 0 auto 2px; }
+    .phone {
+      position: absolute; top: 8px; width: 132px; height: 258px;
+      background: #10162B; border-radius: 20px; padding: 5px;
+      box-shadow: 0 20px 34px rgba(12, 22, 62, .34);
+    }
+    .phone-a { left: 50%; margin-left: -132px; transform: rotate(-7deg); z-index: 2; }
+    .phone-b { left: 50%; margin-left: 0; transform: rotate(6deg) translateY(16px); z-index: 1; }
+    .p-screen {
+      height: 100%; border-radius: 16px; background: #F8FAFF; overflow: hidden;
+      display: flex; flex-direction: column; color: #33405E; text-align: left;
+      padding-bottom: 6px;
+    }
+    .p-status { display: flex; justify-content: space-between; align-items: center; font-size: 5px; color: #7C87A6; padding: 5px 7px 3px; }
+    .p-notch { width: 40px; height: 5px; border-radius: 4px; background: #10162B; margin: 0 auto; }
+    .p-head { padding: 7px 8px 6px; }
+    .p-album { font-size: 7.5px; font-weight: 800; color: #26325A; letter-spacing: .02em; }
+    .p-date { font-size: 5px; color: #8B94B0; }
+    .p-tabs { display: flex; gap: 6px; padding: 0 8px 6px; border-bottom: 1px solid #E7EBF7; }
+    .p-tabs span { font-size: 5px; font-weight: 700; color: #9AA3BE; padding-bottom: 3px; }
+    .p-tabs span.on { color: var(--blue); border-bottom: 2px solid var(--blue); }
+    .p-label { font-size: 5px; font-weight: 700; color: #6B7794; padding: 8px 8px 3px; }
+    .p-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 0 8px; }
+    .p-cell { aspect-ratio: 1 / 1; border-radius: 4px; }
+    .p-grid.g2 { grid-template-columns: repeat(2, 1fr); gap: 4px; }
+    .p-grid.g2 .p-cell { aspect-ratio: 4 / 3; }
+    .p-field { margin: 6px 8px 0; height: 12px; border-radius: 4px; background: #fff; border: 1px solid #E4E9F6; }
+    .p-btn { margin: 6px 8px; padding: 6px 0; border-radius: 999px; background: var(--blue); color: #fff; font-size: 5.5px; font-weight: 800; text-align: center; box-shadow: 0 3px 8px rgba(79,109,245,.35); }
+    .p-shot { position: relative; margin: 2px 8px 6px; border-radius: 7px; height: 68px; overflow: hidden; background: linear-gradient(160deg, #F7E0D3, #C9907A 60%, #A76F5C); }
+    .p-play {
+      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      background: rgba(16, 22, 43, .6); color: #fff; font-size: 5px; font-weight: 700;
+      padding: 4px 7px; border-radius: 999px; white-space: nowrap;
+    }
+    .p-home { width: 34px; height: 3px; border-radius: 2px; background: #C9D1E4; margin: auto auto 2px; }
 
-    /* FAQ */
-    .faq-item { border-bottom: 1px solid #eee; padding: 16px 0; }
-    .faq-q { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; display: flex; gap: 8px; }
-    .faq-q::before { content: "Q"; color: var(--primary); font-weight: 800; }
-    .faq-a { font-size: 13px; color: var(--text-muted); line-height: 1.6; padding-left: 20px; }
+    /* 浮いている小さなパーツ */
+    .float-chip {
+      position: absolute; display: flex; align-items: center; gap: 5px;
+      background: #fff; border-radius: 999px; padding: 5px 9px 5px 5px;
+      font-size: 8px; font-weight: 800; color: #2C3A66; white-space: nowrap;
+      box-shadow: 0 8px 18px rgba(12, 22, 62, .20); z-index: 3;
+    }
+    .float-chip .fc-ico { width: 20px; height: 20px; border-radius: 50%; background: var(--blue-soft); display: flex; align-items: center; justify-content: center; }
+    .float-chip .fc-ico svg { width: 12px; height: 12px; }
+    .chip-qr { left: 4px; top: 14px; }
+    .chip-ss { right: 4px; top: 6px; }
+    .chip-zip { right: 10px; bottom: 26px; }
 
-    /* Purchase area */
-    .form-box { background: #fdfaf3; border: 1px solid var(--card-border); padding: 22px 18px; border-radius: var(--radius); margin-bottom: 12px; }
-    .form-box h4 { font-size: 15px; font-weight: 800; color: var(--primary-dark); margin-bottom: 6px; text-align: center; }
-    .form-lead { font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 16px; }
+    .hero-h1 {
+      position: relative; font-size: 26px; font-weight: 900; line-height: 1.5;
+      letter-spacing: .01em; margin: 10px 0 0; text-shadow: 0 2px 12px rgba(20, 30, 80, .18);
+    }
+    .hero-h1 em { font-style: normal; }
+    .hero-sub {
+      position: relative; font-size: 12.5px; line-height: 1.95; margin: 12px 0 0;
+      color: rgba(255, 255, 255, .92);
+    }
+    .hero-sub strong { color: #fff; font-weight: 800; }
+    .hero-cta {
+      position: relative; display: flex; align-items: center; justify-content: center;
+      gap: 8px; width: 100%; height: 54px; margin: 20px 0 10px;
+      background: #fff; color: var(--blue-dark); text-decoration: none;
+      border-radius: 999px; font-size: 15.5px; font-weight: 900;
+      box-shadow: 0 12px 26px rgba(12, 22, 62, .22);
+      transition: transform .12s;
+    }
+    .hero-cta:active { transform: scale(.985); }
+    .hero-cta .arrow { font-size: 13px; color: var(--blue-3); }
+    .hero-note { position: relative; font-size: 10.5px; color: rgba(255, 255, 255, .82); }
+    .hero-chips { position: relative; display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .hero-chips span {
+      font-size: 9.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+      background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .3); color: #fff;
+    }
+    .hero-wave { position: relative; display: block; width: calc(100% + 40px); max-width: none; height: 46px; margin: 22px -20px 0; color: #fff; }
+
+    /* =========================================================
+       Sections
+       ========================================================= */
+    .sec { padding: 36px 20px; scroll-margin-top: 68px; }
+    .sec--mist { background: var(--blue-mist); }
+    .sec--warm { background: var(--warm); }
+    .sec--soft { background: linear-gradient(180deg, #F7F9FF 0%, #FFFFFF 100%); }
+    .eyebrow {
+      display: block; text-align: center; font-size: 10.5px; font-weight: 900;
+      letter-spacing: .2em; color: var(--blue); margin-bottom: 8px;
+    }
+    .h2 { font-size: 19.5px; font-weight: 900; line-height: 1.6; text-align: center; letter-spacing: .01em; }
+    .h2 em { font-style: normal; color: var(--blue); }
+    .lead { font-size: 12px; color: var(--muted); line-height: 1.9; text-align: center; margin-top: 10px; }
+
+    /* problem */
+    .pcard {
+      background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 16px; margin-top: 12px; box-shadow: var(--shadow-sm);
+    }
+    .pcard h3 { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: #2B3550; }
+    .pcard h3 .tag {
+      font-size: 9px; font-weight: 800; color: var(--blue); background: var(--blue-soft);
+      border-radius: 999px; padding: 2px 8px; letter-spacing: .02em;
+    }
+    .pcard ul { list-style: none; margin-top: 10px; display: flex; flex-direction: column; gap: 9px; }
+    .pcard li {
+      position: relative; font-size: 11.5px; line-height: 1.75; color: #4A5468; padding-left: 22px;
+    }
+    .pcard li::before {
+      content: "✓"; position: absolute; left: 0; top: 2px;
+      width: 15px; height: 15px; border-radius: 50%;
+      background: var(--blue-soft); border: 1px solid #CFDAFF;
+      font-size: 8px; line-height: 15px; text-align: center; color: var(--blue); font-weight: 900;
+    }
+    .resolve { text-align: center; margin-top: 24px; }
+    .resolve .r1 { font-size: 11.5px; color: var(--muted); letter-spacing: .08em; }
+    .resolve .r2 { font-size: 23px; font-weight: 900; line-height: 1.5; margin-top: 2px; }
+    .resolve .r2 span {
+      background: linear-gradient(transparent 62%, #D6E0FF 62%);
+      padding: 0 2px; color: var(--blue-dark);
+    }
+
+    /* features */
+    .fcard {
+      background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg);
+      padding: 18px; margin-top: 14px; box-shadow: var(--shadow-sm);
+    }
+    .fcard .num {
+      font-size: 10px; font-weight: 900; letter-spacing: .16em; color: var(--blue);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .fcard .num i { font-style: normal; color: #C2CDF5; }
+    .fcard .num u { text-decoration: none; color: #8D99C2; font-size: 9.5px; }
+    .fcard h3 { font-size: 16px; font-weight: 900; line-height: 1.55; margin: 8px 0 8px; }
+    .fcard p { font-size: 12px; color: var(--muted); line-height: 1.9; }
+    .ui {
+      margin-top: 16px; padding: 14px 12px; border-radius: 14px;
+      background: linear-gradient(160deg, #F3F6FF 0%, #FAFBFF 100%);
+      border: 1px solid #E4EAF9;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .ui-note { font-size: 8.5px; color: #7C86A5; font-weight: 700; }
+
+    .ui-qr { width: 62px; height: 62px; padding: 5px; background: #fff; border-radius: 9px; box-shadow: 0 4px 12px rgba(43,65,160,.12); flex: 0 0 auto; }
+    .ui-qr svg { width: 100%; height: 100%; }
+    .ui-arrow { font-size: 12px; color: #B9C5EE; }
+    .ui-phone { width: 44px; height: 66px; border-radius: 9px; background: #10162B; padding: 2.5px; flex: 0 0 auto; box-shadow: 0 6px 14px rgba(12,22,62,.22); }
+    .ui-phone > div { height: 100%; border-radius: 7px; background: #F8FAFF; display: flex; flex-direction: column; gap: 2px; padding: 4px 3px; }
+    .ui-phone .l { height: 4px; border-radius: 2px; background: #DDE4F7; }
+    .ui-phone .g { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+    .ui-phone .g i { border-radius: 2px; display: block; }
+
+    .ui-price { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .ui-price b { font-size: 26px; font-weight: 900; color: var(--blue); line-height: 1; }
+    .ui-price b small { font-size: 10px; font-weight: 800; }
+    .ui-price span { font-size: 8.5px; font-weight: 800; color: #6B7797; background: #fff; border: 1px solid #E1E8F9; border-radius: 999px; padding: 2px 8px; }
+
+    .ui-photo { position: relative; width: 78px; height: 58px; border-radius: 9px; overflow: hidden; flex: 0 0 auto; box-shadow: 0 4px 12px rgba(43,65,160,.14); }
+    .ui-photo b { position: absolute; left: 4px; bottom: 4px; font-size: 7px; font-weight: 800; color: #fff; background: rgba(16,22,43,.62); border-radius: 4px; padding: 1px 4px; }
+
+    .ui-files { display: flex; flex-direction: column; gap: 4px; }
+    .ui-files span { font-size: 7.5px; font-weight: 700; color: #5C6890; background: #fff; border: 1px solid #E4EAF9; border-radius: 5px; padding: 2px 6px; }
+    .ui-zipbtn { font-size: 8px; font-weight: 900; color: #fff; background: var(--green); border-radius: 999px; padding: 5px 10px; box-shadow: 0 4px 10px rgba(16,185,129,.3); white-space: nowrap; }
+
+    /* comparison */
+    .cmp { margin-top: 16px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
+    table.cmp-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 10px; }
+    table.cmp-table th, table.cmp-table td { padding: 9px 3px; text-align: center; border-bottom: 1px solid #EFF2FA; line-height: 1.45; vertical-align: middle; }
+    table.cmp-table thead th { font-size: 9.5px; font-weight: 800; color: #5B6480; background: #F8FAFF; padding: 10px 2px; }
+    table.cmp-table thead th.me { background: var(--blue); color: #fff; }
+    table.cmp-table thead th.me small { display: block; font-size: 7px; font-weight: 700; opacity: .85; letter-spacing: .06em; }
+    table.cmp-table th:first-child, table.cmp-table td:first-child {
+      text-align: left; font-size: 10px; font-weight: 800; color: #39425C;
+      padding-left: 10px; width: 27%; background: #fff;
+    }
+    table.cmp-table td.me { background: #F5F8FF; color: var(--blue-dark); font-weight: 900; }
+    table.cmp-table tbody tr:last-child th, table.cmp-table tbody tr:last-child td { border-bottom: none; }
+    .ok { color: var(--green-dark); font-weight: 900; font-size: 10.5px; }
+    .cond { color: #E09B2D; font-weight: 900; font-size: 10.5px; }
+    .no { color: #C7CDDC; font-weight: 900; font-size: 10.5px; }
+    .cmp-legend { display: flex; justify-content: center; gap: 12px; margin-top: 10px; font-size: 9px; color: #8A93AD; }
+    .cmp-note { font-size: 9px; color: #9AA2B8; line-height: 1.7; margin-top: 8px; text-align: center; }
+
+    /* pricing */
+    .plan {
+      position: relative; margin-top: 22px; background: #fff; border: 2px solid var(--blue);
+      border-radius: var(--radius-lg); padding: 24px 18px 20px;
+      box-shadow: 0 16px 36px rgba(79, 109, 245, .16);
+    }
+    .plan .badge {
+      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+      background: var(--blue); color: #fff; font-size: 10px; font-weight: 900;
+      padding: 5px 14px; border-radius: 999px; white-space: nowrap;
+      box-shadow: 0 6px 14px rgba(79, 109, 245, .34);
+    }
+    .plan .pname { text-align: center; font-size: 12px; font-weight: 800; color: #5C6890; letter-spacing: .04em; }
+    .price { text-align: center; font-size: 46px; font-weight: 900; line-height: 1.1; color: var(--blue-dark); letter-spacing: -.02em; margin: 6px 0 2px; }
+    .price small { font-size: 12px; font-weight: 800; color: #6B7797; letter-spacing: 0; }
+    .price-sub { text-align: center; font-size: 10.5px; color: var(--muted); }
+    .plist { list-style: none; margin-top: 16px; padding-top: 16px; border-top: 1px dashed #DCE4F8; display: flex; flex-direction: column; gap: 8px; }
+    .plist li { position: relative; font-size: 11.5px; line-height: 1.7; color: #3E4863; padding-left: 20px; }
+    .plist li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--green); font-weight: 900; }
+
+    /* steps */
+    .tabs { display: flex; gap: 4px; margin: 18px 0 4px; padding: 4px; background: #EBF0FD; border-radius: 999px; }
+    .tabbtn {
+      flex: 1; border: none; background: transparent; cursor: pointer; font-family: inherit;
+      font-size: 12px; font-weight: 800; color: #6D7796; padding: 9px 0; border-radius: 999px;
+      transition: background .2s, color .2s, box-shadow .2s;
+    }
+    .tabbtn[aria-selected="true"] { background: #fff; color: var(--blue-dark); box-shadow: 0 3px 10px rgba(43,65,160,.12); }
+    .step { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px dashed #E7EBF7; }
+    .step:last-child { border-bottom: none; }
+    .step .n {
+      flex: 0 0 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      background: var(--blue-soft); border: 1px solid #D3DDFF; color: var(--blue); font-size: 12.5px; font-weight: 900;
+    }
+    .step h4 { font-size: 13px; font-weight: 800; margin-bottom: 3px; }
+    .step p { font-size: 11.5px; color: var(--muted); line-height: 1.8; }
+    .steps-panel[hidden] { display: none; }
+
+    /* security */
+    .sec-items { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .sec-item { display: flex; gap: 12px; align-items: flex-start; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; box-shadow: var(--shadow-sm); }
+    .sec-item .ico { flex: 0 0 34px; height: 34px; border-radius: 10px; background: var(--blue-soft); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+    .sec-item h4 { font-size: 12.5px; font-weight: 800; margin-bottom: 3px; }
+    .sec-item p { font-size: 11px; color: var(--muted); line-height: 1.75; }
+
+    /* faq */
+    .faq { border-bottom: 1px solid #E8ECF8; }
+    .faq summary {
+      list-style: none; cursor: pointer; display: flex; align-items: flex-start; gap: 9px;
+      padding: 15px 0; font-size: 12.5px; font-weight: 800; color: #2B3550; line-height: 1.6;
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary .qmark { color: var(--blue); font-weight: 900; flex: 0 0 auto; }
+    .faq summary .plus { position: relative; flex: 0 0 14px; width: 14px; height: 14px; margin-top: 3px; margin-left: auto; }
+    .faq summary .plus::before, .faq summary .plus::after {
+      content: ""; position: absolute; background: var(--blue); border-radius: 2px; transition: transform .2s;
+    }
+    .faq summary .plus::before { left: 0; top: 6px; width: 14px; height: 1.8px; }
+    .faq summary .plus::after { left: 6px; top: 0; width: 1.8px; height: 14px; }
+    .faq[open] summary .plus::after { transform: rotate(90deg); }
+    .faq .a { font-size: 11.5px; color: var(--muted); line-height: 1.9; padding: 0 24px 16px 20px; }
+    .faq .a strong { color: #3E4863; }
+
+    /* purchase area */
+    .buy-lead {
+      margin-top: 16px; padding: 12px 14px; border-radius: 12px;
+      background: var(--blue-soft); border: 1px solid #DCE4FF;
+      font-size: 11px; color: #40507F; line-height: 1.8; text-align: center;
+    }
+    .fbox { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-top: 14px; box-shadow: var(--shadow); }
+    .fbox h4 { font-size: 14px; font-weight: 900; color: var(--blue-dark); text-align: center; }
+    .fbox .fleada { font-size: 10.5px; color: var(--muted); text-align: center; margin: 4px 0 16px; }
     .field { margin-bottom: 12px; }
-    .field label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
-    .field input, .field textarea { width: 100%; padding: 11px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; background: #fff; font-family: inherit; }
-    .field textarea { height: 70px; resize: vertical; }
-    .small-note { font-size: 11px; color: var(--text-muted); text-align: center; line-height: 1.6; }
-    .small-note a { color: var(--primary-dark); }
-    .notice-box { background: #fff4e5; border: 1px solid #f0d9b5; border-radius: var(--radius); padding: 20px 18px; margin-bottom: 14px; text-align: center; }
-    .notice-box .notice-title { font-size: 15px; font-weight: 800; color: #a26b13; margin-bottom: 6px; }
-    .notice-box p { font-size: 12px; color: #7a6236; line-height: 1.7; }
-    .result-box { display: none; background: #fff; border: 2px solid var(--primary); border-radius: var(--radius); padding: 22px 18px; }
-    .result-box .result-emoji { font-size: 30px; text-align: center; margin-bottom: 4px; }
-    .result-box h4 { font-size: 17px; font-weight: 800; color: var(--primary-dark); margin-bottom: 6px; text-align: center; }
-    .result-box .result-lead { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; text-align: center; }
+    .field label { display: block; font-size: 10.5px; font-weight: 800; color: #39425C; margin-bottom: 5px; }
+    .field input, .field textarea {
+      width: 100%; padding: 12px 14px; border: 1px solid #DCE2F2; border-radius: 12px;
+      font-size: 14px; font-family: inherit; background: #FBFCFE; color: var(--text); outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .field input:focus, .field textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(79,109,245,.13); background: #fff; }
+    .field textarea { height: 74px; resize: vertical; }
+    .btn-cta {
+      display: block; width: 100%; border: none; cursor: pointer; font-family: inherit;
+      background: linear-gradient(135deg, #5B7CFA 0%, #4F6DF5 55%, #3F5AE0 100%);
+      color: #fff; padding: 17px 18px; border-radius: 999px;
+      font-size: 14.5px; font-weight: 900; text-align: center; text-decoration: none;
+      box-shadow: 0 10px 22px rgba(79, 109, 245, .32);
+      transition: transform .12s;
+    }
+    .btn-cta:active { transform: scale(.985); }
+    .btn-cta[disabled] { background: #C8D1E8; box-shadow: none; cursor: not-allowed; }
+    .btn-ghost {
+      display: block; width: 100%; background: #fff; color: var(--blue-dark);
+      border: 1.5px solid #C9D5FF; padding: 11px 14px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 800; cursor: pointer; text-align: center; text-decoration: none;
+      font-family: inherit;
+    }
+    .btn-sub { display: inline-block; font-size: 11px; color: var(--muted); text-decoration: underline; }
+    .small-note { font-size: 10px; color: var(--muted); text-align: center; line-height: 1.75; }
+    .small-note a { color: var(--blue-dark); }
+    .notice-box {
+      display: none; background: #FFF9EC; border: 1px solid #F3DFB4; border-radius: var(--radius);
+      padding: 20px 16px; margin-top: 14px; text-align: center;
+    }
+    .notice-box .notice-title { font-size: 13.5px; font-weight: 900; color: #94651A; margin-bottom: 6px; }
+    .notice-box p { font-size: 11px; color: #7A6236; line-height: 1.8; }
+    .result-box { display: none; margin-top: 14px; background: #fff; border: 2px solid var(--blue); border-radius: var(--radius); padding: 20px 16px; box-shadow: var(--shadow); }
+    .result-box .result-emoji { font-size: 26px; text-align: center; margin-bottom: 2px; }
+    .result-box h4 { font-size: 15.5px; font-weight: 900; color: var(--blue-dark); text-align: center; margin-bottom: 5px; }
+    .result-box .result-lead { font-size: 11px; color: var(--muted); line-height: 1.8; text-align: center; margin-bottom: 16px; }
     .url-block { margin-bottom: 14px; }
-    .url-block .url-label { font-size: 12px; font-weight: 800; color: var(--primary-dark); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
-    .url-block .url-label span.tag { font-size: 10px; background: var(--primary-light); border: 1px solid var(--card-border); border-radius: 10px; padding: 2px 8px; color: #8a7440; font-weight: 700; }
-    .url-text { background: #f9f9f9; border: 1px dashed #c59b27; padding: 10px; border-radius: 8px; font-size: 11px; word-break: break-all; color: #333; line-height: 1.5; }
-    .url-block .hint { font-size: 10px; color: #999; margin-top: 4px; line-height: 1.5; }
-    .warn-box { background: #fff8f6; border: 1px solid #f3cbc0; border-radius: 10px; padding: 1px 12px 8px; margin-top: 14px; }
-    .warn-box p { font-size: 11px; color: #a4523c; line-height: 1.6; }
+    .url-block .url-label { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; font-weight: 900; color: var(--blue-dark); margin-bottom: 5px; }
+    .url-block .url-label .tag { font-size: 9px; font-weight: 800; color: #5C6890; background: var(--blue-soft); border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+    .url-text { background: #F8FAFF; border: 1px dashed #B9C8F7; padding: 10px; border-radius: 10px; font-size: 10px; word-break: break-all; color: #33405E; line-height: 1.6; }
+    .url-block .hint { font-size: 9.5px; color: #8A93AD; margin-top: 5px; line-height: 1.6; }
+    .warn-box { background: #FFF6F4; border: 1px solid #F3CEC5; border-radius: 12px; padding: 10px 12px; margin-top: 14px; }
+    .warn-box p { font-size: 10px; color: #A4523C; line-height: 1.8; }
+    .restore-wrap { text-align: center; margin-top: 14px; }
+    .restore-btn { background: none; border: none; color: #8A93AD; font-size: 10.5px; text-decoration: underline; cursor: pointer; font-family: inherit; }
+    .restore-box { display: none; margin-top: 12px; background: #F8FAFF; border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+    .restore-box p { font-size: 10.5px; color: #55607E; line-height: 1.8; }
+    .restore-box code { background: #fff; border: 1px solid #E4E9F6; border-radius: 4px; padding: 0 4px; font-size: 10px; }
 
-    /* Footer */
-    .footer { text-align: center; padding: 40px 20px; background: #fff9ee; border-top: 1px solid var(--card-border); }
-    .footer p { font-size: 12px; color: var(--text-muted); }
-    .footer-links { display: flex; flex-wrap: wrap; gap: 10px 16px; justify-content: center; margin: 16px 0 18px; }
-    .footer-links a { font-size: 12px; color: var(--primary-dark); text-decoration: underline; }
+    /* footer */
+    .footer { background: #F4F6FC; border-top: 1px solid var(--line); padding: 34px 20px 26px; text-align: center; }
+    .footer .f-logo { font-size: 17px; font-weight: 900; letter-spacing: .04em; color: #2A3153; }
+    .footer .f-copy-sub { font-size: 7.5px; letter-spacing: .2em; color: #9AA2C0; margin-top: 4px; }
+    .footer .f-msg { font-size: 12px; color: #4A5468; line-height: 1.9; margin: 16px 0 18px; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 8px 14px; justify-content: center; margin: 16px 0; }
+    .footer-links a { font-size: 10.5px; color: #5C6890; text-decoration: underline; }
+    .footer .f-org { font-size: 10px; color: #8A93AD; }
+    .footer .f-cr { font-size: 9.5px; color: #A2AAC0; margin-top: 4px; }
+
+    /* bottom floating bar */
+    .bottom-bar {
+      position: fixed; left: 50%; transform: translateX(-50%); bottom: 10px; z-index: 60;
+      display: flex; gap: 8px; width: calc(100% - 20px); max-width: 460px;
+      padding: 8px; border-radius: 16px;
+      background: rgba(255, 255, 255, .92);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(230, 233, 245, .9);
+      box-shadow: 0 12px 30px rgba(43, 65, 160, .20);
+      transition: opacity .25s, transform .25s;
+    }
+    .bottom-bar.is-hidden { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(140%); }
+    .bb-btn { display: flex; align-items: center; justify-content: center; gap: 4px; height: 46px; border-radius: 11px; font-size: 11.5px; font-weight: 900; text-decoration: none; }
+    .bb-1 { flex: 1; background: #fff; color: var(--blue-dark); border: 1.5px solid #C9D5FF; }
+    .bb-2 { flex: 1.18; background: linear-gradient(135deg, #5B7CFA, #4059DA); color: #fff; box-shadow: 0 6px 14px rgba(79,109,245,.32); }
+
+    @media (max-width: 380px) {
+      table.cmp-table { font-size: 9px; }
+      table.cmp-table th, table.cmp-table td { padding: 8px 2px; }
+      table.cmp-table th:first-child, table.cmp-table td:first-child { font-size: 9px; padding-left: 8px; width: 25%; }
+      table.cmp-table thead th { font-size: 8.5px; padding: 8px 1px; }
+      .ok, .cond, .no { font-size: 10px; }
+    }
+    @media (max-width: 360px) {
+      .hero-h1 { font-size: 23px; }
+      .phone { width: 120px; height: 240px; }
+      .phone-a { margin-left: -120px; }
+      .phones { height: 250px; }
+      .fcard h3 { font-size: 15px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <!-- HERO -->
-    <header class="hero">
-      <div class="badge-hero">💍 1組500円（税込）買い切り・広告なし</div>
-      <h1 class="hero-h1">
-        式場の写真共有、高すぎませんか？🥹<br>
-        <span class="highlight">QRコードを読み取るだけ。</span><br>
-        ゲストの写真が、その場でどんどん集まる。
-      </h1>
-      <p class="hero-sub">
-        メッセージアプリに送ってもらうと、画質が落ちてしまう。<br>
-        クラウドのアルバムは、ログインで年配のゲストが迷ってしまう。<br>
-        そんな声から生まれた、アプリも会員登録もいらない写真共有です。<br>
-        <strong style="color:#a17c18;">料金は、1組500円（税込）の買い切りだけ。</strong>
-      </p>
+  <div class="bg-deco" aria-hidden="true"><i></i><i></i></div>
 
-      <div class="hero-img-wrap">
-        <img src="https://i.imgur.com/BXSVJmk.png" alt="MarryPic アプリ画面イメージ">
+  <!-- ============ 左サイドナビ（PCのみ） ============ -->
+  <nav class="side-nav" aria-label="ページ内メニュー">
+    <a href="#top">トップ</a>
+    <a href="#problems">お悩み</a>
+    <a href="#features">特徴</a>
+    <a href="#compare">比較</a>
+    <a href="#pricing">料金</a>
+    <a href="#howto">使い方</a>
+    <a href="#security">安全性</a>
+    <a href="#faq">よくあるご質問</a>
+    <a href="legal.html" target="_blank" rel="noopener">利用規約</a>
+  </nav>
+
+  <!-- ============ 右サイド（PCのみ） ============ -->
+  <aside class="side-qr" aria-label="スマートフォンでのご利用案内">
+    <div class="sq-logo">MarryPic<small>WEDDING PHOTO SHARE</small></div>
+    <div class="sq-qr">
+      <svg class="qr-svg" viewBox="0 0 29 29" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MarryPicのQRコード"><rect width="29" height="29" fill="#fff"/><path d="M0 0h7v1h-7zM9 0h1v1h-1zM12 0h1v1h-1zM16 0h5v1h-5zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM11 1h3v1h-3zM15 1h2v1h-2zM18 1h1v1h-1zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h2v1h-2zM12 2h1v1h-1zM14 2h2v1h-2zM18 2h1v1h-1zM20 2h1v1h-1zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h3v1h-3zM12 3h2v1h-2zM17 3h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h2v1h-2zM11 4h1v1h-1zM13 4h1v1h-1zM16 4h1v1h-1zM19 4h2v1h-2zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM12 5h4v1h-4zM20 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM8 7h1v1h-1zM11 7h1v1h-1zM14 7h2v1h-2zM0 8h1v1h-1zM2 8h5v1h-5zM9 8h2v1h-2zM15 8h3v1h-3zM19 8h1v1h-1zM22 8h5v1h-5zM1 9h1v1h-1zM4 9h2v1h-2zM7 9h1v1h-1zM12 9h2v1h-2zM16 9h1v1h-1zM18 9h7v1h-7zM28 9h1v1h-1zM0 10h1v1h-1zM3 10h1v1h-1zM5 10h3v1h-3zM11 10h8v1h-8zM20 10h4v1h-4zM1 11h4v1h-4zM7 11h2v1h-2zM10 11h1v1h-1zM12 11h2v1h-2zM15 11h1v1h-1zM18 11h6v1h-6zM25 11h1v1h-1zM27 11h1v1h-1zM0 12h1v1h-1zM2 12h1v1h-1zM5 12h2v1h-2zM8 12h1v1h-1zM12 12h1v1h-1zM14 12h1v1h-1zM16 12h3v1h-3zM25 12h2v1h-2zM0 13h1v1h-1zM2 13h1v1h-1zM4 13h1v1h-1zM7 13h1v1h-1zM9 13h1v1h-1zM16 13h5v1h-5zM22 13h3v1h-3zM28 13h1v1h-1zM0 14h3v1h-3zM4 14h3v1h-3zM10 14h1v1h-1zM12 14h1v1h-1zM15 14h1v1h-1zM17 14h1v1h-1zM24 14h3v1h-3zM0 15h1v1h-1zM2 15h2v1h-2zM8 15h1v1h-1zM10 15h1v1h-1zM14 15h1v1h-1zM18 15h3v1h-3zM27 15h1v1h-1zM2 16h1v1h-1zM5 16h7v1h-7zM15 16h3v1h-3zM19 16h1v1h-1zM21 16h1v1h-1zM23 16h1v1h-1zM25 16h2v1h-2zM0 17h5v1h-5zM7 17h1v1h-1zM10 17h1v1h-1zM12 17h3v1h-3zM16 17h4v1h-4zM21 17h4v1h-4zM26 17h1v1h-1zM28 17h1v1h-1zM0 18h1v1h-1zM3 18h1v1h-1zM6 18h1v1h-1zM8 18h1v1h-1zM10 18h1v1h-1zM13 18h3v1h-3zM18 18h1v1h-1zM20 18h1v1h-1zM22 18h2v1h-2zM26 18h1v1h-1zM0 19h1v1h-1zM4 19h2v1h-2zM7 19h2v1h-2zM10 19h1v1h-1zM13 19h1v1h-1zM19 19h1v1h-1zM23 19h1v1h-1zM27 19h1v1h-1zM0 20h1v1h-1zM6 20h1v1h-1zM8 20h3v1h-3zM14 20h4v1h-4zM20 20h5v1h-5zM26 20h3v1h-3zM8 21h2v1h-2zM11 21h2v1h-2zM16 21h5v1h-5zM24 21h5v1h-5zM0 22h7v1h-7zM9 22h2v1h-2zM12 22h1v1h-1zM15 22h3v1h-3zM19 22h2v1h-2zM22 22h1v1h-1zM24 22h3v1h-3zM0 23h1v1h-1zM6 23h1v1h-1zM8 23h1v1h-1zM10 23h3v1h-3zM14 23h2v1h-2zM19 23h2v1h-2zM24 23h1v1h-1zM27 23h2v1h-2zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM8 24h1v1h-1zM10 24h2v1h-2zM15 24h1v1h-1zM17 24h2v1h-2zM20 24h5v1h-5zM26 24h1v1h-1zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM8 25h1v1h-1zM13 25h2v1h-2zM16 25h3v1h-3zM25 25h4v1h-4zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM8 26h1v1h-1zM10 26h2v1h-2zM13 26h1v1h-1zM15 26h3v1h-3zM21 26h7v1h-7zM0 27h1v1h-1zM6 27h1v1h-1zM9 27h1v1h-1zM12 27h5v1h-5zM19 27h2v1h-2zM22 27h1v1h-1zM24 27h2v1h-2zM27 27h1v1h-1zM0 28h7v1h-7zM8 28h7v1h-7zM17 28h1v1h-1zM19 28h1v1h-1zM22 28h1v1h-1zM25 28h2v1h-2z" fill="#111"/></svg>
+    </div>
+    <p>MarryPicはスマートフォンでの<br>ご利用を推奨しています。</p>
+    <div class="sq-url">xoxoju-ops.github.io/marrypic/</div>
+  </aside>
+
+  <main class="page" id="top">
+
+    <!-- ============ ヘッダー ============ -->
+    <header class="topbar">
+      <a class="logo" href="#top">
+        <b>MarryPic</b>
+        <span>WEDDING PHOTO SHARE</span>
+      </a>
+      <div class="topbar-actions">
+        <a class="topbar-link" href="#howto">使い方</a>
+        <a class="btn-top" href="#purchase">はじめる</a>
       </div>
-
-      <a href="#purchase" class="btn-cta">💍 500円でアルバムを発行する</a>
-      <a href="app.html" target="_blank" class="btn-sub">📱 スマホで動くデモ画面を試す →</a>
     </header>
 
-    <!-- PROBLEMS -->
-    <section class="section problems-bg">
-      <h2 class="section-title">
-        <span>PROBLEMS</span>
-        結婚式の写真集め、こんな悩みありませんか？
-      </h2>
-
-      <div class="problem-card">
-        <div class="problem-icon">📉</div>
-        <div class="problem-text">
-          <h4>メッセージアプリに送ると、写真の画質が落ちてしまう</h4>
-          <p>せっかく友人がiPhoneできれいに撮ってくれたのに、トークやアルバムに送ると画質が粗くなってしまう…。撮ってくれた写真を、きれいなまま残せないのがもったいない。</p>
-        </div>
+    <!-- ============ HERO ============ -->
+    <section class="hero-top">
+      <div class="collage" aria-hidden="true">
+        <div class="snap ph1"></div>
+        <div class="snap ph2"></div>
+        <div class="snap ph3"></div>
       </div>
 
-      <div class="problem-card">
-        <div class="problem-icon">👵</div>
-        <div class="problem-text">
-          <h4>クラウドのアルバムは、親族や年配のゲストがログインでつまずく</h4>
-          <p>「アカウントを作ってログインしてください」とお願いしても、機械が苦手な親世代や友人が「使い方がわからない」と途中で諦めてしまいます。</p>
-        </div>
-      </div>
+      <div class="hero-blue">
+        <div class="phones" aria-hidden="true">
+          <div class="float-chip chip-qr">
+            <span class="fc-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#4F6DF5" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14h1M14 20h3M20 19h1"/></svg>
+            </span>招待QR
+          </div>
+          <div class="float-chip chip-ss">
+            <span class="fc-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#4F6DF5" stroke-width="2.2"><path d="M4 6h16v12H4z" rx="2"/><path d="M10 9.5l5 2.5-5 2.5z" fill="#4F6DF5" stroke="none"/></svg>
+            </span>スライドショー
+          </div>
+          <div class="float-chip chip-zip">
+            <span class="fc-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#4F6DF5" stroke-width="2.2"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M12 10v5M9.5 12.5L12 15l2.5-2.5"/></svg>
+            </span>ZIP保存
+          </div>
 
-      <div class="problem-card">
-        <div class="problem-icon">💸</div>
-        <div class="problem-text">
-          <h4>式場の写真共有サービスは、見積もりに入れると数万円</h4>
-          <p>「写真をスクリーンに映す演出」を式場の見積もりに入れると、数万円〜十数万円することも…。節約したい結婚式準備では、そのまま諦めてしまうカップルが少なくありません。</p>
+          <!-- ゲスト：写真送信画面 -->
+          <div class="phone phone-a">
+            <div class="p-screen">
+              <div class="p-notch"></div>
+              <div class="p-status"><span>9:41</span><span>●●●</span></div>
+              <div class="p-head">
+                <div class="p-album">Taro &amp; Hanako</div>
+                <div class="p-date">2027.05.22</div>
+              </div>
+              <div class="p-tabs"><span class="on">写真を送る</span><span>みんなの写真</span></div>
+              <div class="p-label">カメラロールから選ぶ</div>
+              <div class="p-grid">
+                <div class="p-cell ph1"></div><div class="p-cell ph5"></div><div class="p-cell ph3"></div>
+                <div class="p-cell ph4"></div><div class="p-cell ph7"></div><div class="p-cell ph2"></div>
+                <div class="p-cell ph9"></div><div class="p-cell ph6"></div><div class="p-cell ph8"></div>
+              </div>
+              <div class="p-field"></div>
+              <div class="p-field"></div>
+              <div class="p-btn">アルバムへ送信する</div>
+            </div>
+          </div>
+
+          <!-- ギャラリー画面 -->
+          <div class="phone phone-b">
+            <div class="p-screen">
+              <div class="p-notch"></div>
+              <div class="p-status"><span>9:41</span><span>●●●</span></div>
+              <div class="p-label">みんなの写真</div>
+              <div class="p-shot">
+                <div class="p-play">▶ 自動スライドショー</div>
+              </div>
+              <div class="p-grid g2">
+                <div class="p-cell ph5"></div><div class="p-cell ph1"></div>
+                <div class="p-cell ph3"></div><div class="p-cell ph6"></div>
+                <div class="p-cell ph7"></div><div class="p-cell ph4"></div>
+              </div>
+              <div class="p-home"></div>
+            </div>
+          </div>
         </div>
+
+        <h1 class="hero-h1">結婚式の写真、<br>ぜんぶここに、ひとつに。</h1>
+        <p class="hero-sub">
+          面倒な登録なし、だから集まる。<br>
+          QRコードを読み取って、その場でシェア。<br>
+          <strong>料金は1組500円（税込）の買い切りだけ。</strong>
+        </p>
+        <a class="hero-cta" href="#purchase">500円ではじめる <span class="arrow">›</span></a>
+        <p class="hero-note">追加料金なし・広告なし・自動更新なし</p>
+        <div class="hero-chips">
+          <span>アプリ不要</span>
+          <span>会員登録不要</span>
+          <span>写真は最大100枚</span>
+        </div>
+        <svg class="hero-wave" viewBox="0 0 480 60" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,36 C96,8 170,2 248,16 C326,30 396,46 480,24 L480,60 L0,60 Z" fill="#ffffff"/>
+        </svg>
       </div>
     </section>
 
-    <!-- SOLUTION / FEATURES -->
-    <section class="section">
-      <h2 class="section-title">
-        <span>WHY MARRYPIC</span>
-        MarryPic（マリピク）が選ばれる4つの理由
-      </h2>
+    <!-- ============ PROBLEM ============ -->
+    <section class="sec sec--soft" id="problems">
+      <span class="eyebrow">PROBLEM</span>
+      <h2 class="h2">結婚式の写真集め、<br>こんなお悩みありませんか？</h2>
 
-      <div class="feature-box">
-        <div class="feature-num">POINT 01</div>
-        <h3 class="feature-title">アプリ・会員登録 一切不要！<br>QRコードを読み取って選ぶだけ</h3>
-        <p class="feature-desc">
-          ゲストはテーブルの席札や案内カードのQRコードをカメラで読み取るだけ。専用アプリのダウンロードも、面倒な会員登録もいりません。開いたページでカメラロールから写真を選び、お名前とメッセージを添えて送る。それだけで完了です。
-        </p>
-        <div class="feature-tag">アプリ不要 · 登録不要</div>
+      <div class="pcard">
+        <h3><span class="tag">プレ花嫁</span>準備中のお悩み</h3>
+        <ul>
+          <li>式場の写真共有サービスは、見積もりに入れると数万円になってしまう。</li>
+          <li>ゲストに案内する方法が難しそうで、当日バタバタしそう。</li>
+          <li>アプリのインストールや会員登録をお願いするのは、少し気が引ける。</li>
+        </ul>
       </div>
 
-      <div class="feature-box">
-        <div class="feature-num">POINT 02</div>
-        <h3 class="feature-title">集まった写真は、その場で<br>自動スライドショー再生</h3>
-        <p class="feature-desc">
-          アルバムに写真が届くと「みんなの写真」に一覧で並び、自動再生のスライドショーで見られます。送ってくれたゲストのお名前とお祝いメッセージも一緒に表示されるので、乾杯前の待ち時間にも写真の話題で盛り上がれます。
-        </p>
-        <div class="feature-tag">自動スライドショー · メッセージ付き</div>
+      <div class="pcard">
+        <h3><span class="tag">卒花嫁</span>挙式後のお悩み</h3>
+        <ul>
+          <li>せっかく撮ってくれたのに、集まった写真がほんの一部だけだった。</li>
+          <li>メッセージアプリで送ってもらうと、画質が粗くなってしまう。</li>
+          <li>保存期間が過ぎて、アルバムが見られなくなってしまった。</li>
+        </ul>
       </div>
 
-      <div class="feature-box">
-        <div class="feature-num">POINT 03</div>
-        <h3 class="feature-title">1枚ずつも、まとめても。<br>集めた写真をそのまま保存</h3>
-        <p class="feature-desc">
-          新郎新婦の管理画面から、気に入った写真を1枚ずつ保存することも、ZIPファイルにまとめて一括ダウンロードすることもできます。iPhoneでもパソコンでも、集めた写真をそのまま手元に残せます。
-        </p>
-        <div class="feature-tag">ZIP一括ダウンロード対応</div>
-      </div>
-
-      <div class="feature-box">
-        <div class="feature-num">POINT 04</div>
-        <h3 class="feature-title">印刷して置くだけの<br>卓上QR案内カードつき</h3>
-        <p class="feature-desc">
-          「当日どうやってゲストにQRコードを配るの？」という準備の手間も不要。アルバムを作ると、おふたりのお名前・挙式日・QRコードが入った卓上案内カードが管理画面に表示され、そのまま印刷して各テーブルに置けます。
-        </p>
-        <div class="feature-tag">準備は印刷して置くだけ</div>
-      </div>
+      <p class="resolve">
+        <span class="r1">そのお悩み、</span><br>
+        <span class="r2">MarryPicで<br><span>すべて解決</span>！</span>
+      </p>
     </section>
 
-    <!-- PRICING & PURCHASE -->
-    <section class="section problems-bg" id="purchase">
-      <h2 class="section-title">
-        <span>PRICING</span>
-        料金は、この1プランだけ
-      </h2>
+    <!-- ============ FEATURES ============ -->
+    <section class="sec" id="features">
+      <span class="eyebrow">FEATURES</span>
+      <h2 class="h2">MarryPicの<em>4つの特徴</em></h2>
 
-      <div class="plan-card">
-        <div class="badge-pop">買い切り・追加料金なし</div>
-        <div class="price-name">💍 MarryPic アルバム発行</div>
-        <div class="price-num">500<small>円（税込）／1組</small></div>
-        <div class="price-sub">一度のお支払いで、結婚式が終わっても使えます</div>
-        <ul class="price-list">
-          <li>写真のアップロード（ベータ版は100枚まで・追加料金なし）</li>
+      <article class="fcard">
+        <div class="num"><i>01</i>|<u>SHARE</u></div>
+        <h3>登録・アプリ不要！QRコードだけで、みんなの写真がひとつに</h3>
+        <p>ゲストはテーブルの卓上カードにあるQRコードをカメラで読み取り、カメラロールから写真を選ぶだけ。アプリのインストールも会員登録もいりません。届いた写真はその場でアルバムに追加されます。</p>
+        <div class="ui">
+          <div class="ui-qr">
+            <svg viewBox="0 0 29 29" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="29" height="29" fill="#fff"/><path d="M0 0h7v1h-7zM9 0h1v1h-1zM12 0h1v1h-1zM16 0h5v1h-5zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM11 1h3v1h-3zM15 1h2v1h-2zM18 1h1v1h-1zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h2v1h-2zM12 2h1v1h-1zM14 2h2v1h-2zM18 2h1v1h-1zM20 2h1v1h-1zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h3v1h-3zM12 3h2v1h-2zM17 3h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h2v1h-2zM11 4h1v1h-1zM13 4h1v1h-1zM16 4h1v1h-1zM19 4h2v1h-2zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM12 5h4v1h-4zM20 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM8 7h1v1h-1zM11 7h1v1h-1zM14 7h2v1h-2zM0 8h1v1h-1zM2 8h5v1h-5zM9 8h2v1h-2zM15 8h3v1h-3zM19 8h1v1h-1zM22 8h5v1h-5zM1 9h1v1h-1zM4 9h2v1h-2zM7 9h1v1h-1zM12 9h2v1h-2zM16 9h1v1h-1zM18 9h7v1h-7zM28 9h1v1h-1zM0 10h1v1h-1zM3 10h1v1h-1zM5 10h3v1h-3zM11 10h8v1h-8zM20 10h4v1h-4zM1 11h4v1h-4zM7 11h2v1h-2zM10 11h1v1h-1zM12 11h2v1h-2zM15 11h1v1h-1zM18 11h6v1h-6zM25 11h1v1h-1zM27 11h1v1h-1zM0 12h1v1h-1zM2 12h1v1h-1zM5 12h2v1h-2zM8 12h1v1h-1zM12 12h1v1h-1zM14 12h1v1h-1zM16 12h3v1h-3zM25 12h2v1h-2zM0 13h1v1h-1zM2 13h1v1h-1zM4 13h1v1h-1zM7 13h1v1h-1zM9 13h1v1h-1zM16 13h5v1h-5zM22 13h3v1h-3zM28 13h1v1h-1zM0 14h3v1h-3zM4 14h3v1h-3zM10 14h1v1h-1zM12 14h1v1h-1zM15 14h1v1h-1zM17 14h1v1h-1zM24 14h3v1h-3zM0 15h1v1h-1zM2 15h2v1h-2zM8 15h1v1h-1zM10 15h1v1h-1zM14 15h1v1h-1zM18 15h3v1h-3zM27 15h1v1h-1zM2 16h1v1h-1zM5 16h7v1h-7zM15 16h3v1h-3zM19 16h1v1h-1zM21 16h1v1h-1zM23 16h1v1h-1zM25 16h2v1h-2zM0 17h5v1h-5zM7 17h1v1h-1zM10 17h1v1h-1zM12 17h3v1h-3zM16 17h4v1h-4zM21 17h4v1h-4zM26 17h1v1h-1zM28 17h1v1h-1zM0 18h1v1h-1zM3 18h1v1h-1zM6 18h1v1h-1zM8 18h1v1h-1zM10 18h1v1h-1zM13 18h3v1h-3zM18 18h1v1h-1zM20 18h1v1h-1zM22 18h2v1h-2zM26 18h1v1h-1zM0 19h1v1h-1zM4 19h2v1h-2zM7 19h2v1h-2zM10 19h1v1h-1zM13 19h1v1h-1zM19 19h1v1h-1zM23 19h1v1h-1zM27 19h1v1h-1zM0 20h1v1h-1zM6 20h1v1h-1zM8 20h3v1h-3zM14 20h4v1h-4zM20 20h5v1h-5zM26 20h3v1h-3zM8 21h2v1h-2zM11 21h2v1h-2zM16 21h5v1h-5zM24 21h5v1h-5zM0 22h7v1h-7zM9 22h2v1h-2zM12 22h1v1h-1zM15 22h3v1h-3zM19 22h2v1h-2zM22 22h1v1h-1zM24 22h3v1h-3zM0 23h1v1h-1zM6 23h1v1h-1zM8 23h1v1h-1zM10 23h3v1h-3zM14 23h2v1h-2zM19 23h2v1h-2zM24 23h1v1h-1zM27 23h2v1h-2zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM8 24h1v1h-1zM10 24h2v1h-2zM15 24h1v1h-1zM17 24h2v1h-2zM20 24h5v1h-5zM26 24h1v1h-1zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM8 25h1v1h-1zM13 25h2v1h-2zM16 25h3v1h-3zM25 25h4v1h-4zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM8 26h1v1h-1zM10 26h2v1h-2zM13 26h1v1h-1zM15 26h3v1h-3zM21 26h7v1h-7zM0 27h1v1h-1zM6 27h1v1h-1zM9 27h1v1h-1zM12 27h5v1h-5zM19 27h2v1h-2zM22 27h1v1h-1zM24 27h2v1h-2zM27 27h1v1h-1zM0 28h7v1h-7zM8 28h7v1h-7zM17 28h1v1h-1zM19 28h1v1h-1zM22 28h1v1h-1zM25 28h2v1h-2z" fill="#111"/></svg>
+          </div>
+          <span class="ui-arrow">›</span>
+          <div class="ui-phone"><div>
+            <span class="l"></span>
+            <span class="g"><i class="ph1"></i><i class="ph5"></i><i class="ph3"></i><i class="ph4"></i></span>
+          </div></div>
+          <span class="ui-note">読み取って<br>選ぶだけ</span>
+        </div>
+      </article>
+
+      <article class="fcard">
+        <div class="num"><i>02</i>|<u>PRICE</u></div>
+        <h3>1組500円（税込）買い切り。広告なし・追加料金なし</h3>
+        <p>お支払いは1回だけ。自動更新もサブスクも、隠れた追加料金もありません。アルバムに広告や提携サービスの案内枠が表示されることもないので、ゲストも安心して使えます。</p>
+        <div class="ui">
+          <div class="ui-price">
+            <b>500<small>円</small></b>
+            <span>税込・1組・買い切り</span>
+          </div>
+          <span class="ui-note">追加料金<br>なし</span>
+        </div>
+      </article>
+
+      <article class="fcard">
+        <div class="num"><i>03</i>|<u>QUALITY</u></div>
+        <h3>スマホで見やすい高画質で保存</h3>
+        <p>送られた写真は長辺1600pxに自動で最適化して保存するので、スマホでも見やすく、フォトアルバム作りにも使えます。1つのアルバムに保存できるのは最大100枚までです。</p>
+        <div class="ui">
+          <div class="ui-photo ph5"><b>長辺1600px</b></div>
+          <div class="ui-photo ph2"><b>JPEG</b></div>
+          <span class="ui-note">自動で<br>最適化</span>
+        </div>
+      </article>
+
+      <article class="fcard">
+        <div class="num"><i>04</i>|<u>ZIP SAVE</u></div>
+        <h3>ワンタップで、まとめてZIP一括保存</h3>
+        <p>集まった写真は1枚ずつ保存できるほか、ZIPファイルにまとめて一括ダウンロードできます。iPhoneでもパソコンでも、届いた写真をそのまま手元に残せます。</p>
+        <div class="ui">
+          <div class="ui-files">
+            <span>IMG_0421.jpg</span>
+            <span>IMG_0422.jpg</span>
+            <span>IMG_0423.jpg</span>
+          </div>
+          <span class="ui-zipbtn">ZIPで一括保存</span>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ COMPARISON ============ -->
+    <section class="sec sec--mist" id="compare">
+      <span class="eyebrow">COMPARISON</span>
+      <h2 class="h2">ほかの写真共有と<br>比べてみました</h2>
+      <p class="lead">「登録の手間」と「かかるお金」で比べると、違いがはっきり出ます。</p>
+
+      <div class="cmp">
+        <table class="cmp-table">
+          <thead>
+            <tr>
+              <th scope="col" aria-label="比較項目"></th>
+              <th scope="col" class="me">MarryPic<small>マリピク</small></th>
+              <th scope="col">一般的な<br>写真共有</th>
+              <th scope="col">LINE<br>アルバム</th>
+              <th scope="col">Google<br>フォト</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">料金</th>
+              <td class="me">500円<br>買い切り</td>
+              <td>サービスに<br>よる</td>
+              <td>無料</td>
+              <td>無料</td>
+            </tr>
+            <tr>
+              <th scope="row">アプリの<br>インストール</th>
+              <td class="me">不要</td>
+              <td>必要な<br>場合あり</td>
+              <td>必要</td>
+              <td>必要</td>
+            </tr>
+            <tr>
+              <th scope="row">会員登録</th>
+              <td class="me">不要</td>
+              <td>必要な<br>場合あり</td>
+              <td>必要</td>
+              <td>必要</td>
+            </tr>
+            <tr>
+              <th scope="row">QRで参加</th>
+              <td class="me"><span class="ok">○</span></td>
+              <td><span class="cond">△</span></td>
+              <td><span class="no">−</span></td>
+              <td><span class="no">−</span></td>
+            </tr>
+            <tr>
+              <th scope="row">保存画質</th>
+              <td class="me">1600pxに<br>自動最適化</td>
+              <td>サービスに<br>よる</td>
+              <td>圧縮<br>される</td>
+              <td>元画質</td>
+            </tr>
+            <tr>
+              <th scope="row">ZIP一括保存</th>
+              <td class="me"><span class="ok">○</span></td>
+              <td><span class="cond">△</span></td>
+              <td><span class="no">−</span></td>
+              <td><span class="ok">○</span></td>
+            </tr>
+            <tr>
+              <th scope="row">写真の上限</th>
+              <td class="me">100枚<br>まで</td>
+              <td>サービスに<br>よる</td>
+              <td>アルバム<br>次第</td>
+              <td>容量<br>次第</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="cmp-legend">
+        <span><b class="ok">○</b> 対応</span>
+        <span><b class="cond">△</b> 条件つき</span>
+        <span><b class="no">−</b> 非対応</span>
+      </div>
+      <p class="cmp-note">※ 他社サービスの内容は、各サービスが公開している情報をもとにした一般的な比較です。最新の仕様・料金は各サービスにてご確認ください。</p>
+    </section>
+
+    <!-- ============ PRICING ============ -->
+    <section class="sec" id="pricing">
+      <span class="eyebrow">PRICING</span>
+      <h2 class="h2">料金は、この<em>1プラン</em>だけ</h2>
+
+      <div class="plan">
+        <div class="badge">買い切り・追加料金なし</div>
+        <div class="pname">MarryPic アルバム発行</div>
+        <div class="price">500<small>円（税込）／1組</small></div>
+        <p class="price-sub">一度のお支払いで、結婚式が終わっても使えます</p>
+        <ul class="plist">
+          <li>アルバム発行（ゲスト用URL・管理用URL）</li>
           <li>ゲストはアプリ・会員登録なしでQRコードから送信</li>
-          <li>自動スライドショー・みんなの写真一覧</li>
+          <li>写真の保存は最大100枚まで（ベータ版）</li>
+          <li>写真は長辺1600pxに自動で最適化して保存</li>
+          <li>みんなの写真一覧・自動スライドショー</li>
           <li>1枚ずつの保存／ZIPで一括ダウンロード</li>
           <li>卓上QR案内カード（印刷用プレビュー）</li>
-          <li><strong>広告・提携サービスの案内枠は一切表示されません</strong></li>
+          <li>広告・提携サービスの案内枠は一切表示されません</li>
           <li>自動更新・サブスク・隠れた追加料金は一切なし</li>
         </ul>
       </div>
 
+      <div class="buy-lead">
+        アルバムの発行は約1分。お名前と挙式日を入力して、<br>500円のお支払いが済むと専用URLがその場で発行されます。
+      </div>
+    </section>
+
+    <!-- ============ 4STEP GUIDE ============ -->
+    <section class="sec sec--soft" id="howto">
+      <span class="eyebrow">HOW TO USE</span>
+      <h2 class="h2">当日までの流れは、<em>4ステップ</em></h2>
+
+      <div class="tabs" role="tablist" aria-label="使い方の切り替え">
+        <button class="tabbtn" id="tab-couple" role="tab" aria-selected="true" aria-controls="panel-couple" type="button">新郎新婦</button>
+        <button class="tabbtn" id="tab-guest" role="tab" aria-selected="false" aria-controls="panel-guest" type="button">ゲスト</button>
+      </div>
+
+      <div class="steps-panel" id="panel-couple" role="tabpanel" aria-labelledby="tab-couple">
+        <div class="step">
+          <div class="n">1</div>
+          <div><h4>アルバムをつくる（約1分）</h4><p>おふたりのお名前と挙式日を入力して、500円をお支払い。専用のアルバムURLと管理用URLがその場で発行されます。</p></div>
+        </div>
+        <div class="step">
+          <div class="n">2</div>
+          <div><h4>QRコードを印刷して置く</h4><p>管理画面に表示される卓上案内カードを印刷して、各テーブルや席札にセットします。</p></div>
+        </div>
+        <div class="step">
+          <div class="n">3</div>
+          <div><h4>当日、写真が集まる</h4><p>ゲストがQRコードから送った写真が、アルバムに次々と追加されます。みんなの写真はスライドショーでも楽しめます。</p></div>
+        </div>
+        <div class="step">
+          <div class="n">4</div>
+          <div><h4>まとめて保存する</h4><p>集まった写真は1枚ずつ保存することも、ZIPで一括ダウンロードすることもできます。</p></div>
+        </div>
+      </div>
+
+      <div class="steps-panel" id="panel-guest" role="tabpanel" aria-labelledby="tab-guest" hidden>
+        <div class="step">
+          <div class="n">1</div>
+          <div><h4>QRコードを読み取る</h4><p>テーブルの卓上カードにあるQRコードを、スマートフォンのカメラで読み取ります。アプリのインストールは不要です。</p></div>
+        </div>
+        <div class="step">
+          <div class="n">2</div>
+          <div><h4>写真を選ぶ</h4><p>カメラロールから送りたい写真を選びます。複数枚をまとめて選べます。</p></div>
+        </div>
+        <div class="step">
+          <div class="n">3</div>
+          <div><h4>お名前とメッセージを添えて送信</h4><p>お名前とお祝いのメッセージ（どちらも任意）を入力して送信します。会員登録はありません。</p></div>
+        </div>
+        <div class="step">
+          <div class="n">4</div>
+          <div><h4>アルバムに反映される</h4><p>送った写真はすぐにアルバムに追加されます。ほかのゲストが撮った写真も見られます。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECURITY ============ -->
+    <section class="sec" id="security">
+      <span class="eyebrow">SECURITY</span>
+      <h2 class="h2">大切な写真だから、<br>安心して使えるように</h2>
+
+      <div class="sec-items">
+        <div class="sec-item">
+          <div class="ico">🔒</div>
+          <div>
+            <h4>HTTPSによる暗号化通信</h4>
+            <p>アルバムの閲覧・写真の送信は、すべてHTTPSで暗号化された通信で行われます。</p>
+          </div>
+        </div>
+        <div class="sec-item">
+          <div class="ico">🔗</div>
+          <div>
+            <h4>推測困難な専用URL</h4>
+            <p>アルバムごとに推測されにくい専用URLを発行します。URLを知っている方だけが閲覧・送信できます。</p>
+          </div>
+        </div>
+        <div class="sec-item">
+          <div class="ico">💳</div>
+          <div>
+            <h4>カード情報は保持しません</h4>
+            <p>お支払いは決済サービス「Stripe」の安全なページで行われ、当サービスがカード情報を取得・保存することはありません。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="sec sec--mist" id="faq">
+      <span class="eyebrow">Q &amp; A</span>
+      <h2 class="h2">よくあるご質問</h2>
+
+      <div style="margin-top:10px;">
+        <details class="faq">
+          <summary><span class="qmark">Q</span>料金は本当に500円だけですか？<span class="plus"></span></summary>
+          <div class="a">はい。1組（1アルバム）<strong>500円（税込）の買い切り</strong>で、追加料金はありません。自動更新・月額課金・サブスクへの切り替えも一切ありません。広告や提携サービスの案内枠も表示されません。</div>
+        </details>
+
+        <details class="faq">
+          <summary><span class="qmark">Q</span>ゲストの人数や写真の枚数に上限はありますか？<span class="plus"></span></summary>
+          <div class="a">ゲストの人数に上限はなく、追加料金もかかりません。なお現在はベータ版として運用しているため、1つのアルバムに保存できる写真は<strong>100枚まで</strong>となっています。</div>
+        </details>
+
+        <details class="faq">
+          <summary><span class="qmark">Q</span>動画も送れますか？<span class="plus"></span></summary>
+          <div class="a">現在はお写真のみの対応です。動画の送信は今後の対応を予定しています。</div>
+        </details>
+
+        <details class="faq">
+          <summary><span class="qmark">Q</span>Androidのスマートフォンでも使えますか？<span class="plus"></span></summary>
+          <div class="a">はい、iPhoneでもAndroidでもブラウザ（Safari／Chrome）から同じようにご利用いただけます。ゲスト側のアプリインストールや会員登録は必要ありません。</div>
+        </details>
+
+        <details class="faq">
+          <summary><span class="qmark">Q</span>支払い方法を教えてください。<span class="plus"></span></summary>
+          <div class="a">クレジットカード（Visa・Mastercard・JCB・American Express 等）でのお支払いです。決済はStripeの安全なページで行われ、カード情報を当サービスが取得・保存することはありません。</div>
+        </details>
+
+        <details class="faq">
+          <summary><span class="qmark">Q</span>返金はできますか？<span class="plus"></span></summary>
+          <div class="a">デジタルコンテンツの性質上、決済完了後の返品・返金はお受けできません。アルバムURLが表示されないなどの不具合があった場合は、お支払い時のメールアドレスと決済日時を添えてご連絡いただければ再発行いたします。</div>
+        </details>
+
+        <details class="faq">
+          <summary><span class="qmark">Q</span>アルバムURLをなくしてしまったら？<span class="plus"></span></summary>
+          <div class="a">お支払い時のメールアドレスと決済日時を添えて xoxo.junaaaa@gmail.com までご連絡ください。確認のうえ、同じアルバムURLを再発行いたします。（発行完了画面の注文IDをお控えの場合は、購入エリアの「すでにお支払い済みでURLが表示されない方はこちら」からも再発行できます）</div>
+        </details>
+
+        <details class="faq">
+          <summary><span class="qmark">Q</span>写真はどこに保存されますか？<span class="plus"></span></summary>
+          <div class="a">アルバムURLを知っている方が閲覧できる形で保存されます。管理用URLをお持ちの方は、写真の一括保存・削除・お名前の変更ができます。管理用URLは他の方に教えないでください。</div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ PURCHASE ============ -->
+    <section class="sec" id="purchase">
+      <span class="eyebrow">GET STARTED</span>
+      <h2 class="h2">500円で、アルバムを<em>はじめよう</em></h2>
+      <p class="lead">お支払いのあと、その場で専用アルバムURLが発行されます。</p>
+
       <!-- 販売準備中（設定が済むまで表示） -->
-      <div class="notice-box" id="notice-state" style="display:none;">
+      <div class="notice-box" id="notice-state">
         <div class="notice-title">ただいま公開準備中です</div>
         <p>
           お支払いの受付を開始するまで、もうしばらくお待ちください。<br>
-          ご質問は <a href="mailto:xoxo.junaaaa@gmail.com" style="color:#a26b13;">xoxo.junaaaa@gmail.com</a> まで。
+          ご質問は <a href="mailto:xoxo.junaaaa@gmail.com" style="color:#94651A;">xoxo.junaaaa@gmail.com</a> まで。
         </p>
       </div>
 
       <!-- 入力フォーム -->
-      <div class="form-box" id="form-state">
-        <h4 id="form-heading">💍 おふたりの結婚式情報を入力（約1分）</h4>
-        <p class="form-lead" id="form-lead">お支払いのあと、その場で専用アルバムURLが発行されます</p>
+      <div class="fbox" id="form-state">
+        <h4 id="form-heading">おふたりの結婚式情報を入力（約1分）</h4>
+        <p class="fleada" id="form-lead">お支払いのあと、その場で専用アルバムURLが発行されます</p>
 
         <form id="create-album-form" onsubmit="handleCreateAlbum(event)">
           <div class="field">
@@ -273,30 +1029,30 @@
             <textarea id="input-message" placeholder="本日はご列席いただきありがとうございます！ぜひ写真を送ってください📷" maxlength="120"></textarea>
           </div>
 
-          <button type="submit" id="btn-create-submit" class="btn-cta" style="margin-bottom:10px;">
-            💳 500円で決済してアルバムを発行する
+          <button type="submit" id="btn-create-submit" class="btn-cta" style="margin-bottom:12px;">
+            500円で決済してアルバムを発行する
           </button>
           <div class="small-note">
             決済はStripeの安全なページで行われます。クレジットカード情報を当サービスが保存することはありません。<br>
-            デジタルコンテンツのため、決済後の返品・返金はお受けできません（<a href="legal.html#tokushoho" target="_blank">特定商取引法に基づく表記</a>）。
+            デジタルコンテンツのため、決済後の返品・返金はお受けできません（<a href="legal.html#tokushoho" target="_blank" rel="noopener">特定商取引法に基づく表記</a>）。
           </div>
         </form>
 
-        <div style="text-align:center; margin-top:14px;">
-          <button type="button" id="btn-restore" onclick="toggleRestore()" style="background:none; border:none; color:#8a8a8a; font-size:11px; text-decoration:underline; cursor:pointer;">
+        <div class="restore-wrap">
+          <button type="button" id="btn-restore" class="restore-btn" onclick="toggleRestore()">
             すでにお支払い済みでURLが表示されない方はこちら
           </button>
         </div>
 
-        <div id="restore-box" style="display:none; margin-top:14px; background:#fff; border:1px solid var(--card-border); border-radius:10px; padding:14px;">
-          <p style="font-size:12px; color:#555; line-height:1.6; margin-bottom:10px;">
-            決済完了後にURLが表示されなかった場合は、お支払い時の<strong>メールアドレス</strong>と<strong>決済日時</strong>を添えて <a href="mailto:xoxo.junaaaa@gmail.com?subject=MarryPic%20%E3%82%A2%E3%83%AB%E3%83%90%E3%83%A0URL%E5%86%8D%E7%99%BA%E8%A1%8C%E3%81%AE%E3%81%94%E4%BE%9D%E9%A0%BC" style="color:#a26b13; word-break:break-all;">xoxo.junaaaa@gmail.com</a> までご連絡ください。確認のうえ再発行いたします。
+        <div id="restore-box" class="restore-box">
+          <p style="margin-bottom:10px;">
+            決済完了後にURLが表示されなかった場合は、お支払い時の<strong>メールアドレス</strong>と<strong>決済日時</strong>を添えて <a href="mailto:xoxo.junaaaa@gmail.com?subject=MarryPic%20%E3%82%A2%E3%83%AB%E3%83%90%E3%83%A0URL%E5%86%8D%E7%99%BA%E8%A1%8C%E3%81%AE%E3%81%94%E4%BE%9D%E9%A0%BC" style="color:#3A54C8; word-break:break-all;">xoxo.junaaaa@gmail.com</a> までご連絡ください。確認のうえ再発行いたします。
           </p>
-          <p style="font-size:11px; color:#777; line-height:1.6; margin-bottom:8px;">
+          <p style="margin-bottom:8px;">
             発行完了画面やサポート案内でお持ちの注文ID（<code>cs_...</code>）で再発行する場合：
           </p>
           <div class="field" style="margin-bottom:8px;">
-            <input id="input-session" type="text" placeholder="cs_live_..." style="width:100%; padding:11px 12px; border:1px solid #ccc; border-radius:8px; font-size:13px;">
+            <input id="input-session" type="text" placeholder="cs_live_..." style="width:100%; padding:11px 12px; border:1px solid #DCE2F2; border-radius:12px; font-size:13px; background:#fff;">
           </div>
           <button type="button" class="btn-ghost" onclick="applyManualSession()">この注文IDで再発行する</button>
         </div>
@@ -315,8 +1071,8 @@
           <div class="url-label">① ゲスト用URL（QRコード・招待用）<span class="tag">みんなに配る</span></div>
           <div class="url-text" id="guest-url-text"></div>
           <div style="display:flex; gap:8px; margin-top:8px;">
-            <button type="button" class="btn-ghost" style="margin:0; font-size:12px;" onclick="copyIssued('guest')">📋 ゲスト用URLをコピー</button>
-            <a id="guest-open-link" class="btn-ghost" style="margin:0; font-size:12px;" href="#" target="_blank">ゲスト画面を開く</a>
+            <button type="button" class="btn-ghost" style="margin:0; font-size:10.5px; padding:9px 8px;" onclick="copyIssued('guest')">ゲスト用URLをコピー</button>
+            <a id="guest-open-link" class="btn-ghost" style="margin:0; font-size:10.5px; padding:9px 8px;" href="#" target="_blank" rel="noopener">ゲスト画面を開く</a>
           </div>
         </div>
 
@@ -324,15 +1080,15 @@
           <div class="url-label">② 管理用URL（おふたり専用）<span class="tag">他の人に教えない</span></div>
           <div class="url-text" id="admin-url-text"></div>
           <div style="display:flex; gap:8px; margin-top:8px;">
-            <button type="button" class="btn-ghost" style="margin:0; font-size:12px;" onclick="copyIssued('admin')">📋 管理用URLをコピー</button>
-            <a id="admin-open-link" class="btn-ghost" style="margin:0; font-size:12px;" href="#" target="_blank">管理画面を開く</a>
+            <button type="button" class="btn-ghost" style="margin:0; font-size:10.5px; padding:9px 8px;" onclick="copyIssued('admin')">管理用URLをコピー</button>
+            <a id="admin-open-link" class="btn-ghost" style="margin:0; font-size:10.5px; padding:9px 8px;" href="#" target="_blank" rel="noopener">管理画面を開く</a>
           </div>
           <div class="hint">※ 管理用URLでは、写真の一括保存・削除・お名前の変更ができます。</div>
         </div>
 
         <div class="warn-box">
           <p>
-            ⚠️ <strong>管理用URLは、ゲストや他の人に教えないでください。</strong><br>
+            <strong>管理用URLは、ゲストや他の人に教えないでください。</strong><br>
             ゲスト用URLを知っている人は、写真の閲覧と送信ができます。<br>
             注文ID：<span id="order-id-text" style="word-break:break-all;"></span>（お問い合わせの際に必要です）
           </p>
@@ -341,101 +1097,34 @@
         <a href="#purchase" class="btn-sub" style="display:block; text-align:center; margin-top:14px;" onclick="showFormState()">← 入力画面に戻る</a>
       </div>
 
-      <div class="small-note" style="margin-top:14px;">
+      <div class="small-note" style="margin-top:16px;">
         ※ 現在はベータ版として提供しており、1つのアルバムに保存できる写真は100枚までです。<br>
         ※ 写真は外部の画像保管サービスに保存され、アルバムURLを知る方は閲覧できます。
       </div>
     </section>
 
-    <!-- STEPS -->
-    <section class="section">
-      <h2 class="section-title">
-        <span>HOW TO USE</span>
-        当日の使い方はかんたん3ステップ
-      </h2>
-
-      <div class="step-item">
-        <div class="step-badge">1</div>
-        <div class="step-body">
-          <h4>WEBで結婚式を登録（約1分）</h4>
-          <p>おふたりのお名前と挙式日を入力してお支払いすると、専用のアルバムとQRコードがその場で発行されます。</p>
-        </div>
-      </div>
-
-      <div class="step-item">
-        <div class="step-badge">2</div>
-        <div class="step-body">
-          <h4>卓上カードを印刷して置く</h4>
-          <p>管理画面に表示される卓上案内カードを印刷して、披露宴会場の各テーブルや席札にセットします。</p>
-        </div>
-      </div>
-
-      <div class="step-item">
-        <div class="step-badge">3</div>
-        <div class="step-body">
-          <h4>当日はゲストが撮って送るだけ！</h4>
-          <p>ゲストがスマホでQRコードを読み取って写真を送信。集まった写真はアルバムに次々と追加され、スライドショーでも楽しめます。</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- FAQ -->
-    <section class="section problems-bg">
-      <h2 class="section-title">
-        <span>Q &amp; A</span>
-        よくあるご質問
-      </h2>
-
-      <div class="faq-item">
-        <div class="faq-q">料金は本当に500円だけですか？</div>
-        <div class="faq-a">はい。1組（1アルバム）500円（税込）の買い切りで、追加料金はありません。自動更新・月額課金・サブスクへの切り替えも一切ありません。広告や提携サービスの案内枠も表示されません。</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q">ゲストの人数や写真の枚数に上限はありますか？</div>
-        <div class="faq-a">ゲストの人数に上限はなく、追加料金もかかりません。なお現在はベータ版として運用しているため、1つのアルバムに保存できる写真は100枚までとなっています。</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q">動画も送れますか？</div>
-        <div class="faq-a">現在はお写真のみの対応です。動画の送信は今後の対応を予定しています。</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q">Androidのスマートフォンでも使えますか？</div>
-        <div class="faq-a">はい、iPhoneでもAndroidでもブラウザ（Safari/Chrome）から同じようにご利用いただけます。ゲスト側のアプリインストールや会員登録は必要ありません。</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q">支払い方法を教えてください。</div>
-        <div class="faq-a">クレジットカード（Visa・Mastercard・JCB・American Express 等）でのお支払いです。決済はStripeの安全なページで行われ、カード情報を当サービスが取得・保存することはありません。</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q">返金はできますか？</div>
-        <div class="faq-a">デジタルコンテンツの性質上、決済完了後の返品・返金はお受けできません。アルバムURLが表示されないなどの不具合があった場合は、お支払い時のメールアドレスと決済日時を添えてご連絡いただければ再発行いたします。</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q">アルバムURLをなくしてしまったら？</div>
-        <div class="faq-a">お支払い時のメールアドレスと決済日時を添えて xoxo.junaaaa@gmail.com までご連絡ください。確認のうえ、同じアルバムURLを再発行いたします。（※発行完了画面の注文IDをお控えの場合は、このページの「すでにお支払い済みでURLが表示されない方はこちら」からも再発行できます）</div>
-      </div>
-    </section>
-
-    <!-- FOOTER -->
+    <!-- ============ FOOTER ============ -->
     <footer class="footer">
-      <h3 style="font-size:18px; font-weight:700; margin-bottom:12px;">一生に一度の、大切な一日。</h3>
-      <p style="margin-bottom:20px;">ゲストが撮ってくれた笑顔や涙を、1枚も逃さず残しましょう。</p>
-      <a href="#purchase" class="btn-cta" style="margin-bottom:16px;">500円でアルバムを発行する 💍</a>
+      <div class="f-logo">MarryPic</div>
+      <div class="f-copy-sub">WEDDING PHOTO SHARE</div>
+      <p class="f-msg">一生に一度の、大切な一日。<br>ゲストが撮ってくれた笑顔や涙を、1枚も逃さず残しましょう。</p>
+      <a href="#purchase" class="btn-cta" style="margin-bottom:14px;">500円でアルバムをはじめる</a>
       <div class="footer-links">
-        <a href="legal.html#terms" target="_blank">利用規約</a>
-        <a href="legal.html#privacy" target="_blank">プライバシーポリシー</a>
-        <a href="legal.html#tokushoho" target="_blank">特定商取引法に基づく表記</a>
+        <a href="legal.html#terms" target="_blank" rel="noopener">利用規約</a>
+        <a href="legal.html#privacy" target="_blank" rel="noopener">プライバシーポリシー</a>
+        <a href="legal.html#tokushoho" target="_blank" rel="noopener">特定商取引法に基づく表記</a>
         <a href="mailto:xoxo.junaaaa@gmail.com">お問い合わせ</a>
+        <a href="app.html" target="_blank" rel="noopener">アプリ画面のデモ</a>
       </div>
-      <p>運営：MarryPic運営事務局</p>
-      <p style="margin-top:4px;">© 2026 MarryPic All Rights Reserved.</p>
+      <p class="f-org">運営：MarryPic運営事務局</p>
+      <p class="f-cr">© 2026 MarryPic All Rights Reserved.</p>
     </footer>
+  </main>
+
+  <!-- ============ 下部固定バー ============ -->
+  <div class="bottom-bar" id="bottom-bar">
+    <a class="bb-btn bb-1" href="#howto">使い方を見る</a>
+    <a class="bb-btn bb-2" href="#purchase">500円ではじめる ›</a>
   </div>
 
   <script src="config.js"></script>
@@ -630,9 +1319,9 @@
         return;
       }
       manualSessionId = v;
-      document.getElementById('form-heading').textContent = '💍 お支払い済みの方：アルバム情報を入力';
+      document.getElementById('form-heading').textContent = 'お支払い済みの方：アルバム情報を入力';
       document.getElementById('form-lead').textContent = '入力後「アルバムを発行する」を押すと、同じアルバムURLが再発行されます';
-      document.getElementById('btn-create-submit').textContent = '✨ アルバムを発行する';
+      document.getElementById('btn-create-submit').textContent = 'アルバムを発行する';
       document.getElementById('restore-box').style.display = 'none';
     }
 
@@ -665,7 +1354,7 @@
 
       const btn = document.getElementById('btn-create-submit');
       btn.disabled = true;
-      btn.textContent = '⏳ 決済ページへ移動します...';
+      btn.textContent = '決済ページへ移動します...';
 
       window.location.href = STRIPE_PAYMENT_LINK_URL + sep + 'client_reference_id=' + encodeURIComponent(orderRef);
     }
@@ -676,7 +1365,7 @@
       const btn = document.getElementById('btn-create-submit');
       const original = btn.textContent;
       btn.disabled = true;
-      btn.textContent = '⏳ アルバムを発行しています...';
+      btn.textContent = 'アルバムを発行しています...';
 
       try {
         if (!window.crypto || !window.crypto.subtle) {
@@ -736,8 +1425,8 @@
       // 1) Stripeの決済から戻ってきた場合（お支払い済み）
       if (currentSessionId) {
         showFormState();
-        document.getElementById('form-heading').textContent = '🎉 お支払いありがとうございます！';
-        document.getElementById('btn-create-submit').textContent = '✨ アルバムを発行する';
+        document.getElementById('form-heading').textContent = 'お支払いありがとうございます！';
+        document.getElementById('btn-create-submit').textContent = 'アルバムを発行する';
         if (draft) {
           fillForm(draft);
           document.getElementById('form-lead').textContent = '入力内容を確認して「アルバムを発行する」を押してください';
@@ -762,6 +1451,50 @@
     } else {
       init();
     }
+  </script>
+
+  <script>
+    /* =====================================================================
+       LP 表示まわり（購入ロジックとは独立）
+       ===================================================================== */
+    (function () {
+      // 使い方タブ
+      var tCouple = document.getElementById('tab-couple');
+      var tGuest = document.getElementById('tab-guest');
+      var pCouple = document.getElementById('panel-couple');
+      var pGuest = document.getElementById('panel-guest');
+
+      function selectTab(which) {
+        var isCouple = which === 'couple';
+        tCouple.setAttribute('aria-selected', isCouple ? 'true' : 'false');
+        tGuest.setAttribute('aria-selected', isCouple ? 'false' : 'true');
+        pCouple.hidden = !isCouple;
+        pGuest.hidden = isCouple;
+      }
+      if (tCouple && tGuest) {
+        tCouple.addEventListener('click', function () { selectTab('couple'); });
+        tGuest.addEventListener('click', function () { selectTab('guest'); });
+      }
+
+      // 下部固定バー：購入エリアが見えているとき・結果表示中は隠す
+      var bar = document.getElementById('bottom-bar');
+      var purchase = document.getElementById('purchase');
+      function setBar(hidden) {
+        if (!bar) return;
+        bar.classList.toggle('is-hidden', !!hidden);
+      }
+      if (bar && purchase && 'IntersectionObserver' in window) {
+        new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) { setBar(entry.isIntersecting); });
+        }, { threshold: 0.12 }).observe(purchase);
+      }
+      var resultState = document.getElementById('result-state');
+      if (resultState && 'MutationObserver' in window) {
+        new MutationObserver(function () {
+          if (resultState.style.display === 'block') setBar(true);
+        }).observe(resultState, { attributes: true, attributeFilter: ['style'] });
+      }
+    })();
   </script>
 </body>
 </html>
