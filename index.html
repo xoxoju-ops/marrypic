@@ -88,6 +88,8 @@
         transition: opacity .2s, color .2s;
       }
       .side-nav a:hover { opacity: 1; color: var(--blue); }
+      .side-nav a.nav-demo { color: var(--blue); opacity: 1; font-weight: 800; }
+      .side-nav a.nav-demo::after { content: " ›"; }
       .side-qr {
         display: block;
         position: fixed;
@@ -257,7 +259,27 @@
     .hero-cta:active { transform: scale(.985); }
     .hero-cta .arrow { font-size: 13px; color: var(--blue-3); }
     .hero-note { position: relative; font-size: 10.5px; color: rgba(255, 255, 255, .82); }
-    .hero-chips { position: relative; display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    /* デモ画面へのサブ導線（メインCTAより控えめなガラス風ピル） */
+    .hero-demo {
+      position: relative; display: flex; align-items: center; justify-content: center; gap: 7px;
+      width: 100%; max-width: 296px; height: 38px; margin: 10px auto 0;
+      border-radius: 999px; text-decoration: none;
+      font-size: 11.5px; font-weight: 800; letter-spacing: .02em; color: #fff;
+      background: rgba(255, 255, 255, .15);
+      border: 1px solid rgba(255, 255, 255, .52);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28);
+      transition: transform .12s ease, background .2s ease;
+    }
+    .hero-demo:active { transform: scale(.985); background: rgba(255, 255, 255, .26); }
+    .hero-demo .hd-play {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 14px; height: 14px; border-radius: 50%; padding-left: 1px;
+      background: rgba(255, 255, 255, .9); color: var(--blue-dark);
+      font-size: 6px; line-height: 1;
+    }
+    .hero-demo .arrow { font-size: 11px; color: rgba(255, 255, 255, .82); }
+    .hero-chips { position: relative; display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
     .hero-chips span {
       font-size: 9.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
       background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .3); color: #fff;
@@ -437,6 +459,26 @@
       background: var(--blue-soft); border: 1px solid #f5d5df;
       font-size: 11px; color: #5a2c3e; line-height: 1.8; text-align: center;
     }
+    /* 購入エリアのデモ導線 */
+    .demo-cta {
+      display: flex; align-items: center; gap: 11px; margin-top: 14px;
+      padding: 12px 15px; border-radius: 16px; text-decoration: none;
+      background: #fff; border: 1px solid #f3cfda;
+      box-shadow: 0 6px 16px rgba(160, 52, 82, .08);
+      transition: transform .12s, border-color .18s, box-shadow .18s;
+    }
+    .demo-cta:active { transform: scale(.99); }
+    .demo-cta .dc-ico {
+      flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #e26384, #c24264);
+      box-shadow: 0 4px 10px rgba(210, 76, 110, .26);
+    }
+    .demo-cta .dc-ico svg { width: 11px; height: 11px; margin-left: 1px; }
+    .demo-cta .dc-body { display: flex; flex-direction: column; gap: 2px; }
+    .demo-cta .dc-kicker { font-size: 9.5px; font-weight: 700; color: #9c7b87; letter-spacing: .01em; }
+    .demo-cta .dc-main { font-size: 12.5px; font-weight: 900; color: var(--blue-dark); }
+    .demo-cta .dc-arrow { color: var(--blue); font-size: 12px; }
     .fbox { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-top: 14px; box-shadow: var(--shadow); }
     .fbox h4 { font-size: 14px; font-weight: 900; color: var(--blue-dark); text-align: center; }
     .fbox .fleada { font-size: 10.5px; color: var(--muted); text-align: center; margin: 4px 0 16px; }
@@ -551,6 +593,7 @@
     <a href="#howto">使い方</a>
     <a href="#security">安全性</a>
     <a href="#faq">よくあるご質問</a>
+    <a class="nav-demo" href="app.html">デモ画面を試す</a>
     <a href="legal.html" target="_blank" rel="noopener">利用規約</a>
   </nav>
 
@@ -653,6 +696,9 @@
         </p>
         <a class="hero-cta" href="#purchase">500円ではじめる <span class="arrow">›</span></a>
         <p class="hero-note">追加料金なし・広告なし・自動更新なし</p>
+        <a class="hero-demo" href="app.html">
+          <span class="hd-play" aria-hidden="true">▶</span>まずはデモ画面を試してみる<span class="arrow">›</span>
+        </a>
         <div class="hero-chips">
           <span>アプリ不要</span>
           <span>会員登録不要</span>
@@ -992,6 +1038,16 @@
       <span class="eyebrow">GET STARTED</span>
       <h2 class="h2">500円で、アルバムを<em>はじめよう</em></h2>
       <p class="lead">お支払いのあと、その場で専用アルバムURLが発行されます。</p>
+
+      <a class="demo-cta" href="app.html">
+        <span class="dc-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" fill="#fff"/></svg>
+        </span>
+        <span class="dc-body">
+          <span class="dc-kicker">購入前に実際の画面を体験できます</span>
+          <span class="dc-main">デモアルバムを開いて試す <span class="dc-arrow">›</span></span>
+        </span>
+      </a>
 
       <!-- 販売準備中（設定が済むまで表示） -->
       <div class="notice-box" id="notice-state">
