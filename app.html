@@ -367,8 +367,8 @@
           <span style="font-size:11px; background:#27ae60; color:#fff; padding:2px 8px; border-radius:10px;">高画質</span>
         </div>
         <p style="font-size:12px; color:var(--text-muted); line-height:1.5;">
-          ゲストが送ってくれた写真は、アルバムに保存されます（長辺1600px・JPEG）。1枚ずつ、またはZIPでまとめてダウンロードして、印刷やフォトアルバム作りにお使いいただけます。<br>
-          <span style="font-size:11px; color:#999;">※ 撮影時のオリジナルデータは、送信したゲストの端末内に残ります。1アルバム100枚まで。</span>
+          ゲストが送ってくれた写真は、アルバムに保存されます（長辺1280px・JPEG）。1枚ずつ、またはZIPでまとめてダウンロードして、印刷やフォトアルバム作りにお使いいただけます。<br>
+          <span style="font-size:11px; color:#999;">※ 撮影時のオリジナルデータは、送信したゲストの端末内に残ります。1アルバム500枚まで。</span>
         </p>
       </div>
 
@@ -509,11 +509,11 @@
 
 const MARRYPIC_CFG = window.MARRYPIC || {};
 const STORAGE_CFG = MARRYPIC_CFG.storage || { mode: 'local' };
-const MAX_PHOTOS = 100; // 1アルバムの上限（2026-11-23 に 30 → 100 へ拡張）
+const MAX_PHOTOS = 500; // 1アルバムの上限（2026-11-24 に 100 → 500 へ拡張）
 const PHOTO_TABLE = STORAGE_CFG.table || 'marrypic_photos';
 
 /* 圧縮の設定（ゲストのiPhone写真をアップロード前に自動で縮小） */
-const COMPRESS_MAX_SIDE = 1600;   // 長辺の最大ピクセル
+const COMPRESS_MAX_SIDE = 1280;   // 長辺の最大ピクセル（500枚分の容量が収まるよう、2026-11-24に縮小）
 const COMPRESS_QUALITY = 0.82;    // JPEG品質
 
 /* Supabase Edge Functions（決済確認・削除） */
@@ -1090,8 +1090,8 @@ function clearSelected() {
 }
 
 /* ---------------------------------------------------------------
-   端末内で縮小・圧縮（iPhoneの数MB写真 → 約200〜400KBのJPEG）
-   - 長辺 1600px / JPEG品質 0.82
+   端末内で縮小・圧縮（iPhoneの数MB写真 → 約120〜150KBのJPEG）
+   - 長辺 1280px / JPEG品質 0.82
    - EXIFの向き（縦向きで撮った写真）を反映して描画する：
      createImageBitmap(file, { imageOrientation:'from-image' }) を優先し、
      使えない環境では <img> での描画に切り替える（現代のSafari/Chromeは
@@ -1178,7 +1178,7 @@ async function uploadPhotos() {
     return;
   }
 
-  // アルバムの上限（100枚）をこえる分は先に伝える
+  // アルバムの上限（500枚）をこえる分は先に伝える
   const remaining = Math.max(0, MAX_PHOTOS - uploadedItems.length);
   if (remaining === 0) {
     alert('このアルバムは ' + MAX_PHOTOS + '枚までです。これ以上は保存できません。');
