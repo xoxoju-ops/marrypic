@@ -187,7 +187,7 @@
     }
 
     /* スマホモックアップ */
-    .phones { position: relative; height: 296px; margin: 0 auto 2px; }
+    .phones { position: relative; height: 286px; margin: 0 auto 2px; }
     .phone {
       position: absolute; top: 8px; width: 132px; height: 258px;
       background: #10162B; border-radius: 20px; padding: 5px;
@@ -198,7 +198,7 @@
     .p-screen {
       height: 100%; border-radius: 16px; background: #F8FAFF; overflow: hidden;
       display: flex; flex-direction: column; color: #33405E; text-align: left;
-      padding-bottom: 6px;
+      padding-bottom: 2px;
     }
     .p-status { display: flex; justify-content: space-between; align-items: center; font-size: 5px; color: #7C87A6; padding: 5px 7px 3px; }
     .p-notch { width: 40px; height: 5px; border-radius: 4px; background: #10162B; margin: 0 auto; }
@@ -212,7 +212,7 @@
     .p-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 0 8px; }
     .p-cell { aspect-ratio: 1 / 1; border-radius: 4px; }
     .p-grid.g2 { grid-template-columns: repeat(2, 1fr); gap: 4px; }
-    .p-grid.g2 .p-cell { aspect-ratio: 4 / 3; }
+    .p-grid.g2 .p-cell { aspect-ratio: 3 / 2; }
     .p-field { margin: 6px 8px 0; height: 12px; border-radius: 4px; background: #fff; border: 1px solid #E4E9F6; }
     .p-btn { margin: 6px 8px; padding: 6px 0; border-radius: 999px; background: var(--blue); color: #fff; font-size: 5.5px; font-weight: 800; text-align: center; box-shadow: 0 3px 8px rgba(79,109,245,.35); }
     .p-shot { position: relative; margin: 2px 8px 6px; border-radius: 7px; height: 68px; overflow: hidden; background: linear-gradient(160deg, #F7E0D3, #C9907A 60%, #A76F5C); }
@@ -238,7 +238,7 @@
 
     .hero-h1 {
       position: relative; font-size: 26px; font-weight: 900; line-height: 1.5;
-      letter-spacing: .01em; margin: 10px 0 0; text-shadow: 0 2px 12px rgba(20, 30, 80, .18);
+      letter-spacing: .01em; margin: 6px 0 0; text-shadow: 0 2px 12px rgba(20, 30, 80, .18);
     }
     .hero-h1 em { font-style: normal; }
     .hero-sub {
@@ -248,7 +248,7 @@
     .hero-sub strong { color: #fff; font-weight: 800; }
     .hero-cta {
       position: relative; display: flex; align-items: center; justify-content: center;
-      gap: 8px; width: 100%; height: 54px; margin: 20px 0 10px;
+      gap: 8px; width: 100%; height: 54px; margin: 16px 0 10px;
       background: #fff; color: var(--blue-dark); text-decoration: none;
       border-radius: 999px; font-size: 15.5px; font-weight: 900;
       box-shadow: 0 12px 26px rgba(12, 22, 62, .22);
@@ -257,7 +257,7 @@
     .hero-cta:active { transform: scale(.985); }
     .hero-cta .arrow { font-size: 13px; color: var(--blue-3); }
     .hero-note { position: relative; font-size: 10.5px; color: rgba(255, 255, 255, .82); }
-    .hero-chips { position: relative; display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .hero-chips { position: relative; display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
     .hero-chips span {
       font-size: 9.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
       background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .3); color: #fff;
@@ -1122,7 +1122,7 @@
   </main>
 
   <!-- ============ 下部固定バー ============ -->
-  <div class="bottom-bar" id="bottom-bar">
+  <div class="bottom-bar is-hidden" id="bottom-bar">
     <a class="bb-btn bb-1" href="#howto">使い方を見る</a>
     <a class="bb-btn bb-2" href="#purchase">500円ではじめる ›</a>
   </div>
@@ -1476,22 +1476,33 @@
         tGuest.addEventListener('click', function () { selectTab('guest'); });
       }
 
-      // 下部固定バー：購入エリアが見えているとき・結果表示中は隠す
+      // 下部固定バー：ヒーローを過ぎたら表示。購入エリアが見えているとき・結果表示中は隠す
       var bar = document.getElementById('bottom-bar');
       var purchase = document.getElementById('purchase');
-      function setBar(hidden) {
+      var resultState = document.getElementById('result-state');
+      var state = { scrolled: false, inPurchase: false, hasResult: false };
+
+      function renderBar() {
         if (!bar) return;
-        bar.classList.toggle('is-hidden', !!hidden);
+        var hidden = !state.scrolled || state.inPurchase || state.hasResult;
+        bar.classList.toggle('is-hidden', hidden);
       }
+      function onScroll() {
+        state.scrolled = window.scrollY > 140;
+        renderBar();
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
       if (bar && purchase && 'IntersectionObserver' in window) {
         new IntersectionObserver(function (entries) {
-          entries.forEach(function (entry) { setBar(entry.isIntersecting); });
+          entries.forEach(function (entry) { state.inPurchase = entry.isIntersecting; renderBar(); });
         }, { threshold: 0.12 }).observe(purchase);
       }
-      var resultState = document.getElementById('result-state');
       if (resultState && 'MutationObserver' in window) {
         new MutationObserver(function () {
-          if (resultState.style.display === 'block') setBar(true);
+          state.hasResult = resultState.style.display === 'block';
+          renderBar();
         }).observe(resultState, { attributes: true, attributeFilter: ['style'] });
       }
     })();
