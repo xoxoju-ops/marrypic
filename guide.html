@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>結婚式の写真集め、LINE以外でゲストに負担をかけない方法まとめ｜MarryPic（マリピク）</title>
+  <meta name="description" content="結婚式の写真をゲストから集めるとき、LINEアルバムやGoogleフォトのどこが負担になりやすいのか。画質・期限・友だち追加やアカウントの手間・容量を整理し、QRコードで集める方法と、1組500円（税込）買い切り・最大500枚のMarryPicをわかりやすく紹介します。">
+  <link rel="canonical" href="https://xoxoju-ops.github.io/marrypic/guide.html">
+
+  <meta property="og:site_name" content="MarryPic（マリピク）">
+  <meta property="og:title" content="結婚式の写真集め、LINE以外でゲストに負担をかけない方法まとめ">
+  <meta property="og:description" content="LINEアルバム・Googleフォト・Web共有サービスの違いを、画質・期限・登録の手間・容量で整理。QRコードで集める写真共有と、1組500円（税込）買い切りのMarryPicを紹介します。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://xoxoju-ops.github.io/marrypic/guide.html">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "結婚式の写真集め、LINE以外でゲストに負担をかけない方法まとめ",
+    "description": "LINEアルバム・Googleフォト・Web共有サービスの違いを、画質・期限・登録の手間・容量の観点で整理し、QRコードで写真を集める方法を紹介します。",
+    "datePublished": "2026-11-26",
+    "dateModified": "2026-11-26",
+    "inLanguage": "ja",
+    "mainEntityOfPage": "https://xoxoju-ops.github.io/marrypic/guide.html",
+    "author": { "@type": "Organization", "name": "MarryPic運営事務局" },
+    "publisher": { "@type": "Organization", "name": "MarryPic運営事務局" }
+  }
+  </script>
+
+  <style>
+    :root {
+      --rose: #D24C6E;
+      --rose-2: #E26384;
+      --rose-3: #f295ad;
+      --rose-dark: #be3e60;
+      --rose-ink: #8c2a44;
+      --blush: #fdf4f6;
+      --mist: #fbf0f3;
+      --text: #2b2126;
+      --muted: #6f5a62;
+      --line: #f3d8e0;
+      --radius: 18px;
+      --green: #10B981;
+      --green-dark: #059669;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+      color: var(--text);
+      background: #f6e9ed;
+      line-height: 1.85;
+    }
+    img, svg { display: block; max-width: 100%; }
+    a { color: inherit; }
+
+    /* ---------- 背景 ---------- */
+    .bg-deco { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .bg-deco i { position: absolute; display: block; border-radius: 50%; background: #f0afc1; opacity: .5; }
+    .bg-deco i:nth-child(1) { width: 88vw; height: 72vh; left: -26vw; bottom: -34vh; }
+    .bg-deco i:nth-child(2) { width: 96vw; height: 80vh; right: -30vw; bottom: -46vh; opacity: .34; }
+
+    .page {
+      position: relative; z-index: 1;
+      max-width: 720px; margin: 0 auto; background: #fff;
+      min-height: 100vh;
+      box-shadow: 0 0 60px rgba(160, 52, 82, .12);
+    }
+
+    /* ---------- トップバー ---------- */
+    .topbar {
+      position: sticky; top: 0; z-index: 40;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 12px 18px;
+      background: rgba(255, 255, 255, .94);
+      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(243, 216, 224, .9);
+    }
+    .logo { text-decoration: none; line-height: 1; display: flex; flex-direction: column; }
+    .logo b { font-size: 19px; font-weight: 800; letter-spacing: .04em; color: var(--text); }
+    .logo span { font-size: 7.5px; font-weight: 700; letter-spacing: .2em; color: #ad8c99; margin-top: 4px; }
+    .topbar-actions { display: flex; align-items: center; gap: 8px; }
+    .topbar-link { font-size: 12px; font-weight: 700; color: #5c3a48; text-decoration: none; }
+    .btn-top {
+      display: inline-block; background: var(--rose); color: #fff; text-decoration: none;
+      font-size: 12px; font-weight: 800; padding: 9px 16px; border-radius: 999px;
+      box-shadow: 0 5px 14px rgba(210, 76, 110, .3); white-space: nowrap;
+    }
+
+    /* ---------- ヒーロー ---------- */
+    .hero {
+      position: relative; overflow: hidden;
+      padding: 40px 22px 34px;
+      background:
+        radial-gradient(120% 70% at 50% 0%, #fdf2f6 0%, rgba(255,255,255,0) 72%),
+        #fff;
+      border-bottom: 1px solid var(--line);
+    }
+    .hero::after {
+      content: ""; position: absolute; right: -110px; top: -90px; width: 300px; height: 300px;
+      border: 1px solid rgba(210, 76, 110, .13); border-radius: 50%;
+    }
+    .crumb { position: relative; font-size: 10.5px; color: #a5838f; letter-spacing: .04em; }
+    .crumb a { text-decoration: none; }
+    .crumb span { margin: 0 6px; }
+    .eyebrow {
+      position: relative; display: block; margin-top: 22px;
+      font-size: 10px; font-weight: 900; letter-spacing: .26em; color: var(--rose); text-transform: uppercase;
+    }
+    h1 {
+      position: relative; font-size: 25px; font-weight: 900; line-height: 1.55;
+      letter-spacing: .01em; margin-top: 10px;
+    }
+    h1 em { font-style: normal; color: var(--rose); }
+    .hero-lead { position: relative; font-size: 12.5px; color: var(--muted); margin-top: 14px; }
+    .hero-meta { position: relative; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+    .hero-meta span {
+      font-size: 10px; font-weight: 700; color: var(--rose-ink);
+      background: var(--blush); border: 1px solid #f5d5df; border-radius: 999px; padding: 3px 10px;
+    }
+
+    /* ---------- 本文 ---------- */
+    .body { padding: 6px 22px 40px; }
+    .toc {
+      background: var(--blush); border: 1px solid #f5dbe3; border-radius: var(--radius);
+      padding: 16px 18px; margin-top: 26px;
+    }
+    .toc h2 { font-size: 12px; font-weight: 900; letter-spacing: .12em; color: var(--rose-ink); }
+    .toc ol { list-style: none; margin-top: 10px; counter-reset: toc; }
+    .toc li { counter-increment: toc; position: relative; padding-left: 26px; font-size: 12px; line-height: 1.7; }
+    .toc li + li { margin-top: 7px; }
+    .toc li::before {
+      content: counter(toc, decimal-leading-zero);
+      position: absolute; left: 0; top: 2px;
+      font-size: 10px; font-weight: 900; color: var(--rose-3); letter-spacing: .04em;
+    }
+    .toc a { text-decoration: none; color: #4c3139; border-bottom: 1px solid transparent; }
+    .toc a:hover { border-bottom-color: #eabbc9; }
+
+    section { padding-top: 40px; }
+    h2.h {
+      font-size: 19px; font-weight: 900; line-height: 1.6; letter-spacing: .01em;
+      padding-bottom: 10px; border-bottom: 1px solid var(--line);
+    }
+    h2.h small {
+      display: block; font-size: 9.5px; font-weight: 900; letter-spacing: .22em;
+      color: var(--rose); margin-bottom: 7px; text-transform: uppercase;
+    }
+    h3.sh { font-size: 14.5px; font-weight: 900; margin-top: 26px; color: #3d2935; }
+    p.tx { font-size: 13px; color: #4e3941; margin-top: 14px; }
+    p.tx strong { color: #2b2126; }
+    .note { font-size: 11px; color: #8e6a76; line-height: 1.75; margin-top: 10px; }
+
+    .card {
+      background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 16px 16px 14px; margin-top: 16px;
+      box-shadow: 0 4px 14px rgba(160, 52, 82, .05);
+    }
+    .card h3 { font-size: 13.5px; font-weight: 900; color: #3d2935; }
+    .card h3 .tag {
+      display: inline-block; font-size: 9px; font-weight: 800; color: var(--rose);
+      background: var(--blush); border-radius: 999px; padding: 2px 9px; margin-left: 6px;
+      vertical-align: middle;
+    }
+    .card ul { list-style: none; margin-top: 10px; }
+    .card li { position: relative; font-size: 12px; line-height: 1.8; color: #513840; padding-left: 20px; }
+    .card li + li { margin-top: 7px; }
+    .card li::before {
+      content: ""; position: absolute; left: 5px; top: .78em;
+      width: 5px; height: 5px; border-radius: 50%; background: #eabbc9;
+    }
+    .card li b { font-weight: 800; color: var(--rose-ink); }
+    .card .ok-li::before { background: var(--green); }
+
+    .split { display: grid; gap: 12px; margin-top: 14px; }
+    @media (min-width: 560px) { .split { grid-template-columns: 1fr 1fr; } }
+    .mini { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+    .mini .mh { font-size: 11px; font-weight: 900; letter-spacing: .06em; }
+    .mini .mh.good { color: var(--green-dark); }
+    .mini .mh.bad { color: var(--rose-dark); }
+    .mini ul { list-style: none; margin-top: 8px; }
+    .mini li { font-size: 11.5px; line-height: 1.75; color: #5b3e46; padding-left: 14px; position: relative; }
+    .mini li + li { margin-top: 5px; }
+    .mini li::before { content: "・"; position: absolute; left: 2px; color: #d8a9b8; }
+
+    /* ---------- 比較表 ---------- */
+    .cmp {
+      margin-top: 18px; border: 1px solid var(--line); border-radius: 16px;
+      overflow: hidden; background: #fff; box-shadow: 0 4px 14px rgba(160, 52, 82, .05);
+    }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 10px; }
+    th, td { padding: 9px 4px; text-align: center; border-bottom: 1px solid #faeaf0; line-height: 1.5; vertical-align: middle; }
+    thead th { font-size: 9px; font-weight: 800; color: #6e4e58; background: #fef9fb; padding: 10px 3px; }
+    thead th.me { background: var(--rose); color: #fff; }
+    thead th.me small { display: block; font-size: 6.5px; font-weight: 700; opacity: .85; letter-spacing: .06em; }
+    tbody th {
+      text-align: left; font-size: 10px; font-weight: 800; color: #4c3139;
+      padding-left: 10px; width: 24%; background: #fff;
+    }
+    td.me { background: #fdf3f6; color: var(--rose-dark); font-weight: 900; }
+    tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+    .good-t { color: var(--green-dark); font-weight: 900; }
+    .mid-t { color: #c88a1e; font-weight: 900; }
+    .cmp-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    @media (max-width: 520px) {
+      table { font-size: 9px; }
+      th, td { padding: 8px 2px; }
+      thead th { font-size: 8px; padding: 8px 2px; }
+      tbody th { font-size: 8.5px; padding-left: 7px; width: 23%; }
+    }
+
+    /* ---------- MarryPic 紹介 ---------- */
+    .pick {
+      margin-top: 20px; border: 2px solid var(--rose); border-radius: 22px;
+      padding: 22px 18px 18px; background: #fff;
+      box-shadow: 0 14px 32px rgba(210, 76, 110, .14); position: relative;
+    }
+    .pick .badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: var(--rose); color: #fff; font-size: 9.5px; font-weight: 900;
+      padding: 4px 14px; border-radius: 999px; white-space: nowrap;
+      box-shadow: 0 5px 12px rgba(210, 76, 110, .3);
+    }
+    .pick h3 { text-align: center; font-size: 17px; font-weight: 900; line-height: 1.6; }
+    .pick .price { text-align: center; margin-top: 8px; }
+    .pick .price b { font-size: 40px; font-weight: 900; color: var(--rose-dark); letter-spacing: -.02em; line-height: 1; }
+    .pick .price small { font-size: 11px; font-weight: 800; color: #7e5a66; }
+    .pick .price-sub { text-align: center; font-size: 10.5px; color: var(--muted); margin-top: 4px; }
+    .pick ul { list-style: none; margin-top: 16px; padding-top: 15px; border-top: 1px dashed var(--line); }
+    .pick li { position: relative; font-size: 12px; line-height: 1.75; color: #513840; padding-left: 20px; }
+    .pick li + li { margin-top: 8px; }
+    .pick li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--green); font-weight: 900; }
+
+    /* ---------- ステップ ---------- */
+    .steps { margin-top: 6px; }
+    .step { display: flex; gap: 13px; padding: 15px 0; border-bottom: 1px dashed #f5dde4; }
+    .step:last-child { border-bottom: none; }
+    .step .n {
+      flex: 0 0 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--blush); border: 1px solid #f5cbd8; color: var(--rose);
+      font-size: 12.5px; font-weight: 900;
+    }
+    .step h4 { font-size: 13px; font-weight: 900; margin-bottom: 2px; }
+    .step p { font-size: 11.5px; color: var(--muted); line-height: 1.8; }
+
+    /* ---------- FAQ ---------- */
+    .faq { border-bottom: 1px solid #f5dde4; }
+    .faq summary {
+      list-style: none; cursor: pointer; display: flex; gap: 9px; align-items: flex-start;
+      padding: 15px 0; font-size: 12.5px; font-weight: 800; color: #3d2935; line-height: 1.6;
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary .q { color: var(--rose); font-weight: 900; flex: 0 0 auto; }
+    .faq summary .plus { position: relative; width: 13px; height: 13px; margin-top: 4px; margin-left: auto; flex: 0 0 13px; }
+    .faq summary .plus::before, .faq summary .plus::after {
+      content: ""; position: absolute; background: var(--rose); border-radius: 2px; transition: transform .2s;
+    }
+    .faq summary .plus::before { left: 0; top: 5.5px; width: 13px; height: 1.8px; }
+    .faq summary .plus::after { left: 5.6px; top: 0; width: 1.8px; height: 13px; }
+    .faq[open] summary .plus::after { transform: rotate(90deg); }
+    .faq .a { font-size: 11.5px; color: var(--muted); line-height: 1.9; padding: 0 22px 16px 21px; }
+
+    /* ---------- CTA ---------- */
+    .cta-box {
+      margin-top: 34px; border-radius: 22px; padding: 26px 20px;
+      background: linear-gradient(140deg, #e26384 0%, #d24c6e 55%, #bc3a5b 100%);
+      color: #fff; text-align: center;
+      box-shadow: 0 16px 34px rgba(186, 58, 88, .26);
+    }
+    .cta-box .k { font-size: 10.5px; font-weight: 800; letter-spacing: .14em; opacity: .9; }
+    .cta-box .t { font-size: 17px; font-weight: 900; line-height: 1.65; margin-top: 6px; }
+    .btn-cta {
+      display: block; width: 100%; margin-top: 16px; text-decoration: none; text-align: center;
+      background: #fff; color: var(--rose-dark); padding: 15px 18px; border-radius: 999px;
+      font-size: 14px; font-weight: 900;
+      box-shadow: 0 10px 22px rgba(110, 32, 52, .2);
+    }
+    .btn-ghost {
+      display: block; width: 100%; margin-top: 9px; text-decoration: none; text-align: center;
+      background: rgba(255, 255, 255, .14); color: #fff;
+      border: 1px solid rgba(255, 255, 255, .55);
+      padding: 12px 18px; border-radius: 999px; font-size: 12px; font-weight: 800;
+    }
+    .cta-box .fine { font-size: 10px; opacity: .85; margin-top: 12px; line-height: 1.7; }
+
+    /* ---------- フッター ---------- */
+    .footer { background: #fbf0f3; border-top: 1px solid var(--line); padding: 30px 22px 26px; text-align: center; }
+    .footer .f-logo { font-size: 17px; font-weight: 900; letter-spacing: .04em; color: #3b2330; }
+    .footer .f-copy-sub { font-size: 7.5px; letter-spacing: .2em; color: #ad8c99; margin-top: 4px; }
+    .footer .f-msg { font-size: 11.5px; color: #5b3e46; line-height: 1.9; margin: 14px 0 16px; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 8px 14px; justify-content: center; margin: 14px 0; }
+    .footer-links a { font-size: 10.5px; color: #6f4c58; text-decoration: underline; }
+    .footer .f-org { font-size: 10px; color: #9c7b87; }
+    .footer .f-cr { font-size: 9.5px; color: #b49aa5; margin-top: 4px; }
+
+    @media (max-width: 380px) {
+      h1 { font-size: 22px; }
+      h2.h { font-size: 17.5px; }
+      .hero, .body, .footer { padding-left: 16px; padding-right: 16px; }
+      .topbar { padding: 11px 14px; }
+      .topbar-link { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-deco" aria-hidden="true"><i></i><i></i></div>
+
+  <div class="page">
+    <header class="topbar">
+      <a class="logo" href="index.html"><b>MarryPic</b><span>WEDDING PHOTO SHARE</span></a>
+      <div class="topbar-actions">
+        <a class="topbar-link" href="app.html" target="_blank" rel="noopener">デモを見る</a>
+        <a class="btn-top" href="index.html#purchase">500円ではじめる</a>
+      </div>
+    </header>
+
+    <main>
+      <div class="hero">
+        <p class="crumb"><a href="index.html">MarryPic</a><span>›</span>写真集めガイド</p>
+        <span class="eyebrow">Photo Collection Guide</span>
+        <h1>結婚式の写真集め、<br>LINE以外で<em>ゲストに負担をかけない</em>方法まとめ</h1>
+        <p class="hero-lead">
+          「写真を送ってね」のひとことが、ゲストにとっては意外とハードルになります。
+          友だち追加、アカウント作成、アプリのインストール……。
+          この記事では、代表的な写真の集め方を比べながら、当日いちばん手間が少ない方法を整理します。
+        </p>
+        <div class="hero-meta">
+          <span>結婚式 写真共有 QRコード</span>
+          <span>LINE以外</span>
+          <span>プレ花嫁</span>
+        </div>
+      </div>
+
+      <div class="body">
+        <nav class="toc" aria-label="目次">
+          <h2>この記事の内容</h2>
+          <ol>
+            <li><a href="#why">写真集めがうまくいかないのは、なぜ？</a></li>
+            <li><a href="#line">LINEアルバムで集める場合</a></li>
+            <li><a href="#google">Googleフォトで集める場合</a></li>
+            <li><a href="#web">QRコードで集めるWebサービスという選択肢</a></li>
+            <li><a href="#compare">4つの方法をまとめて比較</a></li>
+            <li><a href="#marrypic">MarryPic（マリピク）の場合</a></li>
+            <li><a href="#flow">当日までの4ステップ</a></li>
+            <li><a href="#faq">よくあるご質問</a></li>
+          </ol>
+        </nav>
+
+        <!-- 1 -->
+        <section id="why">
+          <h2 class="h"><small>Why</small>写真集めがうまくいかないのは、なぜ？</h2>
+          <p class="tx">
+            結婚式のあと、「ゲストが撮ってくれた写真がほとんど手元にない」という声は少なくありません。
+            理由はシンプルで、<strong>送る側の手間が大きいほど、写真は集まらない</strong>からです。
+          </p>
+          <div class="card">
+            <h3>ゲストの手間になりやすいポイント</h3>
+            <ul>
+              <li><b>友だち追加・グループ招待</b>：アカウント同士がつながっていないと参加できない仕組みがある</li>
+              <li><b>アプリのインストール</b>：その場で入れてもらうのは、特に年配のゲストには負担が大きい</li>
+              <li><b>アカウント作成・ログイン</b>：パスワードを思い出すところから始まってしまう</li>
+              <li><b>送り方がわからない</b>：説明を読まずに「あとで送ろう」と思ったまま忘れる</li>
+            </ul>
+          </div>
+          <p class="tx">
+            反対に、<strong>QRコードを読み取って写真を選ぶだけ</strong>なら、説明はひとことですみます。
+            この「読み取るだけ」に近づけられるかどうかが、集まる枚数を大きく左右します。
+          </p>
+        </section>
+
+        <!-- 2 -->
+        <section id="line">
+          <h2 class="h"><small>Case 01</small>LINEアルバムで集める場合</h2>
+          <p class="tx">
+            いちばん身近な方法です。すでにLINEを使っているゲストが多ければ、伝え方はかんたんです。
+            ただし、アルバムは<strong>トークルームの中の機能</strong>なので、全員が同じトークルームに入っている必要があります。
+          </p>
+          <div class="split">
+            <div class="mini">
+              <div class="mh good">向いているところ</div>
+              <ul>
+                <li>すでに友だち・同じグループのゲストが多い</li>
+                <li>無料で使い始められる</li>
+                <li>アルバムの保存期間に制限がない</li>
+              </ul>
+            </div>
+            <div class="mini">
+              <div class="mh bad">気になりやすいところ</div>
+              <ul>
+                <li>友だち追加・グループ招待が前提になる</li>
+                <li>写真は自動で圧縮され、画質が落ちる</li>
+                <li>1アルバム最大1,000枚まで</li>
+              </ul>
+            </div>
+          </div>
+          <h3 class="sh">画質について</h3>
+          <p class="tx">
+            LINEのアルバムに追加した写真は、自動的に圧縮されます。
+            オリジナル画質のまま保存できるのは、LINEヤフーの有料サービス「LYPプレミアム」（月額508円）の会員のみです。
+            「あとでフォトブックにしたい」「大きく引き伸ばしたい」という写真が混ざる場合は、画質が気になるところです。
+          </p>
+          <h3 class="sh">参加のしやすさについて</h3>
+          <p class="tx">
+            アルバムを見る・投稿するには、新郎新婦とLINEでつながっているか、グループに招待されている必要があります。
+            当日いちばん多いのが「LINEをやっていない」「友だち追加の仕方がわからない」というケースです。
+            また、アルバムはトークルームに紐づくため、参加者が退出したりアカウントを削除したりすると、見られなくなることがあります。
+          </p>
+          <p class="note">
+            ※ 仕様は変更される場合があります。最新の内容はLINEの公式ヘルプをご確認ください。
+          </p>
+        </section>
+
+        <!-- 3 -->
+        <section id="google">
+          <h2 class="h"><small>Case 02</small>Googleフォトで集める場合</h2>
+          <p class="tx">
+            Googleフォトの「共有アルバム」を使えば、リンクを配るだけで写真を集められます。
+            リンクをQRコードに変換して卓上に置く、という使い方もできます。
+          </p>
+          <div class="split">
+            <div class="mini">
+              <div class="mh good">向いているところ</div>
+              <ul>
+                <li>元の画質のまま保存できる</li>
+                <li>共有アルバムはリンクで参加できる</li>
+                <li>写真の一覧が見やすい</li>
+              </ul>
+            </div>
+            <div class="mini">
+              <div class="mh bad">気になりやすいところ</div>
+              <ul>
+                <li>写真を追加するにはGoogleアカウントが必要</li>
+                <li>無料の保存容量は15GB（Gmail・ドライブと共通）</li>
+                <li>元の画質は容量を使う</li>
+              </ul>
+            </div>
+          </div>
+          <h3 class="sh">アカウントと容量について</h3>
+          <p class="tx">
+            共有アルバムは閲覧だけならアカウントなしでも開けますが、<strong>写真を追加するにはGoogleアカウントでのログインが必要</strong>です。
+            さらに、アップロードした写真の容量は<strong>アップロードした本人のアカウント</strong>から消費されます。
+            ゲストの空き容量が少ないと、その場でアップロードできないこともあります。
+          </p>
+          <h3 class="sh">あとからまとめて受け取るとき</h3>
+          <p class="tx">
+            共有アルバムの写真は、アップロードした人のデータです。本人が削除するとアルバムからも消えてしまいます。
+            また、主催者が全枚数を一括でダウンロードするには、アルバムからまとめて保存するひと手間がかかります。
+          </p>
+          <p class="note">
+            ※ 容量や共有の仕様は変更される場合があります。最新の内容はGoogle フォトの公式ヘルプをご確認ください。
+          </p>
+        </section>
+
+        <!-- 4 -->
+        <section id="web">
+          <h2 class="h"><small>Case 03</small>QRコードで集めるWebサービスという選択肢</h2>
+          <p class="tx">
+            最近は、<strong>QRコードを読み取るだけで写真を送れるWebサービス</strong>も増えました。
+            アプリのインストールが不要で、ゲストはブラウザだけで完結します。
+            ただし、料金体系や保存の条件はサービスごとに大きく違うため、選ぶ前に確認したいポイントがあります。
+          </p>
+          <div class="card">
+            <h3>選ぶ前にチェックしたい5つのポイント</h3>
+            <ul>
+              <li><b>料金の形</b>：買い切りか、月額・年額のサブスクか。あとから追加料金が発生しないか</li>
+              <li><b>枚数の上限</b>：1アルバムに何枚まで保存できるか。超えたときの案内はあるか</li>
+              <li><b>画質</b>：圧縮されるか、長辺何pxで保存されるか</li>
+              <li><b>ダウンロード方法</b>：1枚ずつか、まとめてZIPで保存できるか</li>
+              <li><b>広告・登録の有無</b>：ゲスト側に広告や会員登録を求めないか</li>
+            </ul>
+          </div>
+          <p class="tx">
+            特に見落としやすいのが<strong>「あとから料金が続くかどうか」</strong>です。
+            結婚式は一度きりのイベントなので、月額課金より買い切りのほうがすっきりします。
+          </p>
+        </section>
+
+        <!-- 5 -->
+        <section id="compare">
+          <h2 class="h"><small>Comparison</small>4つの方法をまとめて比較</h2>
+          <p class="tx">
+            「ゲストの手間」「料金」「画質」「保存のしかた」で並べると、違いがはっきりします。
+          </p>
+          <div class="cmp">
+            <div class="cmp-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col" aria-label="比較項目"></th>
+                    <th scope="col">LINE<br>アルバム</th>
+                    <th scope="col">Google<br>フォト</th>
+                    <th scope="col">一般的な<br>Web共有</th>
+                    <th scope="col" class="me">MarryPic<small>マリピク</small></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">ゲストの<br>手間</th>
+                    <td>友だち追加<br>または招待</td>
+                    <td>アカウント<br>ログイン</td>
+                    <td>サービスに<br>よる</td>
+                    <td class="me">QRを読み取る<br>だけ</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">料金</th>
+                    <td>無料<br><span style="font-size:8.5px;color:#8e6a76;">※画質は圧縮</span></td>
+                    <td>無料<br><span style="font-size:8.5px;color:#8e6a76;">※15GBまで</span></td>
+                    <td>買い切り／<br>サブスク</td>
+                    <td class="me">500円<br>買い切り</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">画質</th>
+                    <td>圧縮される</td>
+                    <td>元の画質<br>（容量使用）</td>
+                    <td>サービスに<br>よる</td>
+                    <td class="me">長辺1280px<br>に自動最適化</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">1アルバムの<br>枚数</th>
+                    <td>最大1,000枚</td>
+                    <td>容量次第</td>
+                    <td>サービスに<br>よる</td>
+                    <td class="me">最大500枚</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">ZIP一括<br>保存</th>
+                    <td><span style="color:#d8c3cb;font-weight:900;">−</span></td>
+                    <td><span class="good-t">○</span></td>
+                    <td>サービスに<br>よる</td>
+                    <td class="me">○</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">アプリ・<br>会員登録</th>
+                    <td>必要</td>
+                    <td>必要</td>
+                    <td>サービスに<br>よる</td>
+                    <td class="me">不要</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p class="note">
+            ※ 他社サービスの内容は、各サービスが公開している情報をもとにした2026年11月時点の一般的な比較です。最新の仕様・料金は各サービスにてご確認ください。
+          </p>
+        </section>
+
+        <!-- 6 -->
+        <section id="marrypic">
+          <h2 class="h"><small>MarryPic</small>MarryPic（マリピク）の場合</h2>
+          <p class="tx">
+            この記事を書いているMarryPicは、<strong>結婚式の写真を集めるためだけに作ったWebサービス</strong>です。
+            ゲストはテーブルに置いたQRコードを読み取って、写真を選んで送るだけ。アプリも会員登録もいりません。
+          </p>
+
+          <div class="pick">
+            <div class="badge">買い切り・追加料金なし</div>
+            <h3>1組500円で、<br>写真がぜんぶ集まる。</h3>
+            <div class="price"><b>500</b><small>円（税込）／1組</small></div>
+            <p class="price-sub">一度のお支払いで、式が終わっても使えます</p>
+            <ul>
+              <li>1組500円（税込）の買い切り。広告なし・追加料金なし</li>
+              <li>1つのアルバムに最大500枚まで保存</li>
+              <li>写真は長辺1280pxに自動で最適化して保存</li>
+              <li>ゲストはアプリ・会員登録なしでQRコードから送信</li>
+              <li>集まった写真はZIPで一括ダウンロード</li>
+              <li>写真専用のサービスなので、操作はシンプル</li>
+            </ul>
+          </div>
+          <p class="note">
+            ※ 現在はベータ版として提供しており、1つのアルバムに保存できる写真は500枚までです。
+          </p>
+
+          <h3 class="sh">デモ画面を、購入前に試せます</h3>
+          <p class="tx">
+            実際のアルバム画面は、購入前にデモで確認できます。
+            ゲストがどうやって写真を送るのか、アルバムがどう見えるのかを、登録なしで試せます。
+            <a href="app.html" target="_blank" rel="noopener" style="color:#be3e60;font-weight:800;">デモアルバムを開く ›</a>
+          </p>
+        </section>
+
+        <!-- 7 -->
+        <section id="flow">
+          <h2 class="h"><small>Flow</small>当日までの4ステップ</h2>
+          <div class="steps">
+            <div class="step">
+              <div class="n">1</div>
+              <div>
+                <h4>アルバムをつくる（約1分）</h4>
+                <p>おふたりのお名前と挙式日を入力して、500円をお支払い。専用のアルバムURLがその場で発行されます。</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="n">2</div>
+              <div>
+                <h4>ゲスト用URL・QRコードを受け取る</h4>
+                <p>管理画面に表示されるQRコードを印刷して、各テーブルや席札に置きます。ゲスト用URLはそのまま招待文に貼れます。</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="n">3</div>
+              <div>
+                <h4>当日、ゲストが写真を送る</h4>
+                <p>ゲストはQRコードを読み取って、カメラロールから写真を選んで送るだけ。アプリのインストールは不要です。</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="n">4</div>
+              <div>
+                <h4>あとから、まとめて保存</h4>
+                <p>集まった写真は、管理画面から1枚ずつでも、ZIPで一括でもダウンロードできます。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8 -->
+        <section id="faq">
+          <h2 class="h"><small>Q &amp; A</small>よくあるご質問</h2>
+          <div style="margin-top:8px;">
+            <details class="faq">
+              <summary><span class="q">Q</span>ゲストは何かをダウンロードする必要がありますか？<span class="plus"></span></summary>
+              <div class="a">いいえ。ゲストはスマートフォンのカメラでQRコードを読み取り、ブラウザで写真を選んで送るだけです。アプリのインストールも会員登録も必要ありません。</div>
+            </details>
+            <details class="faq">
+              <summary><span class="q">Q</span>写真の枚数に上限はありますか？<span class="plus"></span></summary>
+              <div class="a">ゲストの人数に上限はありません。1つのアルバムに保存できる写真は、現在ベータ版として最大500枚までです。500枚を超える場合は、挙式用・二次会用でアルバムを分けて購入するか、ZIPで保存したあとにアルバム内の写真を削除して空きを作ることで続けてご利用いただけます。</div>
+            </details>
+            <details class="faq">
+              <summary><span class="q">Q</span>集めた写真はどうやって受け取りますか？<span class="plus"></span></summary>
+              <div class="a">管理画面から、1枚ずつ保存することも、ZIPファイルにまとめて一括ダウンロードすることもできます。</div>
+            </details>
+            <details class="faq">
+              <summary><span class="q">Q</span>動画も送れますか？<span class="plus"></span></summary>
+              <div class="a">現在はお写真のみの対応です。</div>
+            </details>
+            <details class="faq">
+              <summary><span class="q">Q</span>Androidのスマートフォンでも使えますか？<span class="plus"></span></summary>
+              <div class="a">はい。iPhoneでもAndroidでも、Safari／Chromeなどのブラウザから同じようにご利用いただけます。</div>
+            </details>
+            <details class="faq">
+              <summary><span class="q">Q</span>写真はどこに保存されますか？<span class="plus"></span></summary>
+              <div class="a">アルバムURLを知っている方が閲覧できる形で保存されます。管理用URLをお持ちの方は、写真の一括保存・削除・お名前の変更ができます。管理用URLは他の方に教えないでください。</div>
+            </details>
+            <details class="faq">
+              <summary><span class="q">Q</span>アルバムURLをなくしてしまったら？<span class="plus"></span></summary>
+              <div class="a">お支払い時のメールアドレスと決済日時を添えて、<a href="https://www.instagram.com/marrypic.wedding/" target="_blank" rel="noopener" style="color:#be3e60;">公式Instagram（@marrypic.wedding）のDM</a>までご連絡ください。確認のうえ再発行いたします。</div>
+            </details>
+          </div>
+        </section>
+
+        <div class="cta-box">
+          <div class="k">500円・買い切り・追加料金なし</div>
+          <div class="t">結婚式の写真を、<br>1枚も逃さず集めましょう。</div>
+          <a class="btn-cta" href="index.html#purchase">500円でアルバムをはじめる ›</a>
+          <a class="btn-ghost" href="app.html" target="_blank" rel="noopener">まずはデモ画面を試す</a>
+          <p class="fine">アプリ・会員登録は不要です。<br>お支払いのあと、その場で専用アルバムURLが発行されます。</p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="f-logo">MarryPic</div>
+      <div class="f-copy-sub">WEDDING PHOTO SHARE</div>
+      <p class="f-msg">一生に一度の、大切な一日。<br>ゲストが撮ってくれた笑顔や涙を、1枚も逃さず残しましょう。</p>
+      <div class="footer-links">
+        <a href="index.html">トップ</a>
+        <a href="legal.html#terms" target="_blank" rel="noopener">利用規約</a>
+        <a href="legal.html#privacy" target="_blank" rel="noopener">プライバシーポリシー</a>
+        <a href="legal.html#tokushoho" target="_blank" rel="noopener">特定商取引法に基づく表記</a>
+        <a href="https://www.instagram.com/marrypic.wedding/" target="_blank" rel="noopener">お問い合わせ（Instagram）</a>
+      </div>
+      <p class="f-org">運営：MarryPic運営事務局</p>
+      <p class="f-cr">© 2026 MarryPic All Rights Reserved.</p>
+    </footer>
+  </div>
+</body>
+</html>
