@@ -381,6 +381,28 @@
     .hero-wave { position: relative; display: block; width: calc(100% + 40px); max-width: none; height: 46px; margin: 22px -20px 0; color: #fff; }
 
     /* =========================================================
+       無料モニターのご案内（ヒーロー下・控えめな帯）
+       ========================================================= */
+    .monitor-note {
+      display: flex; align-items: center; gap: 11px;
+      padding: 13px 18px; text-decoration: none;
+      background: linear-gradient(160deg, #fffafc 0%, #fdf1f5 100%);
+      border-top: 1px solid #f8dfe7;
+      border-bottom: 1px solid #f8dfe7;
+    }
+    .monitor-note .mn-ico {
+      flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: #fff; border: 1px solid #f4cfda; font-size: 12px;
+    }
+    .monitor-note .mn-body { display: flex; flex-direction: column; gap: 1px; }
+    .monitor-note .mn-k { font-size: 8.5px; font-weight: 900; letter-spacing: .16em; color: var(--blue); }
+    .monitor-note .mn-t { font-size: 12px; font-weight: 800; color: #4a2b38; line-height: 1.6; }
+    .monitor-note .mn-t b { color: var(--blue-dark); }
+    .monitor-note .mn-s { font-size: 10px; color: #8e6a76; line-height: 1.65; }
+    .monitor-note .mn-arrow { margin-left: auto; flex: 0 0 auto; color: #e9b7c6; font-size: 13px; }
+
+    /* =========================================================
        Sections
        ========================================================= */
     .sec { padding: 36px 20px; scroll-margin-top: 68px; }
@@ -688,6 +710,7 @@
     <a href="#security">安全性</a>
     <a href="#faq">よくあるご質問</a>
     <a href="guide.html">写真集めガイド</a>
+    <a href="qr-guide.html">QRカードの作り方</a>
     <a class="nav-demo" href="app.html">デモ画面を試す</a>
     <a href="legal.html" target="_blank" rel="noopener">利用規約</a>
   </nav>
@@ -804,6 +827,17 @@
         </svg>
       </div>
     </section>
+
+    <!-- ============ 無料モニターのご案内 ============ -->
+    <a class="monitor-note" href="https://www.instagram.com/marrypic.wedding/" target="_blank" rel="noopener">
+      <span class="mn-ico" aria-hidden="true">💐</span>
+      <span class="mn-body">
+        <span class="mn-k">MONITOR</span>
+        <span class="mn-t">先着3組さま <b>無料モニター</b>募集中</span>
+        <span class="mn-s">通常500円のアルバムを無料でご用意しています。Instagram @marrypic.wedding のDMへ「モニター希望」と挙式日をお送りください。</span>
+      </span>
+      <span class="mn-arrow" aria-hidden="true">›</span>
+    </a>
 
     <!-- ============ PROBLEM ============ -->
     <section class="sec sec--soft" id="problems">
@@ -1019,7 +1053,7 @@
         </div>
         <div class="step">
           <div class="n">2</div>
-          <div><h4>QRコードを印刷して置く</h4><p>管理画面に表示される卓上案内カードを印刷して、各テーブルや席札にセットします。</p></div>
+          <div><h4>QRコードを印刷して置く</h4><p>管理画面に表示される卓上案内カードを印刷して、各テーブルや席札にセットします。<br><a href="qr-guide.html" style="font-size:11px; font-weight:800; color:var(--blue-dark);">QRカードの作り方と置き場所は、こちらのガイドで解説 ›</a></p></div>
         </div>
         <div class="step">
           <div class="n">3</div>
@@ -1268,6 +1302,7 @@
         <a href="https://www.instagram.com/marrypic.wedding/" target="_blank" rel="noopener">お問い合わせ（Instagram）</a>
         <a href="app.html" target="_blank" rel="noopener">アプリ画面のデモ</a>
         <a href="guide.html">結婚式の写真集め ガイド</a>
+        <a href="qr-guide.html">QRカードの作り方・置き場所ガイド</a>
       </div>
       <p class="f-org">運営：MarryPic運営事務局</p>
       <p class="f-cr">© 2026 MarryPic All Rights Reserved.</p>
