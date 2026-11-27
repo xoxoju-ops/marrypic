@@ -197,11 +197,11 @@
       -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(243, 216, 224, .9);
     }
-    .logo { text-decoration: none; line-height: 1; display: flex; flex-direction: column; }
+    .logo { text-decoration: none; line-height: 1; display: flex; flex-direction: column; flex-shrink: 0; }
     .logo b { font-size: 19px; font-weight: 800; letter-spacing: .04em; color: var(--text); }
     .logo span { font-size: 7.5px; font-weight: 700; letter-spacing: .2em; color: #ad8c99; margin-top: 4px; }
     .topbar-actions { display: flex; align-items: center; gap: 8px; }
-    .topbar-link { font-size: 12px; font-weight: 700; color: #5c3a48; text-decoration: none; }
+    .topbar-link { font-size: 12px; font-weight: 700; color: #5c3a48; text-decoration: none; white-space: nowrap; }
     .btn-top {
       display: inline-block; background: var(--rose); color: #fff; text-decoration: none;
       font-size: 12px; font-weight: 800; padding: 9px 16px; border-radius: 999px;
@@ -532,6 +532,7 @@
       h2.h { font-size: 17.5px; }
       .hero, .body, .footer { padding-left: 16px; padding-right: 16px; }
       .topbar { padding: 11px 14px; }
+      .topbar-actions { gap: 6px; }
       .topbar-link { display: none; }
       .theme-grid, .size-grid { grid-template-columns: 1fr 1fr; }
     }
